@@ -31,12 +31,18 @@
 	let sessionStartedAt = $state<string | null>(null);
 	let segmentEndsAt = $state<number | null>(null);
 	let history = $state<FocusSessionRecord[]>([]);
+	let startOrExtendSound: HTMLAudioElement | null = null;
+	let timerFinishSound: HTMLAudioElement | null = null;
 
 	let canEditIntention = $derived(phase === 'idle');
 	let activeTitle = $derived(getSessionTitle(intention));
 
 	onMount(() => {
 		history = loadSessionHistory();
+		startOrExtendSound = new Audio('/sounds/start-or-extend.mp3');
+		timerFinishSound = new Audio('/sounds/timer-finish.mp3');
+		startOrExtendSound.preload = 'auto';
+		timerFinishSound.preload = 'auto';
 
 		const interval = window.setInterval(() => {
 			if (phase !== 'running' || segmentEndsAt === null) return;
@@ -50,6 +56,7 @@
 				completedContracts = nextCompletedContracts;
 				phase = 'contract-complete';
 				segmentEndsAt = null;
+				playSound(timerFinishSound);
 				notifyContractComplete({
 					intention: activeTitle,
 					completedContracts: nextCompletedContracts
@@ -62,6 +69,7 @@
 
 	function startSession() {
 		void prepareTimerNotifications();
+		playSound(startOrExtendSound);
 
 		sessionStartedAt = new Date().toISOString();
 		completedContracts = 0;
@@ -73,6 +81,7 @@
 
 	function addFiveMinutes() {
 		void prepareTimerNotifications();
+		playSound(startOrExtendSound);
 
 		extensionCount += 1;
 		remainingSeconds = FIVE_MINUTES_SECONDS;
@@ -110,6 +119,15 @@
 		if (clearIntention) {
 			intention = '';
 		}
+	}
+
+	function playSound(sound: HTMLAudioElement | null) {
+		if (!sound) return;
+
+		sound.currentTime = 0;
+		void sound.play().catch(() => {
+			// Some browsers may block non-gesture audio if autoplay permission is unavailable.
+		});
 	}
 </script>
 
