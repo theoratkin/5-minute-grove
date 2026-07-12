@@ -1,12 +1,20 @@
+## Project Configuration
+
+- **Language**: TypeScript
+- **Package Manager**: npm
+- **Add-ons**: none
+
+---
+
 # Agent Context
 
 This repository is for a planned SvelteKit web app called "Just 5 More Minutes".
 
 ## Current State
 
-- No app has been scaffolded yet.
-- The user explicitly asked to initialize durable agent docs only.
-- Do not start building the web app until the user asks.
+- The SvelteKit app has been scaffolded.
+- The first MVP route is implemented as a local-first focus timer.
+- Continue preserving the durable docs and product nuance as implementation evolves.
 
 ## Product Summary
 
@@ -39,4 +47,3 @@ The key nuance is consent-based continuation. This is not a standard Pomodoro cl
 - Product context: `docs/product-context.md`
 - Technical direction: `docs/technical-direction.md`
 - Decision log: `docs/decision-log.md`
-
