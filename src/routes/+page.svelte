@@ -23,6 +23,7 @@
 	} from '$lib/app/notifications';
 	import { formatClock } from '$lib/app/time';
 	import TaskIntentionInput from '$lib/features/task-intention/components/TaskIntentionInput.svelte';
+	import { buttonBurst } from '$lib/actions/buttonBurst';
 
 	let intention = $state('');
 	let phase = $state<FocusPhase>('idle');
@@ -193,7 +194,9 @@
 			/>
 
 			{#if phase === 'idle'}
-				<button class="start-button" type="button" onclick={startSession}>Start 5 minutes</button>
+				<button class="start-button" type="button" use:buttonBurst onclick={startSession}>
+					Start 5 minutes
+				</button>
 			{:else if phase === 'contract-complete'}
 				<EndOfTimerPrompt
 					intention={activeTitle}

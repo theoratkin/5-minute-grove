@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { buttonBurst } from '$lib/actions/buttonBurst';
+
 	let {
 		intention,
 		completedContracts,
@@ -29,7 +31,7 @@
 	</div>
 
 	<div class="actions">
-		<button class="primary" type="button" onclick={onAddFive}>Add 5 minutes</button>
+		<button class="primary" type="button" use:buttonBurst onclick={onAddFive}>Add 5 minutes</button>
 		<button type="button" onclick={onDone}>Done</button>
 		<button type="button" onclick={onBreak}>Break</button>
 		<button type="button" onclick={onSwitchTask}>Switch task</button>
