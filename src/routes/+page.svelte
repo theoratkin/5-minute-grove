@@ -38,7 +38,11 @@
 	let canEditIntention = $derived(phase === 'idle');
 	let activeTitle = $derived(getSessionTitle(intention));
 	let pageTitle = $derived(
-		phase === 'running' ? `${formatClock(remainingSeconds)} - Just 5 More Minutes` : 'Just 5 More Minutes'
+		phase === 'running'
+			? `${formatClock(remainingSeconds)} - Just 5 More Minutes`
+			: phase === 'paused'
+				? 'Paused - Just 5 More Minutes'
+				: 'Just 5 More Minutes'
 	);
 
 	onMount(() => {
@@ -91,6 +95,30 @@
 		remainingSeconds = FIVE_MINUTES_SECONDS;
 		segmentEndsAt = Date.now() + FIVE_MINUTES_SECONDS * 1000;
 		phase = 'running';
+	}
+
+	function pauseSession() {
+		if (phase !== 'running' || segmentEndsAt === null) return;
+
+		remainingSeconds = Math.max(1, Math.ceil((segmentEndsAt - Date.now()) / 1000));
+		segmentEndsAt = null;
+		phase = 'paused';
+	}
+
+	function resumeSession() {
+		if (phase !== 'paused') return;
+
+		segmentEndsAt = Date.now() + remainingSeconds * 1000;
+		phase = 'running';
+	}
+
+	function stopSession() {
+		if (completedContracts > 0) {
+			finishSession('break');
+			return;
+		}
+
+		resetSession();
 	}
 
 	function finishSession(reason: SessionEndReason) {
@@ -176,8 +204,16 @@
 					onBreak={() => finishSession('break')}
 					onSwitchTask={() => finishSession('switch')}
 				/>
+			{:else if phase === 'paused'}
+				<div class="timer-controls" aria-label="Paused timer controls">
+					<button class="resume-button" type="button" onclick={resumeSession}>Resume</button>
+					<button class="stop-button" type="button" onclick={stopSession}>Stop</button>
+				</div>
 			{:else}
-				<p class="running-note">This block is the whole contract.</p>
+				<div class="timer-controls" aria-label="Running timer controls">
+					<button type="button" onclick={pauseSession}>Pause</button>
+					<button class="stop-button" type="button" onclick={stopSession}>Stop</button>
+				</div>
 			{/if}
 		</div>
 	</section>
@@ -255,16 +291,34 @@
 		background: #fabd2f;
 	}
 
-	.running-note {
+	.timer-controls {
 		min-height: 3.35rem;
 		display: grid;
-		place-items: center;
-		margin: 0;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0.7rem;
+	}
+
+	.timer-controls button {
 		border: 1px solid var(--line);
 		border-radius: 8px;
 		background: var(--surface-muted);
-		color: var(--ink-soft);
+		color: var(--ink);
 		font-weight: 800;
+	}
+
+	.timer-controls button:hover {
+		transform: translateY(-1px);
+	}
+
+	.timer-controls .resume-button {
+		border-color: var(--green);
+		background: var(--green);
+		color: #282828;
+	}
+
+	.timer-controls .stop-button {
+		border-color: rgba(251, 73, 52, 0.55);
+		color: #ffb4a8;
 	}
 
 	aside {

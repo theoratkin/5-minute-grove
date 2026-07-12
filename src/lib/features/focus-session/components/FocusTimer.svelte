@@ -16,6 +16,7 @@
 
 	let statusText = $derived.by(() => {
 		if (phase === 'running') return 'Contract in progress';
+		if (phase === 'paused') return 'Contract paused';
 		if (phase === 'contract-complete') return 'Contract complete';
 		return 'Ready when you are';
 	});

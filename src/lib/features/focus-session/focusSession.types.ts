@@ -1,4 +1,4 @@
-export type FocusPhase = 'idle' | 'running' | 'contract-complete';
+export type FocusPhase = 'idle' | 'running' | 'paused' | 'contract-complete';
 
 export type SessionEndReason = 'done' | 'break' | 'switch';
 
