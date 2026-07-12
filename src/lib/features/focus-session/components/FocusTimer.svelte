@@ -76,7 +76,7 @@
 		place-items: center;
 		border: 1px solid var(--line);
 		border-radius: 8px;
-		background: #fff;
+		background: var(--surface-raised);
 		font-size: clamp(4.4rem, 18vw, 8.5rem);
 		font-weight: 800;
 		font-variant-numeric: tabular-nums;
@@ -102,7 +102,7 @@
 		min-width: 8rem;
 		border: 1px solid var(--line);
 		border-radius: 8px;
-		background: rgba(255, 255, 255, 0.58);
+		background: rgba(50, 48, 47, 0.84);
 		padding: 0.8rem;
 	}
 

@@ -37,14 +37,18 @@
 		min-height: 3.1rem;
 		border: 1px solid var(--line);
 		border-radius: 8px;
-		background: #fff;
+		background: var(--surface-raised);
 		color: var(--ink);
 		padding: 0.85rem 0.95rem;
 		outline: none;
 	}
 
+	input::placeholder {
+		color: #928374;
+	}
+
 	input:focus {
 		border-color: var(--green);
-		box-shadow: 0 0 0 3px rgba(47, 125, 95, 0.14);
+		box-shadow: 0 0 0 3px rgba(184, 187, 38, 0.18);
 	}
 </style>

@@ -40,9 +40,9 @@
 	.prompt {
 		display: grid;
 		gap: 1rem;
-		border: 1px solid rgba(47, 125, 95, 0.25);
+		border: 1px solid rgba(184, 187, 38, 0.35);
 		border-radius: 8px;
-		background: rgba(47, 125, 95, 0.08);
+		background: rgba(152, 151, 26, 0.12);
 		padding: 1rem;
 	}
 
@@ -80,7 +80,7 @@
 		min-height: 2.85rem;
 		border: 1px solid var(--line);
 		border-radius: 8px;
-		background: #fff;
+		background: var(--surface-raised);
 		color: var(--ink);
 		font-weight: 800;
 	}
@@ -88,7 +88,7 @@
 	.primary {
 		border-color: var(--green);
 		background: var(--green);
-		color: #fff;
+		color: #282828;
 	}
 
 	button:hover {

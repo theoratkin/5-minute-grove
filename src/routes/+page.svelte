@@ -167,7 +167,7 @@
 	aside {
 		border: 1px solid var(--line);
 		border-radius: 8px;
-		background: rgba(255, 253, 248, 0.86);
+		background: rgba(60, 56, 54, 0.9);
 		box-shadow: var(--shadow);
 	}
 
@@ -188,7 +188,7 @@
 	}
 
 	header p {
-		color: var(--green-dark);
+		color: var(--amber);
 		font-size: 0.82rem;
 		font-weight: 900;
 		text-transform: uppercase;
@@ -210,13 +210,13 @@
 		min-height: 3.35rem;
 		border: 0;
 		border-radius: 8px;
-		background: var(--ink);
-		color: #fff;
+		background: var(--green-dark);
+		color: #282828;
 		font-weight: 900;
 	}
 
 	.start-button:hover {
-		background: #111827;
+		background: #fabd2f;
 	}
 
 	.running-note {

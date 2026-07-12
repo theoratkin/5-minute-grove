@@ -88,7 +88,7 @@
 		gap: 0.8rem;
 		border: 1px solid var(--line);
 		border-radius: 8px;
-		background: #fff;
+		background: var(--surface-raised);
 		padding: 0.8rem;
 	}
 
