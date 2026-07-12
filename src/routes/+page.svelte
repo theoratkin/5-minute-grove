@@ -46,6 +46,22 @@
 				: 'Just 5 More Minutes'
 	);
 
+	function finishCurrentTurn() {
+		if (phase !== 'running' && phase !== 'paused') return;
+
+		const nextCompletedContracts = completedContracts + 1;
+
+		remainingSeconds = 0;
+		completedContracts = nextCompletedContracts;
+		phase = 'contract-complete';
+		segmentEndsAt = null;
+		playSound(timerFinishSound);
+		notifyContractComplete({
+			intention: activeTitle,
+			completedContracts: nextCompletedContracts
+		});
+	}
+
 	onMount(() => {
 		history = loadSessionHistory();
 		startOrExtendSound = new Audio('/sounds/start-or-extend.mp3');
@@ -60,16 +76,7 @@
 			remainingSeconds = nextRemaining;
 
 			if (nextRemaining === 0) {
-				const nextCompletedContracts = completedContracts + 1;
-
-				completedContracts = nextCompletedContracts;
-				phase = 'contract-complete';
-				segmentEndsAt = null;
-				playSound(timerFinishSound);
-				notifyContractComplete({
-					intention: activeTitle,
-					completedContracts: nextCompletedContracts
-				});
+				finishCurrentTurn();
 			}
 		}, 250);
 
@@ -111,15 +118,6 @@
 
 		segmentEndsAt = Date.now() + remainingSeconds * 1000;
 		phase = 'running';
-	}
-
-	function stopSession() {
-		if (completedContracts > 0) {
-			finishSession('break');
-			return;
-		}
-
-		resetSession();
 	}
 
 	function finishSession(reason: SessionEndReason) {
@@ -210,12 +208,12 @@
 			{:else if phase === 'paused'}
 				<div class="timer-controls" aria-label="Paused timer controls">
 					<button class="resume-button" type="button" onclick={resumeSession}>Resume</button>
-					<button class="stop-button" type="button" onclick={stopSession}>Stop</button>
+					<button class="stop-button" type="button" onclick={finishCurrentTurn}>Finish</button>
 				</div>
 			{:else}
 				<div class="timer-controls" aria-label="Running timer controls">
 					<button type="button" onclick={pauseSession}>Pause</button>
-					<button class="stop-button" type="button" onclick={stopSession}>Stop</button>
+					<button class="stop-button" type="button" onclick={finishCurrentTurn}>Finish</button>
 				</div>
 			{/if}
 		</div>
