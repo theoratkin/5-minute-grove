@@ -21,6 +21,7 @@
 		notifyContractComplete,
 		prepareTimerNotifications
 	} from '$lib/app/notifications';
+	import { formatClock } from '$lib/app/time';
 	import TaskIntentionInput from '$lib/features/task-intention/components/TaskIntentionInput.svelte';
 
 	let intention = $state('');
@@ -36,6 +37,9 @@
 
 	let canEditIntention = $derived(phase === 'idle');
 	let activeTitle = $derived(getSessionTitle(intention));
+	let pageTitle = $derived(
+		phase === 'running' ? `${formatClock(remainingSeconds)} - Just 5 More Minutes` : 'Just 5 More Minutes'
+	);
 
 	onMount(() => {
 		history = loadSessionHistory();
@@ -132,7 +136,7 @@
 </script>
 
 <svelte:head>
-	<title>Just 5 More Minutes</title>
+	<title>{pageTitle}</title>
 	<meta
 		name="description"
 		content="A tiny focus timer centered on five-minute starts and voluntary continuation."
