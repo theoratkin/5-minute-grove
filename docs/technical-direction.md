@@ -106,6 +106,5 @@ When implementation begins, a pragmatic MVP would be:
 
 - Whether to use localStorage, IndexedDB, or a small local-first library.
 - Whether cozy/gamified visuals should be CSS/Svelte, canvas, or later Three.js.
-- Whether notification support is needed for background timers.
 - Whether to support PWA installability.
 - Whether to add account sync later.

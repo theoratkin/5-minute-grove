@@ -17,6 +17,10 @@
 		loadSessionHistory,
 		saveSessionHistory
 	} from '$lib/features/session-history/sessionHistory.storage';
+	import {
+		notifyContractComplete,
+		prepareTimerNotifications
+	} from '$lib/app/notifications';
 	import TaskIntentionInput from '$lib/features/task-intention/components/TaskIntentionInput.svelte';
 
 	let intention = $state('');
@@ -41,9 +45,15 @@
 			remainingSeconds = nextRemaining;
 
 			if (nextRemaining === 0) {
-				completedContracts += 1;
+				const nextCompletedContracts = completedContracts + 1;
+
+				completedContracts = nextCompletedContracts;
 				phase = 'contract-complete';
 				segmentEndsAt = null;
+				notifyContractComplete({
+					intention: activeTitle,
+					completedContracts: nextCompletedContracts
+				});
 			}
 		}, 250);
 
@@ -51,6 +61,8 @@
 	});
 
 	function startSession() {
+		void prepareTimerNotifications();
+
 		sessionStartedAt = new Date().toISOString();
 		completedContracts = 0;
 		extensionCount = 0;
@@ -60,6 +72,8 @@
 	}
 
 	function addFiveMinutes() {
+		void prepareTimerNotifications();
+
 		extensionCount += 1;
 		remainingSeconds = FIVE_MINUTES_SECONDS;
 		segmentEndsAt = Date.now() + FIVE_MINUTES_SECONDS * 1000;
