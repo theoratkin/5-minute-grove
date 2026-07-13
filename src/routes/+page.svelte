@@ -23,7 +23,7 @@
 	} from '$lib/app/notifications';
 	import { formatClock } from '$lib/app/time';
 	import TaskIntentionInput from '$lib/features/task-intention/components/TaskIntentionInput.svelte';
-	import { buttonBurst } from '$lib/actions/buttonBurst';
+	import { buttonSplash } from '$lib/actions/buttonSplash';
 
 	let intention = $state('');
 	let phase = $state<FocusPhase>('idle');
@@ -192,7 +192,7 @@
 			/>
 
 			{#if phase === 'idle'}
-				<button class="start-button" type="button" use:buttonBurst onclick={startSession}>
+				<button class="start-button" type="button" use:buttonSplash onclick={startSession}>
 					Start 5 minutes
 				</button>
 			{:else if phase === 'contract-complete'}
@@ -226,11 +226,12 @@
 
 <style>
 	main {
-		width: min(1180px, calc(100vw - 2rem));
+		position: relative;
+		z-index: 1;
+		width: min(760px, calc(100vw - 2rem));
 		min-height: 100vh;
 		margin: 0 auto;
 		display: grid;
-		grid-template-columns: minmax(0, 1fr) minmax(18rem, 24rem);
 		gap: 1.25rem;
 		align-items: start;
 		padding: 2rem 0;
@@ -324,18 +325,11 @@
 
 	aside {
 		padding: 1rem;
-		position: sticky;
-		top: 1rem;
 	}
 
 	@media (max-width: 880px) {
 		main {
-			grid-template-columns: 1fr;
 			padding: 1rem 0;
-		}
-
-		aside {
-			position: static;
 		}
 	}
 </style>
