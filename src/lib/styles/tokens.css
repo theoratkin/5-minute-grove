@@ -53,15 +53,28 @@
 
 	body {
 		@apply min-w-80 bg-mist font-sans text-ink;
+		--grid-gap: 12px;
+		--grid-major-gap: calc(var(--grid-gap) * 5);
+		--grid-minor: color-mix(in srgb, var(--color-ink) 7%, transparent);
+		--grid-major: color-mix(in srgb, var(--color-ink) 13%, transparent);
+
+		/* A quiet sheet of graph paper: structured enough to invite a small start. */
 		background-image:
-			radial-gradient(circle at 5% 5%, rgb(215 230 172 / 80%), transparent 25rem),
-			radial-gradient(circle at 95% 8%, rgb(244 201 107 / 42%), transparent 24rem);
+			linear-gradient(var(--grid-minor) 1px, transparent 1px),
+			linear-gradient(90deg, var(--grid-minor) 1px, transparent 1px),
+			linear-gradient(var(--grid-major) 1px, transparent 1px),
+			linear-gradient(90deg, var(--grid-major) 1px, transparent 1px);
+		background-position: 16px 16px;
+		background-size:
+			var(--grid-gap) var(--grid-gap),
+			var(--grid-gap) var(--grid-gap),
+			var(--grid-major-gap) var(--grid-major-gap),
+			var(--grid-major-gap) var(--grid-major-gap);
 	}
 
 	:root[data-theme='gruvbox-dark'] body {
-		background-image:
-			radial-gradient(circle at 5% 5%, rgb(184 187 38 / 15%), transparent 25rem),
-			radial-gradient(circle at 95% 8%, rgb(250 189 47 / 10%), transparent 24rem);
+		--grid-minor: color-mix(in srgb, var(--color-ink) 9%, transparent);
+		--grid-major: color-mix(in srgb, var(--color-ink) 17%, transparent);
 	}
 
 	button:not(:disabled) {
