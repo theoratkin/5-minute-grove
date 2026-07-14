@@ -244,8 +244,6 @@
 				{remainingSeconds}
 				{phase}
 				{completedContracts}
-				{extensionCount}
-				totalTimeSeconds={sprintTimeSeconds}
 			/>
 
 			{#if phase === 'idle'}
@@ -271,6 +269,17 @@
 					<button class="rounded-2xl border border-clay/30 bg-surface px-4 font-bold text-clay transition hover:bg-clay/10" type="button" onclick={finishCurrentTurn}>Finish</button>
 				</div>
 			{/if}
+
+			<div class="grid grid-cols-2 gap-3" aria-label="Current sprint progress">
+				<div class="rounded-2xl border border-moss/10 bg-mist/60 p-4">
+					<strong class="block text-2xl leading-none font-extrabold text-moss-dark">{formatClock(sprintTimeSeconds)}</strong>
+					<span class="mt-1 block text-xs font-bold tracking-wide text-ink-muted uppercase">sprint time</span>
+				</div>
+				<div class="rounded-2xl border border-moss/10 bg-mist/60 p-4">
+					<strong class="block text-2xl leading-none font-extrabold text-moss-dark">{extensionCount}</strong>
+					<span class="mt-1 block text-xs font-bold tracking-wide text-ink-muted uppercase">extensions</span>
+				</div>
+			</div>
 		</div>
 	</section>
 
