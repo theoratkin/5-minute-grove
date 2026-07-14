@@ -30,6 +30,7 @@
 	let remainingSeconds = $state(FIVE_MINUTES_SECONDS);
 	let completedContracts = $state(0);
 	let extensionCount = $state(0);
+	let elapsedSprintSeconds = $state(0);
 	let sessionStartedAt = $state<string | null>(null);
 	let activeSprintId = $state<string | null>(null);
 	let segmentEndsAt = $state<number | null>(null);
@@ -42,7 +43,7 @@
 	let sprintTimeSeconds = $derived(
 		phase === 'idle'
 			? 0
-			: completedContracts * FIVE_MINUTES_SECONDS +
+			: elapsedSprintSeconds +
 				(phase === 'contract-complete' ? 0 : FIVE_MINUTES_SECONDS - remainingSeconds)
 	);
 	let pageTitle = $derived(
@@ -57,6 +58,7 @@
 		if (phase !== 'running' && phase !== 'paused') return;
 
 		const nextCompletedContracts = completedContracts + 1;
+		elapsedSprintSeconds += FIVE_MINUTES_SECONDS - remainingSeconds;
 
 		remainingSeconds = 0;
 		completedContracts = nextCompletedContracts;
@@ -98,6 +100,7 @@
 		activeSprintId = createSessionId();
 		completedContracts = 0;
 		extensionCount = 0;
+		elapsedSprintSeconds = 0;
 		remainingSeconds = FIVE_MINUTES_SECONDS;
 		segmentEndsAt = Date.now() + FIVE_MINUTES_SECONDS * 1000;
 		phase = 'running';
@@ -138,7 +141,7 @@
 			endedAt: new Date().toISOString(),
 			completedContracts,
 			extensionCount,
-			totalSeconds: completedContracts * FIVE_MINUTES_SECONDS
+			totalSeconds: sprintTimeSeconds
 		};
 
 		history = [...history.filter((sprint) => sprint.id !== record.id), record]
@@ -156,6 +159,7 @@
 		sessionStartedAt = record.startedAt;
 		completedContracts = record.completedContracts || Math.round(record.totalSeconds / FIVE_MINUTES_SECONDS);
 		extensionCount = record.extensionCount;
+		elapsedSprintSeconds = record.totalSeconds;
 		remainingSeconds = FIVE_MINUTES_SECONDS;
 		segmentEndsAt = Date.now() + FIVE_MINUTES_SECONDS * 1000;
 		phase = 'running';
@@ -174,6 +178,7 @@
 		remainingSeconds = FIVE_MINUTES_SECONDS;
 		completedContracts = 0;
 		extensionCount = 0;
+		elapsedSprintSeconds = 0;
 		sessionStartedAt = null;
 		activeSprintId = null;
 		segmentEndsAt = null;
