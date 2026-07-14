@@ -4,10 +4,12 @@
 
 	let {
 		records,
+		currentSprint = null,
 		onresume,
 		deleteSprint
 	}: {
 		records: FocusSessionRecord[];
+		currentSprint?: FocusSessionRecord | null;
 		onresume: (record: FocusSessionRecord) => void;
 		deleteSprint: (id: string) => void;
 	} = $props();
@@ -25,24 +27,41 @@
 
 	let groups = $derived.by(() => {
 		const grouped = new Map<string, FocusSessionRecord[]>();
-		for (const record of records) {
+		for (const record of records.filter((record) => record.id !== currentSprint?.id)) {
 			const key = new Date(record.startedAt).toDateString();
 			grouped.set(key, [...(grouped.get(key) ?? []), record]);
 		}
 		return [...grouped.entries()].map(([key, sprints]) => ({ key, label: dayLabel(sprints[0].startedAt), sprints }));
 	});
+
+	let sprintCount = $derived(records.filter((record) => record.id !== currentSprint?.id).length + Number(currentSprint !== null));
 </script>
 
 <section class="grid gap-4" aria-label="Recent sprints">
 	<div class="flex items-center justify-between gap-4">
 		<h2 class="font-display text-2xl font-semibold tracking-[-0.03em] text-moss-dark">Recent sprints</h2>
-		<span class="min-w-8 rounded-full bg-sprout px-2 py-0.5 text-center text-sm font-extrabold text-moss">{records.length}</span>
+		<span class="min-w-8 rounded-full bg-sprout px-2 py-0.5 text-center text-sm font-extrabold text-moss">{sprintCount}</span>
 	</div>
 
-	{#if records.length === 0}
+	{#if currentSprint === null && records.length === 0}
 		<p class="rounded-2xl border border-dashed border-moss/20 bg-mist/50 p-4 text-sm leading-relaxed text-ink-muted">No sprints yet. Completed five-minute contracts will be saved here.</p>
 	{:else}
 		<div class="grid gap-5">
+			{#if currentSprint}
+				<section class="grid gap-2.5" aria-label="Current sprint">
+					<h3 class="text-xs font-extrabold tracking-[0.12em] text-moss uppercase">In progress</h3>
+					<div class="grid gap-3 rounded-2xl border border-moss/20 bg-sprout/25 p-3">
+						<div class="flex items-start justify-between gap-3">
+							<strong class="max-w-48 wrap-anywhere text-sm font-extrabold text-ink">{currentSprint.title}</strong>
+							<div class="grid flex-none justify-items-end">
+								<span class="text-sm font-extrabold text-moss">{formatMinutes(currentSprint.totalSeconds)}</span>
+								<span class="mt-1 text-xs font-bold text-ink-muted">{currentSprint.extensionCount} extensions</span>
+							</div>
+						</div>
+						<span class="text-xs font-bold text-moss">Current sprint</span>
+					</div>
+				</section>
+			{/if}
 			{#each groups as group (group.key)}
 				<section class="grid gap-2.5" aria-label={group.label}>
 					<h3 class="text-xs font-extrabold tracking-[0.12em] text-ink-muted uppercase">{group.label}</h3>

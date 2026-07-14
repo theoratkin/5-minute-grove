@@ -53,6 +53,19 @@
 				? 'Paused - Just 5 More Minutes'
 				: 'Just 5 More Minutes'
 	);
+	let currentSprint = $derived<FocusSessionRecord | null>(
+		phase === 'idle' || !sessionStartedAt || !activeSprintId
+			? null
+			: {
+				id: activeSprintId,
+				title: activeTitle,
+				startedAt: sessionStartedAt,
+				endedAt: new Date().toISOString(),
+				completedContracts,
+				extensionCount,
+				totalSeconds: sprintTimeSeconds
+			}
+	);
 
 	function finishCurrentTurn() {
 		if (phase !== 'running' && phase !== 'paused') return;
@@ -258,6 +271,6 @@
 	</section>
 
 	<aside class="rounded-[1.5rem] border border-white/90 bg-paper/80 p-5 shadow-[0_18px_50px_rgb(36_48_41/8%)] backdrop-blur lg:sticky lg:top-8">
-			<SessionHistory records={history} onresume={resumeSprint} {deleteSprint} />
+			<SessionHistory records={history} {currentSprint} onresume={resumeSprint} {deleteSprint} />
 	</aside>
 </main>
