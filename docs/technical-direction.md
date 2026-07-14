@@ -86,13 +86,8 @@ When implementation begins, a pragmatic MVP would be:
   - Done
   - Break
   - Switch task
-- Session summary:
-  - task label
-  - starts
-  - total minutes
-  - extension count
-  - start/end time
-- Local persistence for recent sessions.
+- Current sprint summary with total elapsed time and extension count.
+- Local persistence for recent sprints, grouped by start date and resumable in place.
 
 ## UX Constraints
 

@@ -31,6 +31,7 @@
 	let completedContracts = $state(0);
 	let extensionCount = $state(0);
 	let sessionStartedAt = $state<string | null>(null);
+	let activeSprintId = $state<string | null>(null);
 	let segmentEndsAt = $state<number | null>(null);
 	let history = $state<FocusSessionRecord[]>([]);
 	let startOrExtendSound: HTMLAudioElement | null = null;
@@ -38,6 +39,12 @@
 
 	let canEditIntention = $derived(phase === 'idle');
 	let activeTitle = $derived(getSessionTitle(intention));
+	let sprintTimeSeconds = $derived(
+		phase === 'idle'
+			? 0
+			: completedContracts * FIVE_MINUTES_SECONDS +
+				(phase === 'contract-complete' ? 0 : FIVE_MINUTES_SECONDS - remainingSeconds)
+	);
 	let pageTitle = $derived(
 		phase === 'running'
 			? `${formatClock(remainingSeconds)} - Just 5 More Minutes`
@@ -88,6 +95,7 @@
 		playSound(startOrExtendSound);
 
 		sessionStartedAt = new Date().toISOString();
+		activeSprintId = createSessionId();
 		completedContracts = 0;
 		extensionCount = 0;
 		remainingSeconds = FIVE_MINUTES_SECONDS;
@@ -121,22 +129,44 @@
 	}
 
 	function finishSession(reason: SessionEndReason) {
-		if (!sessionStartedAt || completedContracts === 0) return;
+		if (!sessionStartedAt || !activeSprintId || completedContracts === 0) return;
 
 		const record: FocusSessionRecord = {
-			id: createSessionId(),
-			intention: activeTitle,
+			id: activeSprintId,
+			title: activeTitle,
 			startedAt: sessionStartedAt,
 			endedAt: new Date().toISOString(),
 			completedContracts,
 			extensionCount,
-			totalSeconds: completedContracts * FIVE_MINUTES_SECONDS,
-			reason
+			totalSeconds: completedContracts * FIVE_MINUTES_SECONDS
 		};
 
-		history = [record, ...history].slice(0, 12);
+		history = [...history.filter((sprint) => sprint.id !== record.id), record]
+			.sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime())
+			.slice(0, 12);
 		saveSessionHistory(history);
 		resetSession(reason === 'switch');
+	}
+
+	function resumeSprint(record: FocusSessionRecord) {
+		if (phase !== 'idle') return;
+
+		intention = record.title === 'Sprint' ? '' : record.title;
+		activeSprintId = record.id;
+		sessionStartedAt = record.startedAt;
+		completedContracts = record.completedContracts || Math.round(record.totalSeconds / FIVE_MINUTES_SECONDS);
+		extensionCount = record.extensionCount;
+		remainingSeconds = FIVE_MINUTES_SECONDS;
+		segmentEndsAt = Date.now() + FIVE_MINUTES_SECONDS * 1000;
+		phase = 'running';
+		void prepareTimerNotifications();
+		playSound(startOrExtendSound);
+	}
+
+	function deleteSprint(id: string) {
+		if (id === activeSprintId) return;
+		history = history.filter((sprint) => sprint.id !== id);
+		saveSessionHistory(history);
 	}
 
 	function resetSession(clearIntention = false) {
@@ -145,6 +175,7 @@
 		completedContracts = 0;
 		extensionCount = 0;
 		sessionStartedAt = null;
+		activeSprintId = null;
 		segmentEndsAt = null;
 
 		if (clearIntention) {
@@ -190,6 +221,7 @@
 				{phase}
 				{completedContracts}
 				{extensionCount}
+				totalTimeSeconds={sprintTimeSeconds}
 			/>
 
 			{#if phase === 'idle'}
@@ -221,6 +253,6 @@
 	</section>
 
 	<aside class="rounded-[1.5rem] border border-white/90 bg-paper/80 p-5 shadow-[0_18px_50px_rgb(36_48_41/8%)] backdrop-blur lg:sticky lg:top-8">
-		<SessionHistory records={history} />
+			<SessionHistory records={history} onresume={resumeSprint} {deleteSprint} />
 	</aside>
 </main>

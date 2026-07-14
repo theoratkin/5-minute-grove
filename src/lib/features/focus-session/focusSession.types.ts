@@ -4,11 +4,10 @@ export type SessionEndReason = 'done' | 'break' | 'switch';
 
 export interface FocusSessionRecord {
 	id: string;
-	intention: string;
+	title: string;
 	startedAt: string;
 	endedAt: string;
 	completedContracts: number;
 	extensionCount: number;
 	totalSeconds: number;
-	reason: SessionEndReason;
 }

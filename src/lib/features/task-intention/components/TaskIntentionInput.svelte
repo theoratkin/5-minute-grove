@@ -11,11 +11,11 @@
 </script>
 
 <label class="grid gap-2">
-	<span class="text-sm font-bold text-ink-muted">What are you starting?</span>
+	<span class="text-sm font-bold text-ink-muted">Name this sprint <span class="font-medium">(optional)</span></span>
 	<input
 		class="min-h-13 w-full rounded-2xl border border-moss/15 bg-white px-4 py-3 text-ink outline-none transition placeholder:text-ink-muted/70 focus:border-moss focus:ring-4 focus:ring-sprout/60 disabled:bg-mist"
 		{disabled}
-		placeholder="One tiny visible next step"
+		placeholder="What are you working on?"
 		value={value}
 		oninput={(event) => onchange?.(event.currentTarget.value)}
 	/>

@@ -6,12 +6,14 @@
 		remainingSeconds,
 		phase,
 		completedContracts,
-		extensionCount
+		extensionCount,
+		totalTimeSeconds
 	}: {
 		remainingSeconds: number;
 		phase: FocusPhase;
 		completedContracts: number;
 		extensionCount: number;
+		totalTimeSeconds: number;
 	} = $props();
 
 	let statusText = $derived.by(() => {
@@ -39,10 +41,10 @@
 		<div class="h-full rounded-full bg-[linear-gradient(90deg,#315e4c,#8eae72)] transition-[width] duration-200 ease-out" style={`width: ${Math.max(0, Math.min(100, progress))}%`}></div>
 	</div>
 
-	<div class="grid grid-cols-2 gap-3" aria-label="Session progress">
+	<div class="grid grid-cols-2 gap-3" aria-label="Current sprint progress">
 		<div class="rounded-2xl border border-moss/10 bg-mist/60 p-4">
-			<strong class="block text-2xl leading-none font-extrabold text-moss-dark">{completedContracts}</strong>
-			<span class="mt-1 block text-xs font-bold tracking-wide text-ink-muted uppercase">complete</span>
+			<strong class="block text-2xl leading-none font-extrabold text-moss-dark">{formatClock(totalTimeSeconds)}</strong>
+			<span class="mt-1 block text-xs font-bold tracking-wide text-ink-muted uppercase">sprint time</span>
 		</div>
 		<div class="rounded-2xl border border-moss/10 bg-mist/60 p-4">
 			<strong class="block text-2xl leading-none font-extrabold text-moss-dark">{extensionCount}</strong>

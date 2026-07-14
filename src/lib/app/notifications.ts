@@ -28,7 +28,7 @@ export function notifyContractComplete({
 
 	const blockLabel = completedContracts === 1 ? 'one finished block' : `${completedContracts} finished blocks`;
 	const notification = new Notification('Five minutes counts.', {
-		body: `${intention || 'This start'} has ${blockLabel}. Stop here or add 5 minutes.`,
+		body: `${intention || 'This sprint'} has ${blockLabel}. Stop here or add 5 minutes.`,
 		tag: 'just-5-more-minutes:contract-complete'
 	});
 

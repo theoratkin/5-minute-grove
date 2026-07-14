@@ -29,12 +29,12 @@ The more nuanced opportunity is making the repeated, consent-based "+5 minutes" 
 
 The first usable version should likely include:
 
-- A task or intention field.
+- An optional sprint title, defaulting simply to "Sprint".
 - A default 5-minute timer.
 - A clear end-of-contract state.
 - A prominent "Add 5 minutes" action.
 - Equally valid options to stop, break, or switch.
-- Session history that celebrates starts and extensions.
+- A local sprint history grouped by the day each sprint began, with options to resume or delete a sprint.
 
 Possible later layers:
 
@@ -49,4 +49,3 @@ Possible later layers:
 - Do not require long up-front planning.
 - Do not punish stopping after the first 5 minutes.
 - Do not overbuild accounts, social features, or heavy analytics early.
-
