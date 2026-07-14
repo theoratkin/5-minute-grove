@@ -35,10 +35,10 @@
 		<span class="rounded-full bg-sprout/60 px-3 py-1 text-moss">{Math.max(0, progress)}%</span>
 	</div>
 
-	<div class="grid min-h-56 place-items-center rounded-[1.5rem] border border-moss/10 bg-[radial-gradient(circle_at_center,#fff,theme(colors.mist))] px-4 py-7 font-display text-[clamp(4.5rem,18vw,8rem)] leading-none font-semibold tracking-[-0.065em] text-moss-dark shadow-inner" aria-live="polite">{formatClock(remainingSeconds)}</div>
+	<div class="grid min-h-56 place-items-center rounded-[1.5rem] border border-moss/10 bg-surface px-4 py-7 font-display text-[clamp(4.5rem,18vw,8rem)] leading-none font-semibold tracking-[-0.065em] text-moss-dark shadow-inner" aria-live="polite">{formatClock(remainingSeconds)}</div>
 
 	<div class="h-3 overflow-hidden rounded-full bg-mist" aria-hidden="true">
-		<div class="h-full rounded-full bg-[linear-gradient(90deg,#315e4c,#8eae72)] transition-[width] duration-200 ease-out" style={`width: ${Math.max(0, Math.min(100, progress))}%`}></div>
+		<div class="h-full rounded-full bg-[linear-gradient(90deg,var(--color-moss),var(--color-moss-dark))] transition-[width] duration-200 ease-out" style={`width: ${Math.max(0, Math.min(100, progress))}%`}></div>
 	</div>
 
 	<div class="grid grid-cols-2 gap-3" aria-label="Current sprint progress">

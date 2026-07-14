@@ -7,11 +7,40 @@
 	--color-ink-muted: #68736b;
 	--color-paper: #fbfaf5;
 	--color-mist: #eef1ea;
+	--color-surface: #ffffff;
+	--color-on-accent: #ffffff;
 	--color-moss: #315e4c;
 	--color-moss-dark: #204536;
+	--color-moss-pressed: #204536;
+	--color-moss-hover-pressed: #204536;
 	--color-sprout: #d7e6ac;
 	--color-sun: #f4c96b;
 	--color-clay: #d78267;
+	--splash-color: rgb(49 94 76 / 72%);
+	--splash-fill: rgb(49 94 76 / 12%);
+	--splash-glow: rgb(49 94 76 / 24%);
+	--splash-fade: rgb(49 94 76 / 5%);
+}
+
+:root[data-theme='gruvbox-dark'] {
+	color-scheme: dark;
+	--color-ink: #ebdbb2;
+	--color-ink-muted: #bdae93;
+	--color-paper: #3c3836;
+	--color-mist: #282828;
+	--color-surface: #504945;
+	--color-on-accent: #282828;
+	--color-moss: #b8bb26;
+	--color-moss-dark: #fabd2f;
+	--color-moss-pressed: #98971a;
+	--color-moss-hover-pressed: #d79921;
+	--color-sprout: #504945;
+	--color-sun: #fabd2f;
+	--color-clay: #fb4934;
+	--splash-color: rgb(250 189 47 / 72%);
+	--splash-fill: rgb(184 187 38 / 10%);
+	--splash-glow: rgb(250 189 47 / 20%);
+	--splash-fade: rgb(184 187 38 / 5%);
 }
 
 @layer base {
@@ -27,6 +56,12 @@
 		background-image:
 			radial-gradient(circle at 5% 5%, rgb(215 230 172 / 80%), transparent 25rem),
 			radial-gradient(circle at 95% 8%, rgb(244 201 107 / 42%), transparent 24rem);
+	}
+
+	:root[data-theme='gruvbox-dark'] body {
+		background-image:
+			radial-gradient(circle at 5% 5%, rgb(184 187 38 / 15%), transparent 25rem),
+			radial-gradient(circle at 95% 8%, rgb(250 189 47 / 10%), transparent 24rem);
 	}
 
 	button:not(:disabled) {

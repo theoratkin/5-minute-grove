@@ -1,0 +1,24 @@
+<script lang="ts">
+	import { themes, type ThemeId } from '$lib/app/theme';
+
+	let {
+		value,
+		onchange
+	}: {
+		value: ThemeId;
+		onchange: (theme: ThemeId) => void;
+	} = $props();
+</script>
+
+<label class="grid gap-2">
+	<span class="text-xs font-extrabold tracking-[0.12em] text-ink-muted uppercase">Theme</span>
+	<select
+		class="min-h-10 w-full rounded-xl border border-moss/15 bg-surface px-3 text-sm font-bold text-ink outline-none transition focus:border-moss focus:ring-4 focus:ring-sprout/60"
+		value={value}
+		onchange={(event) => onchange(event.currentTarget.value as ThemeId)}
+	>
+		{#each themes as theme (theme.id)}
+			<option value={theme.id}>{theme.label}</option>
+		{/each}
+	</select>
+</label>

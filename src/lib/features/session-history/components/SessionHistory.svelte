@@ -67,7 +67,7 @@
 					<h3 class="text-xs font-extrabold tracking-[0.12em] text-ink-muted uppercase">{group.label}</h3>
 					<ul class="grid gap-2.5 p-0">
 						{#each group.sprints as record (record.id)}
-							<li class="grid gap-3 rounded-2xl border border-moss/10 bg-white/75 p-3">
+							<li class="grid gap-3 rounded-2xl border border-moss/10 bg-surface/75 p-3">
 								<div class="flex items-start justify-between gap-3">
 									<strong class="max-w-48 wrap-anywhere text-sm font-extrabold text-ink">{record.title}</strong>
 									<div class="grid flex-none justify-items-end">
@@ -76,7 +76,7 @@
 									</div>
 								</div>
 								<div class="grid grid-cols-2 gap-2">
-									<button class="min-h-9 rounded-xl bg-moss px-3 text-xs font-extrabold text-white transition hover:bg-moss-dark" type="button" onclick={() => onresume(record)}>Resume</button>
+									<button class="min-h-9 rounded-xl bg-moss px-3 text-xs font-extrabold text-on-accent transition hover:bg-moss-dark" type="button" onclick={() => onresume(record)}>Resume</button>
 									<button class="min-h-9 rounded-xl border border-clay/25 px-3 text-xs font-bold text-clay transition hover:bg-clay/10" type="button" onclick={() => deleteSprint(record.id)}>Delete</button>
 								</div>
 							</li>
