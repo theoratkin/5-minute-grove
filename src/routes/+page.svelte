@@ -170,14 +170,15 @@
 	/>
 </svelte:head>
 
-<main>
-	<section class="workspace" aria-label="Just 5 More Minutes workspace">
-		<header>
-			<p>Just 5 More Minutes</p>
-			<h1>{phase === 'contract-complete' ? 'You can stop here.' : 'Start small.'}</h1>
+
+<main class="relative mx-auto grid min-h-screen w-full max-w-6xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start lg:px-8 lg:py-10">
+	<section class="overflow-hidden rounded-[2rem] border border-white/80 bg-paper/90 shadow-[0_24px_70px_rgb(36_48_41/12%)] backdrop-blur" aria-label="Just 5 More Minutes workspace">
+		<header class="border-b border-moss/10 bg-[linear-gradient(120deg,#eaf1db,transparent_62%)] px-6 py-7 sm:px-10 sm:py-9">
+			<p class="mb-3 flex items-center gap-2 text-xs font-black tracking-[0.18em] text-moss uppercase before:h-2 before:w-2 before:rounded-full before:bg-sun before:content-['']">Just 5 More Minutes</p>
+			<h1 class="max-w-xl font-display text-5xl leading-[0.94] font-semibold tracking-[-0.045em] text-moss-dark sm:text-6xl">{phase === 'contract-complete' ? 'You can stop here.' : 'Start small.'}</h1>
 		</header>
 
-		<div class="panel">
+		<div class="grid gap-7 px-6 py-7 sm:px-10 sm:py-9">
 			<TaskIntentionInput
 				value={intention}
 				disabled={!canEditIntention}
@@ -192,7 +193,7 @@
 			/>
 
 			{#if phase === 'idle'}
-				<button class="start-button" type="button" use:buttonSplash onclick={startSession}>
+				<button class="min-h-14 w-full rounded-2xl bg-moss px-5 py-4 text-base font-extrabold text-white shadow-[0_8px_0_#204536] transition hover:-translate-y-0.5 hover:bg-moss-dark active:translate-y-1 active:shadow-none" type="button" use:buttonSplash onclick={startSession}>
 					Start 5 minutes
 				</button>
 			{:else if phase === 'contract-complete'}
@@ -206,130 +207,20 @@
 					onSwitchTask={() => finishSession('switch')}
 				/>
 			{:else if phase === 'paused'}
-				<div class="timer-controls" aria-label="Paused timer controls">
-					<button class="resume-button" type="button" onclick={resumeSession}>Resume</button>
-					<button class="stop-button" type="button" onclick={finishCurrentTurn}>Finish</button>
+				<div class="grid min-h-14 grid-cols-2 gap-3" aria-label="Paused timer controls">
+					<button class="rounded-2xl bg-moss px-4 font-extrabold text-white shadow-[0_5px_0_#204536] transition hover:-translate-y-0.5" type="button" onclick={resumeSession}>Resume</button>
+					<button class="rounded-2xl border border-clay/30 bg-white px-4 font-bold text-clay transition hover:bg-clay/10" type="button" onclick={finishCurrentTurn}>Finish</button>
 				</div>
 			{:else}
-				<div class="timer-controls" aria-label="Running timer controls">
-					<button type="button" onclick={pauseSession}>Pause</button>
-					<button class="stop-button" type="button" onclick={finishCurrentTurn}>Finish</button>
+				<div class="grid min-h-14 grid-cols-2 gap-3" aria-label="Running timer controls">
+					<button class="rounded-2xl border border-moss/15 bg-mist px-4 font-extrabold text-moss transition hover:-translate-y-0.5 hover:bg-sprout/50" type="button" onclick={pauseSession}>Pause</button>
+					<button class="rounded-2xl border border-clay/30 bg-white px-4 font-bold text-clay transition hover:bg-clay/10" type="button" onclick={finishCurrentTurn}>Finish</button>
 				</div>
 			{/if}
 		</div>
 	</section>
 
-	<aside>
+	<aside class="rounded-[1.5rem] border border-white/90 bg-paper/80 p-5 shadow-[0_18px_50px_rgb(36_48_41/8%)] backdrop-blur lg:sticky lg:top-8">
 		<SessionHistory records={history} />
 	</aside>
 </main>
-
-<style>
-	main {
-		position: relative;
-		z-index: 1;
-		width: min(760px, calc(100vw - 2rem));
-		min-height: 100vh;
-		margin: 0 auto;
-		display: grid;
-		gap: 1.25rem;
-		align-items: start;
-		padding: 2rem 0;
-	}
-
-	.workspace,
-	aside {
-		border: 1px solid var(--line);
-		border-radius: 8px;
-		background: rgba(60, 56, 54, 0.9);
-		box-shadow: var(--shadow);
-	}
-
-	.workspace {
-		display: grid;
-		gap: 1.25rem;
-		padding: clamp(1rem, 3vw, 2rem);
-	}
-
-	header {
-		display: grid;
-		gap: 0.25rem;
-	}
-
-	header p,
-	h1 {
-		margin: 0;
-	}
-
-	header p {
-		color: var(--amber);
-		font-size: 0.82rem;
-		font-weight: 900;
-		text-transform: uppercase;
-	}
-
-	h1 {
-		font-size: clamp(2.2rem, 7vw, 5.6rem);
-		line-height: 0.96;
-		letter-spacing: 0;
-	}
-
-	.panel {
-		display: grid;
-		gap: 1.2rem;
-	}
-
-	.start-button {
-		width: 100%;
-		min-height: 3.35rem;
-		border: 0;
-		border-radius: 8px;
-		background: var(--green-dark);
-		color: #282828;
-		font-weight: 900;
-	}
-
-	.start-button:hover {
-		background: #fabd2f;
-	}
-
-	.timer-controls {
-		min-height: 3.35rem;
-		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 0.7rem;
-	}
-
-	.timer-controls button {
-		border: 1px solid var(--line);
-		border-radius: 8px;
-		background: var(--surface-muted);
-		color: var(--ink);
-		font-weight: 800;
-	}
-
-	.timer-controls button:hover {
-		transform: translateY(-1px);
-	}
-
-	.timer-controls .resume-button {
-		border-color: var(--green);
-		background: var(--green);
-		color: #282828;
-	}
-
-	.timer-controls .stop-button {
-		border-color: rgba(251, 73, 52, 0.55);
-		color: #ffb4a8;
-	}
-
-	aside {
-		padding: 1rem;
-	}
-
-	@media (max-width: 880px) {
-		main {
-			padding: 1rem 0;
-		}
-	}
-</style>

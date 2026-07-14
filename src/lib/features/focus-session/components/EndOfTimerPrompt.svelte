@@ -20,86 +20,21 @@
 	} = $props();
 </script>
 
-<section class="prompt" aria-label="End of timer decision">
+
+<section class="grid gap-5 rounded-[1.5rem] border border-sprout bg-[linear-gradient(135deg,#f4f8e9,#fffdf5)] p-5 sm:p-6" aria-label="End of timer decision">
 	<div>
-		<p class="eyebrow">Complete</p>
-		<h2>Five minutes counts.</h2>
-		<p class="summary">
+		<p class="mb-2 text-xs font-black tracking-[0.16em] text-moss uppercase">Complete</p>
+		<h2 class="font-display text-3xl leading-none font-semibold tracking-[-0.04em] text-moss-dark">Five minutes counts.</h2>
+		<p class="mt-3 leading-relaxed text-ink-muted">
 			{intention || 'This start'} has {completedContracts === 1 ? 'one finished block' : `${completedContracts} finished blocks`}
 			{extensionCount > 0 ? ` and ${extensionCount} voluntary extensions` : ''}.
 		</p>
 	</div>
 
-	<div class="actions">
-		<button class="primary" type="button" use:buttonSplash onclick={onAddFive}>Add 5 minutes</button>
-		<button type="button" onclick={onDone}>Done</button>
-		<button type="button" onclick={onBreak}>Break</button>
-		<button type="button" onclick={onSwitchTask}>Switch task</button>
+	<div class="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+		<button class="col-span-2 min-h-13 rounded-2xl bg-moss px-4 font-extrabold text-white shadow-[0_5px_0_#204536] transition hover:-translate-y-0.5 hover:bg-moss-dark sm:col-span-1" type="button" use:buttonSplash onclick={onAddFive}>Add 5 minutes</button>
+		<button class="min-h-13 rounded-2xl border border-moss/15 bg-white px-3 text-sm font-extrabold text-moss transition hover:bg-mist" type="button" onclick={onDone}>Done</button>
+		<button class="min-h-13 rounded-2xl border border-moss/15 bg-white px-3 text-sm font-bold text-ink-muted transition hover:bg-mist" type="button" onclick={onBreak}>Break</button>
+		<button class="min-h-13 rounded-2xl border border-moss/15 bg-white px-3 text-sm font-bold text-ink-muted transition hover:bg-mist" type="button" onclick={onSwitchTask}>Switch task</button>
 	</div>
 </section>
-
-<style>
-	.prompt {
-		display: grid;
-		gap: 1rem;
-		border: 1px solid rgba(184, 187, 38, 0.35);
-		border-radius: 8px;
-		background: rgba(152, 151, 26, 0.12);
-		padding: 1rem;
-	}
-
-	.eyebrow {
-		margin: 0 0 0.25rem;
-		color: var(--green-dark);
-		font-size: 0.8rem;
-		font-weight: 800;
-		text-transform: uppercase;
-	}
-
-	h2,
-	.summary {
-		margin: 0;
-	}
-
-	h2 {
-		font-size: 1.35rem;
-		line-height: 1.15;
-	}
-
-	.summary {
-		margin-top: 0.45rem;
-		color: var(--ink-soft);
-		line-height: 1.45;
-	}
-
-	.actions {
-		display: grid;
-		grid-template-columns: repeat(4, minmax(0, 1fr));
-		gap: 0.6rem;
-	}
-
-	button {
-		min-height: 2.85rem;
-		border: 1px solid var(--line);
-		border-radius: 8px;
-		background: var(--surface-raised);
-		color: var(--ink);
-		font-weight: 800;
-	}
-
-	.primary {
-		border-color: var(--green);
-		background: var(--green);
-		color: #282828;
-	}
-
-	button:hover {
-		transform: translateY(-1px);
-	}
-
-	@media (max-width: 760px) {
-		.actions {
-			grid-template-columns: 1fr 1fr;
-		}
-	}
-</style>

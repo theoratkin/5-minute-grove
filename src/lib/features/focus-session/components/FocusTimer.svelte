@@ -27,100 +27,26 @@
 	});
 </script>
 
-<section class="timer" aria-label="Focus timer">
-	<div class="status-row">
+<section class="grid gap-5" aria-label="Focus timer">
+	<div class="flex items-center justify-between gap-4 text-xs font-extrabold tracking-[0.12em] text-ink-muted uppercase">
 		<span>{statusText}</span>
-		<span>{Math.max(0, progress)}%</span>
+		<span class="rounded-full bg-sprout/60 px-3 py-1 text-moss">{Math.max(0, progress)}%</span>
 	</div>
 
-	<div class="clock" aria-live="polite">{formatClock(remainingSeconds)}</div>
+	<div class="grid min-h-56 place-items-center rounded-[1.5rem] border border-moss/10 bg-[radial-gradient(circle_at_center,#fff,theme(colors.mist))] px-4 py-7 font-display text-[clamp(4.5rem,18vw,8rem)] leading-none font-semibold tracking-[-0.065em] text-moss-dark shadow-inner" aria-live="polite">{formatClock(remainingSeconds)}</div>
 
-	<div class="meter" aria-hidden="true">
-		<div style={`width: ${Math.max(0, Math.min(100, progress))}%`}></div>
+	<div class="h-3 overflow-hidden rounded-full bg-mist" aria-hidden="true">
+		<div class="h-full rounded-full bg-[linear-gradient(90deg,#315e4c,#8eae72)] transition-[width] duration-200 ease-out" style={`width: ${Math.max(0, Math.min(100, progress))}%`}></div>
 	</div>
 
-	<div class="stats" aria-label="Session progress">
-		<div>
-			<strong>{completedContracts}</strong>
-			<span>complete</span>
+	<div class="grid grid-cols-2 gap-3" aria-label="Session progress">
+		<div class="rounded-2xl border border-moss/10 bg-mist/60 p-4">
+			<strong class="block text-2xl leading-none font-extrabold text-moss-dark">{completedContracts}</strong>
+			<span class="mt-1 block text-xs font-bold tracking-wide text-ink-muted uppercase">complete</span>
 		</div>
-		<div>
-			<strong>{extensionCount}</strong>
-			<span>extensions</span>
+		<div class="rounded-2xl border border-moss/10 bg-mist/60 p-4">
+			<strong class="block text-2xl leading-none font-extrabold text-moss-dark">{extensionCount}</strong>
+			<span class="mt-1 block text-xs font-bold tracking-wide text-ink-muted uppercase">extensions</span>
 		</div>
 	</div>
 </section>
-
-<style>
-	.timer {
-		display: grid;
-		gap: 1.25rem;
-	}
-
-	.status-row,
-	.stats {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 1rem;
-	}
-
-	.status-row {
-		color: var(--ink-soft);
-		font-size: 0.88rem;
-		font-weight: 700;
-	}
-
-	.clock {
-		min-height: 8rem;
-		display: grid;
-		place-items: center;
-		border: 1px solid var(--line);
-		border-radius: 8px;
-		background: var(--surface-raised);
-		font-size: clamp(4.4rem, 18vw, 8.5rem);
-		font-weight: 800;
-		font-variant-numeric: tabular-nums;
-		line-height: 1;
-		letter-spacing: 0;
-	}
-
-	.meter {
-		overflow: hidden;
-		height: 0.75rem;
-		border-radius: 999px;
-		background: var(--surface-muted);
-	}
-
-	.meter div {
-		height: 100%;
-		border-radius: inherit;
-		background: linear-gradient(90deg, var(--green), var(--amber));
-		transition: width 180ms ease;
-	}
-
-	.stats > div {
-		min-width: 8rem;
-		border: 1px solid var(--line);
-		border-radius: 8px;
-		background: rgba(50, 48, 47, 0.84);
-		padding: 0.8rem;
-	}
-
-	strong,
-	.stats span {
-		display: block;
-	}
-
-	strong {
-		font-size: 1.45rem;
-		line-height: 1;
-	}
-
-	.stats span {
-		margin-top: 0.25rem;
-		color: var(--ink-soft);
-		font-size: 0.82rem;
-		font-weight: 700;
-	}
-</style>

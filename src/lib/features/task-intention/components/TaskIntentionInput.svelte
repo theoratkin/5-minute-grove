@@ -10,45 +10,13 @@
 	} = $props();
 </script>
 
-<label class="field">
-	<span>What are you starting?</span>
+<label class="grid gap-2">
+	<span class="text-sm font-bold text-ink-muted">What are you starting?</span>
 	<input
+		class="min-h-13 w-full rounded-2xl border border-moss/15 bg-white px-4 py-3 text-ink outline-none transition placeholder:text-ink-muted/70 focus:border-moss focus:ring-4 focus:ring-sprout/60 disabled:bg-mist"
 		{disabled}
 		placeholder="One tiny visible next step"
 		value={value}
 		oninput={(event) => onchange?.(event.currentTarget.value)}
 	/>
 </label>
-
-<style>
-	.field {
-		display: grid;
-		gap: 0.55rem;
-	}
-
-	span {
-		color: var(--ink-soft);
-		font-size: 0.88rem;
-		font-weight: 700;
-	}
-
-	input {
-		width: 100%;
-		min-height: 3.1rem;
-		border: 1px solid var(--line);
-		border-radius: 8px;
-		background: var(--surface-raised);
-		color: var(--ink);
-		padding: 0.85rem 0.95rem;
-		outline: none;
-	}
-
-	input::placeholder {
-		color: #928374;
-	}
-
-	input:focus {
-		border-color: var(--green);
-		box-shadow: 0 0 0 3px rgba(184, 187, 38, 0.18);
-	}
-</style>
