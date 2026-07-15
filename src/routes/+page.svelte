@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import FocusTimer from '$lib/features/focus-session/components/FocusTimer.svelte';
-	import EndOfTimerPrompt from '$lib/features/focus-session/components/EndOfTimerPrompt.svelte';
 	import {
 		FIVE_MINUTES_SECONDS,
 		createSessionId,
@@ -19,7 +18,6 @@
 	} from '$lib/app/notifications';
 	import { formatClock } from '$lib/app/time';
 	import TaskIntentionInput from '$lib/features/task-intention/components/TaskIntentionInput.svelte';
-	import { buttonSplash } from '$lib/actions/buttonSplash';
 	import ThemeSelector from '$lib/app/ThemeSelector.svelte';
 	import { applyTheme, loadTheme, type ThemeId } from '$lib/app/theme';
 
@@ -244,31 +242,15 @@
 				{remainingSeconds}
 				{phase}
 				{completedContracts}
+				{extensionCount}
+				intention={activeTitle}
+				onStart={startSession}
+				onAddFive={addFiveMinutes}
+				onPause={pauseSession}
+				onResume={resumeSession}
+				onFinish={finishCurrentTurn}
+				onDone={finishSession}
 			/>
-
-			{#if phase === 'idle'}
-				<button class="min-h-14 w-full rounded-2xl bg-moss px-5 py-4 text-base font-extrabold text-on-accent shadow-[0_8px_0_var(--color-moss-pressed)] transition hover:-translate-y-0.5 hover:bg-moss-dark hover:shadow-[0_8px_0_var(--color-moss-hover-pressed)] active:translate-y-1 active:shadow-none" type="button" use:buttonSplash onclick={startSession}>
-					Start 5 minutes
-				</button>
-			{:else if phase === 'contract-complete'}
-				<EndOfTimerPrompt
-					intention={activeTitle}
-					{completedContracts}
-					{extensionCount}
-					onAddFive={addFiveMinutes}
-					onDone={finishSession}
-				/>
-			{:else if phase === 'paused'}
-				<div class="grid min-h-14 grid-cols-2 gap-3" aria-label="Paused timer controls">
-					<button class="rounded-2xl bg-moss px-4 font-extrabold text-on-accent shadow-[0_5px_0_var(--color-moss-pressed)] transition hover:-translate-y-0.5 hover:bg-moss-dark hover:shadow-[0_5px_0_var(--color-moss-hover-pressed)]" type="button" onclick={resumeSession}>Resume</button>
-					<button class="rounded-2xl border border-clay/30 bg-surface px-4 font-bold text-clay transition hover:bg-clay/10" type="button" onclick={finishCurrentTurn}>Finish</button>
-				</div>
-			{:else}
-				<div class="grid min-h-14 grid-cols-2 gap-3" aria-label="Running timer controls">
-					<button class="rounded-2xl border border-moss/15 bg-mist px-4 font-extrabold text-moss transition hover:-translate-y-0.5 hover:bg-sprout/50" type="button" onclick={pauseSession}>Pause</button>
-					<button class="rounded-2xl border border-clay/30 bg-surface px-4 font-bold text-clay transition hover:bg-clay/10" type="button" onclick={finishCurrentTurn}>Finish</button>
-				</div>
-			{/if}
 
 			<div class="grid grid-cols-2 gap-3" aria-label="Current sprint progress">
 				<div class="rounded-2xl border border-moss/10 bg-mist/60 p-4">
