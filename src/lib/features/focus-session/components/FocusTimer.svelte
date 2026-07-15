@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { formatClock } from '$lib/app/time';
 	import { buttonSplash } from '$lib/actions/buttonSplash';
-	import { Check, CircleStop, Pause, Play, Plus } from '@lucide/svelte';
 	import EndOfTimerPrompt from './EndOfTimerPrompt.svelte';
 	import type { FocusPhase } from '$lib/features/focus-session/focusSession.types';
 	import TaskIntentionInput from '$lib/features/task-intention/components/TaskIntentionInput.svelte';
@@ -99,7 +98,7 @@
 				<div class:paused-readout={phase === 'paused'} class="grid h-full place-items-center font-display text-[clamp(4.5rem,18vw,8rem)] leading-none font-semibold tracking-[-0.065em] text-moss-dark">
 					{#if phase === 'paused'}
 						<div class="paused-badge font-sans text-xs font-black tracking-[0.14em] uppercase">
-							<Pause size={14} strokeWidth={2.5} aria-hidden="true" />
+							<i class="ph-fill ph-pause text-sm" aria-hidden="true"></i>
 							Paused
 						</div>
 					{/if}
@@ -118,39 +117,39 @@
 		<div class="relative z-10 mt-7">
 			{#if phase === 'idle'}
 				<button class="flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-moss px-5 py-4 text-base font-extrabold text-on-accent shadow-[0_8px_0_var(--color-moss-pressed)] transition hover:-translate-y-0.5 hover:bg-moss-dark hover:shadow-[0_8px_0_var(--color-moss-hover-pressed)] active:translate-y-1 active:shadow-none" type="button" use:buttonSplash onclick={onStart}>
-					<Play size={18} fill="currentColor" aria-hidden="true" />
+					<i class="ph-fill ph-play text-lg" aria-hidden="true"></i>
 					<span>Start 5 minutes</span>
 				</button>
 			{:else if phase === 'contract-complete'}
 				<div class="flex gap-2.5" aria-label="Completed timer controls">
 					<button class="flex min-h-14 min-w-0 flex-1 items-center justify-center gap-2 rounded-2xl bg-moss px-4 font-extrabold text-on-accent shadow-[0_5px_0_var(--color-moss-pressed)] transition hover:-translate-y-0.5 hover:bg-moss-dark hover:shadow-[0_5px_0_var(--color-moss-hover-pressed)]" type="button" use:buttonSplash onclick={onAddFive}>
-						<Plus size={18} strokeWidth={2.5} aria-hidden="true" />
+						<i class="ph-bold ph-plus text-lg" aria-hidden="true"></i>
 						<span>Add 5 minutes</span>
 					</button>
 					<button class="flex min-h-14 shrink-0 items-center justify-center gap-1.5 rounded-2xl border border-moss/15 bg-surface px-5 text-sm font-extrabold text-moss transition hover:bg-mist" type="button" onclick={onDone}>
-						<Check size={17} strokeWidth={2.5} aria-hidden="true" />
+						<i class="ph-bold ph-check text-[1.0625rem]" aria-hidden="true"></i>
 						<span>Done</span>
 					</button>
 				</div>
 			{:else if phase === 'paused'}
 				<div class="grid min-h-14 grid-cols-2 gap-3" aria-label="Paused timer controls">
 					<button class="flex items-center justify-center gap-2 rounded-2xl bg-moss px-4 font-extrabold text-on-accent shadow-[0_6px_0_var(--color-moss-pressed)] transition hover:-translate-y-0.5 hover:bg-moss-dark hover:shadow-[0_6px_0_var(--color-moss-hover-pressed)]" type="button" onclick={onResume}>
-						<Play size={17} fill="currentColor" aria-hidden="true" />
+						<i class="ph-fill ph-play text-[1.0625rem]" aria-hidden="true"></i>
 						<span>Resume timer</span>
 					</button>
 					<button class="flex items-center justify-center gap-2 rounded-2xl border border-clay/30 bg-surface px-4 font-bold text-clay transition hover:bg-clay/10" type="button" onclick={onFinish}>
-						<CircleStop size={17} strokeWidth={2.3} aria-hidden="true" />
+						<i class="ph-fill ph-stop-circle text-[1.0625rem]" aria-hidden="true"></i>
 						<span>Finish</span>
 					</button>
 				</div>
 			{:else}
 				<div class="grid min-h-14 grid-cols-2 gap-3" aria-label="Running timer controls">
 					<button class="flex items-center justify-center gap-2 rounded-2xl border border-moss/15 bg-mist px-4 font-extrabold text-moss transition hover:-translate-y-0.5 hover:bg-sprout/50" type="button" onclick={onPause}>
-						<Pause size={17} strokeWidth={2.5} aria-hidden="true" />
+						<i class="ph-fill ph-pause text-[1.0625rem]" aria-hidden="true"></i>
 						<span>Pause</span>
 					</button>
 					<button class="flex items-center justify-center gap-2 rounded-2xl border border-clay/30 bg-surface px-4 font-bold text-clay transition hover:bg-clay/10" type="button" onclick={onFinish}>
-						<CircleStop size={17} strokeWidth={2.3} aria-hidden="true" />
+						<i class="ph-fill ph-stop-circle text-[1.0625rem]" aria-hidden="true"></i>
 						<span>Finish</span>
 					</button>
 				</div>

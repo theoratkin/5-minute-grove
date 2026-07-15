@@ -1,6 +1,8 @@
 <script lang="ts">
 	import favicon from '$lib/assets/favicon.svg';
 	import '$lib/styles/tokens.css';
+	import '@phosphor-icons/web/bold';
+	import '@phosphor-icons/web/fill';
 
 	let { children } = $props();
 </script>

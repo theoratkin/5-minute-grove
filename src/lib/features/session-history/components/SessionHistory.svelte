@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { formatMinutes, formatTime } from '$lib/app/time';
 	import type { FocusSessionRecord } from '$lib/features/focus-session/focusSession.types';
-	import { Play, Trash2 } from '@lucide/svelte';
 
 	let {
 		records,
@@ -81,10 +80,10 @@
 								</div>
 								<div class="flex justify-end gap-2">
 									<button class="grid size-9 place-items-center rounded-xl bg-moss text-on-accent transition hover:bg-moss-dark" type="button" aria-label={`Resume ${record.title}`} title="Resume session" onclick={() => onresume(record)}>
-										<Play size={16} fill="currentColor" aria-hidden="true" />
+										<i class="ph-fill ph-play text-base" aria-hidden="true"></i>
 									</button>
 									<button class="grid size-9 place-items-center rounded-xl border border-clay/25 text-clay transition hover:bg-clay/10" type="button" aria-label={`Delete ${record.title}`} title="Delete session" onclick={() => deleteSession(record.id)}>
-										<Trash2 size={16} strokeWidth={2.25} aria-hidden="true" />
+										<i class="ph-fill ph-trash text-base" aria-hidden="true"></i>
 									</button>
 								</div>
 							</li>
