@@ -192,6 +192,16 @@
 		saveSessionHistory(history);
 	}
 
+	function updateSessionTitle(id: string, title: string) {
+		if (id === activeSessionId) {
+			intention = title === 'Session' ? '' : title;
+			return;
+		}
+
+		history = history.map((session) => (session.id === id ? { ...session, title } : session));
+		saveSessionHistory(history);
+	}
+
 	function resetSession(clearIntention = false) {
 		phase = 'idle';
 		remainingSeconds = FIVE_MINUTES_SECONDS;
@@ -267,6 +277,6 @@
 	<aside class="rounded-[1.5rem] border border-surface/90 bg-paper/80 p-5 shadow-[0_18px_50px_rgb(0_0_0/8%)] backdrop-blur lg:sticky lg:top-8">
 		<ThemeSelector value={theme} onchange={changeTheme} />
 		<div class="my-5 border-t border-moss/10"></div>
-			<SessionHistory records={history} {currentSession} onresume={resumeSavedSession} {deleteSession} />
+			<SessionHistory records={history} {currentSession} onresume={resumeSavedSession} {deleteSession} {updateSessionTitle} />
 	</aside>
 </main>

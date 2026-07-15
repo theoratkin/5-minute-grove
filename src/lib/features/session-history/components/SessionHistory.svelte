@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onDestroy } from 'svelte';
+	import { onDestroy, tick } from 'svelte';
 	import { buttonSplash } from '$lib/actions/buttonSplash';
 	import { formatMinutes, formatTime } from '$lib/app/time';
 	import type { FocusSessionRecord } from '$lib/features/focus-session/focusSession.types';
@@ -8,15 +8,20 @@
 		records,
 		currentSession = null,
 		onresume,
-		deleteSession
+		deleteSession,
+		updateSessionTitle
 	}: {
 		records: FocusSessionRecord[];
 		currentSession?: FocusSessionRecord | null;
 		onresume: (record: FocusSessionRecord) => void;
 		deleteSession: (id: string) => void;
+		updateSessionTitle: (id: string, title: string) => void;
 	} = $props();
 
 	let resumingId = $state<string | null>(null);
+	let editingId = $state<string | null>(null);
+	let titleDraft = $state('');
+	let titleInput = $state<HTMLInputElement | undefined>();
 	let resumeTimeout: ReturnType<typeof setTimeout> | undefined;
 
 	function resumeWithCommitment(record: FocusSessionRecord) {
@@ -27,6 +32,29 @@
 			resumingId = null;
 			onresume(record);
 		}, 420);
+	}
+
+	async function startEditing(record: FocusSessionRecord) {
+		if (resumingId !== null) return;
+
+		editingId = record.id;
+		titleDraft = record.title;
+		await tick();
+		titleInput?.focus();
+		titleInput?.select();
+	}
+
+	function saveTitle(record: FocusSessionRecord) {
+		if (editingId !== record.id) return;
+
+		const title = titleDraft.trim() || 'Session';
+		if (title !== record.title) updateSessionTitle(record.id, title);
+		editingId = null;
+	}
+
+	function cancelEditing() {
+		editingId = null;
+		titleDraft = '';
 	}
 
 	onDestroy(() => {
@@ -71,7 +99,23 @@
 					<h3 class="text-xs font-extrabold tracking-[0.12em] text-moss uppercase">In progress</h3>
 					<div class="grid gap-3 rounded-2xl border border-moss/20 bg-sprout/25 p-3">
 						<div class="flex items-start justify-between gap-3">
-							<strong class="max-w-48 wrap-anywhere text-sm font-extrabold text-ink">{currentSession.title}</strong>
+							<div class="min-w-0">
+								{#if editingId === currentSession.id}
+									<input
+										class="session-title-input max-w-48"
+										aria-label="Session name"
+										bind:this={titleInput}
+										bind:value={titleDraft}
+										onblur={() => saveTitle(currentSession)}
+										onkeydown={(event) => {
+											if (event.key === 'Enter') event.currentTarget.blur();
+											if (event.key === 'Escape') cancelEditing();
+										}}
+									/>
+								{:else}
+									<button class="session-title max-w-48" type="button" aria-label={`Edit name: ${currentSession.title}`} title="Edit session name" onclick={() => startEditing(currentSession)}>{currentSession.title}</button>
+								{/if}
+							</div>
 							<div class="grid flex-none justify-items-end">
 								<span class="text-sm font-extrabold text-moss">{formatMinutes(currentSession.totalSeconds)}</span>
 								<span class="mt-1 text-xs font-bold text-ink-muted">{currentSession.extensionCount} extensions</span>
@@ -92,7 +136,21 @@
 								{/if}
 								<div class="relative z-10 flex items-start justify-between gap-3">
 									<div class="grid min-w-0 gap-1">
-										<strong class="max-w-48 wrap-anywhere text-sm font-extrabold text-ink">{record.title}</strong>
+										{#if editingId === record.id}
+											<input
+												class="session-title-input max-w-48"
+												aria-label="Session name"
+												bind:this={titleInput}
+												bind:value={titleDraft}
+												onblur={() => saveTitle(record)}
+												onkeydown={(event) => {
+													if (event.key === 'Enter') event.currentTarget.blur();
+													if (event.key === 'Escape') cancelEditing();
+												}}
+											/>
+										{:else}
+											<button class="session-title max-w-48" type="button" aria-label={`Edit name: ${record.title}`} title="Edit session name" onclick={() => startEditing(record)}>{record.title}</button>
+										{/if}
 										<span class="text-xs font-bold text-ink-muted">{formatTime(record.startedAt)}</span>
 									</div>
 									<div class="grid flex-none justify-items-end">
@@ -114,6 +172,42 @@
 	</section>
 
 <style>
+	.session-title,
+	.session-title-input {
+		display: block;
+		width: 100%;
+		min-width: 0;
+		padding: 0;
+		font-size: 0.875rem;
+		font-weight: 800;
+		line-height: 1.25rem;
+		color: var(--color-ink);
+		text-align: left;
+		overflow-wrap: anywhere;
+	}
+
+	.session-title {
+		cursor: text;
+		border: 0;
+		background: transparent;
+	}
+
+	.session-title:hover,
+	.session-title:focus-visible {
+		color: var(--color-moss);
+		text-decoration: underline;
+		text-decoration-thickness: 1px;
+		text-underline-offset: 0.2em;
+		outline: none;
+	}
+
+	.session-title-input {
+		border: 0;
+		border-bottom: 1px solid color-mix(in srgb, var(--color-moss) 55%, transparent);
+		background: transparent;
+		outline: none;
+	}
+
 	.resuming-session {
 		animation: session-commit 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
 	}
