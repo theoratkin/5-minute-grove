@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { formatClock } from '$lib/app/time';
 	import { buttonSplash } from '$lib/actions/buttonSplash';
+	import { Check, CircleStop, Pause, Play, Plus } from '@lucide/svelte';
 	import EndOfTimerPrompt from './EndOfTimerPrompt.svelte';
 	import type { FocusPhase } from '$lib/features/focus-session/focusSession.types';
 
@@ -93,7 +94,7 @@
 				<div class:paused-readout={phase === 'paused'} class="grid h-full place-items-center font-display text-[clamp(4.5rem,18vw,8rem)] leading-none font-semibold tracking-[-0.065em] text-moss-dark">
 					{#if phase === 'paused'}
 						<div class="paused-badge font-sans text-xs font-black tracking-[0.14em] uppercase">
-							<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.5v9M11 3.5v9" /></svg>
+							<Pause size={14} strokeWidth={2.5} aria-hidden="true" />
 							Paused
 						</div>
 					{/if}
@@ -107,23 +108,42 @@
 
 		<div class="relative z-10 mt-5">
 			{#if phase === 'idle'}
-				<button class="min-h-14 w-full rounded-2xl bg-moss px-5 py-4 text-base font-extrabold text-on-accent shadow-[0_8px_0_var(--color-moss-pressed)] transition hover:-translate-y-0.5 hover:bg-moss-dark hover:shadow-[0_8px_0_var(--color-moss-hover-pressed)] active:translate-y-1 active:shadow-none" type="button" use:buttonSplash onclick={onStart}>
-					Start 5 minutes
+				<button class="flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-moss px-5 py-4 text-base font-extrabold text-on-accent shadow-[0_8px_0_var(--color-moss-pressed)] transition hover:-translate-y-0.5 hover:bg-moss-dark hover:shadow-[0_8px_0_var(--color-moss-hover-pressed)] active:translate-y-1 active:shadow-none" type="button" use:buttonSplash onclick={onStart}>
+					<Play size={18} fill="currentColor" aria-hidden="true" />
+					<span>Start 5 minutes</span>
 				</button>
 			{:else if phase === 'contract-complete'}
 				<div class="flex gap-2.5" aria-label="Completed timer controls">
-					<button class="min-h-14 min-w-0 flex-1 rounded-2xl bg-moss px-4 font-extrabold text-on-accent shadow-[0_5px_0_var(--color-moss-pressed)] transition hover:-translate-y-0.5 hover:bg-moss-dark hover:shadow-[0_5px_0_var(--color-moss-hover-pressed)]" type="button" use:buttonSplash onclick={onAddFive}>Add 5 minutes</button>
-					<button class="min-h-14 shrink-0 rounded-2xl border border-moss/15 bg-surface px-5 text-sm font-extrabold text-moss transition hover:bg-mist" type="button" onclick={onDone}>Done</button>
+					<button class="flex min-h-14 min-w-0 flex-1 items-center justify-center gap-2 rounded-2xl bg-moss px-4 font-extrabold text-on-accent shadow-[0_5px_0_var(--color-moss-pressed)] transition hover:-translate-y-0.5 hover:bg-moss-dark hover:shadow-[0_5px_0_var(--color-moss-hover-pressed)]" type="button" use:buttonSplash onclick={onAddFive}>
+						<Plus size={18} strokeWidth={2.5} aria-hidden="true" />
+						<span>Add 5 minutes</span>
+					</button>
+					<button class="flex min-h-14 shrink-0 items-center justify-center gap-1.5 rounded-2xl border border-moss/15 bg-surface px-5 text-sm font-extrabold text-moss transition hover:bg-mist" type="button" onclick={onDone}>
+						<Check size={17} strokeWidth={2.5} aria-hidden="true" />
+						<span>Done</span>
+					</button>
 				</div>
 			{:else if phase === 'paused'}
 				<div class="grid min-h-14 grid-cols-2 gap-3" aria-label="Paused timer controls">
-					<button class="rounded-2xl bg-moss px-4 font-extrabold text-on-accent shadow-[0_6px_0_var(--color-moss-pressed)] transition hover:-translate-y-0.5 hover:bg-moss-dark hover:shadow-[0_6px_0_var(--color-moss-hover-pressed)]" type="button" onclick={onResume}>Resume timer</button>
-					<button class="rounded-2xl border border-clay/30 bg-surface px-4 font-bold text-clay transition hover:bg-clay/10" type="button" onclick={onFinish}>Finish</button>
+					<button class="flex items-center justify-center gap-2 rounded-2xl bg-moss px-4 font-extrabold text-on-accent shadow-[0_6px_0_var(--color-moss-pressed)] transition hover:-translate-y-0.5 hover:bg-moss-dark hover:shadow-[0_6px_0_var(--color-moss-hover-pressed)]" type="button" onclick={onResume}>
+						<Play size={17} fill="currentColor" aria-hidden="true" />
+						<span>Resume timer</span>
+					</button>
+					<button class="flex items-center justify-center gap-2 rounded-2xl border border-clay/30 bg-surface px-4 font-bold text-clay transition hover:bg-clay/10" type="button" onclick={onFinish}>
+						<CircleStop size={17} strokeWidth={2.3} aria-hidden="true" />
+						<span>Finish</span>
+					</button>
 				</div>
 			{:else}
 				<div class="grid min-h-14 grid-cols-2 gap-3" aria-label="Running timer controls">
-					<button class="rounded-2xl border border-moss/15 bg-mist px-4 font-extrabold text-moss transition hover:-translate-y-0.5 hover:bg-sprout/50" type="button" onclick={onPause}>Pause</button>
-					<button class="rounded-2xl border border-clay/30 bg-surface px-4 font-bold text-clay transition hover:bg-clay/10" type="button" onclick={onFinish}>Finish</button>
+					<button class="flex items-center justify-center gap-2 rounded-2xl border border-moss/15 bg-mist px-4 font-extrabold text-moss transition hover:-translate-y-0.5 hover:bg-sprout/50" type="button" onclick={onPause}>
+						<Pause size={17} strokeWidth={2.5} aria-hidden="true" />
+						<span>Pause</span>
+					</button>
+					<button class="flex items-center justify-center gap-2 rounded-2xl border border-clay/30 bg-surface px-4 font-bold text-clay transition hover:bg-clay/10" type="button" onclick={onFinish}>
+						<CircleStop size={17} strokeWidth={2.3} aria-hidden="true" />
+						<span>Finish</span>
+					</button>
 				</div>
 			{/if}
 		</div>
@@ -182,15 +202,6 @@
 		color: var(--color-clay);
 		background: color-mix(in srgb, var(--color-surface) 78%, var(--color-clay));
 		transform: translateX(-50%);
-	}
-
-	.paused-badge svg {
-		width: 0.9rem;
-		height: 0.9rem;
-		fill: none;
-		stroke: currentColor;
-		stroke-linecap: round;
-		stroke-width: 2.1;
 	}
 
 	.paused-message {
