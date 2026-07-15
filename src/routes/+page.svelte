@@ -37,6 +37,10 @@
 
 	let canEditIntention = $derived(phase === 'idle');
 	let activeTitle = $derived(getSessionTitle(intention));
+	let segmentProgress = $derived.by(() => {
+		if (phase === 'contract-complete') return 100;
+		return ((FIVE_MINUTES_SECONDS - remainingSeconds) / FIVE_MINUTES_SECONDS) * 100;
+	});
 	let sprintTimeSeconds = $derived(
 		phase === 'idle'
 			? 0
@@ -240,6 +244,7 @@
 
 			<FocusTimer
 				{remainingSeconds}
+				progress={segmentProgress}
 				{phase}
 				{completedContracts}
 				{extensionCount}

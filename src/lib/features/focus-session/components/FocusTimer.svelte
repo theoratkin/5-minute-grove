@@ -6,6 +6,7 @@
 
 	let {
 		remainingSeconds,
+		progress,
 		phase,
 		completedContracts,
 		extensionCount,
@@ -18,6 +19,7 @@
 		onDone
 	}: {
 		remainingSeconds: number;
+		progress: number;
 		phase: FocusPhase;
 		completedContracts: number;
 		extensionCount: number;
@@ -35,11 +37,6 @@
 		if (phase === 'paused') return 'Contract paused';
 		if (phase === 'contract-complete') return 'Contract complete';
 		return 'Ready when you are';
-	});
-
-	let progress = $derived.by(() => {
-		if (phase === 'contract-complete') return 100;
-		return Math.round(((300 - remainingSeconds) / 300) * 100);
 	});
 
 	const confetti = [
@@ -68,10 +65,18 @@
 <section class="grid gap-5" aria-label="Focus timer">
 	<div class="flex items-center justify-between gap-4 text-xs font-extrabold tracking-[0.12em] text-ink-muted uppercase">
 		<span>{statusText}</span>
-		<span class="rounded-full bg-sprout/60 px-3 py-1 text-moss">{Math.max(0, progress)}%</span>
+		<span class="rounded-full bg-sprout/60 px-3 py-1 text-moss">{Math.round(Math.max(0, progress))}%</span>
 	</div>
 
 	<div class:timer-complete={phase === 'contract-complete'} class:timer-paused={phase === 'paused'} class="relative overflow-hidden rounded-[1.5rem] border border-moss/10 bg-surface px-4 py-7 shadow-inner">
+		{#if phase !== 'contract-complete'}
+			<div
+				class:paused-fill={phase === 'paused'}
+				class="timer-progress-fill"
+				aria-hidden="true"
+				style={`width: ${Math.max(0, Math.min(100, progress))}%`}
+			></div>
+		{/if}
 		{#if phase === 'contract-complete'}
 			<div class="confetti" aria-hidden="true">
 				{#each confetti as piece}
@@ -124,13 +129,31 @@
 		</div>
 	</div>
 
-	<div class="h-3 overflow-hidden rounded-full bg-mist" aria-hidden="true">
-		<div class:paused-progress={phase === 'paused'} class="h-full rounded-full bg-[linear-gradient(90deg,var(--color-moss),var(--color-moss-dark))] transition-[width] duration-200 ease-out" style={`width: ${Math.max(0, Math.min(100, progress))}%`}></div>
-	</div>
-
 </section>
 
 <style>
+	.timer-progress-fill {
+		position: absolute;
+		z-index: 0;
+		inset: 0 auto 0 0;
+		--progress-color: color-mix(in srgb, var(--color-moss) 34%, var(--color-surface));
+		background: linear-gradient(
+			90deg,
+			color-mix(in srgb, var(--color-moss) 22%, var(--color-surface)),
+			var(--progress-color)
+		);
+		transition: width 200ms ease-out;
+	}
+
+	.paused-fill {
+		--progress-color: color-mix(in srgb, var(--color-clay) 26%, var(--color-surface));
+		background: linear-gradient(
+			90deg,
+			color-mix(in srgb, var(--color-clay) 15%, var(--color-surface)),
+			var(--progress-color)
+		);
+	}
+
 	.timer-complete {
 		background: linear-gradient(145deg, color-mix(in srgb, var(--color-sprout) 45%, var(--color-surface)), var(--color-surface) 62%);
 	}
@@ -178,10 +201,6 @@
 		font-weight: 400;
 		letter-spacing: normal;
 		transform: translateX(-50%);
-	}
-
-	.paused-progress {
-		background: color-mix(in srgb, var(--color-clay) 72%, var(--color-mist));
 	}
 
 	.confetti {
