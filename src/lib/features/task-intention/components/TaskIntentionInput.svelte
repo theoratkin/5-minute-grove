@@ -10,12 +10,12 @@
 	} = $props();
 </script>
 
-<label class="grid gap-2">
-	<span class="text-sm font-bold text-ink-muted">Name this session <span class="font-medium">(optional)</span></span>
+<label class="block">
+	<span class="sr-only">Session name (optional)</span>
 	<input
-		class="min-h-13 w-full rounded-2xl border border-moss/15 bg-surface px-4 py-3 text-ink outline-none transition placeholder:text-ink-muted/70 focus:border-moss focus:ring-4 focus:ring-sprout/60 disabled:bg-mist"
+		class="w-full border-b border-transparent bg-transparent px-1 py-1 text-center text-base font-medium text-ink-muted outline-none transition placeholder:text-ink-muted/70 hover:border-moss/15 focus:border-moss/40 focus:text-ink focus:ring-0 disabled:cursor-not-allowed disabled:text-ink-muted"
 		{disabled}
-		placeholder="What are you working on?"
+		placeholder="Name this session (optional)"
 		value={value}
 		oninput={(event) => onchange?.(event.currentTarget.value)}
 	/>

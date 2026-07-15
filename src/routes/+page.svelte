@@ -17,7 +17,6 @@
 		prepareTimerNotifications
 	} from '$lib/app/notifications';
 	import { formatClock } from '$lib/app/time';
-	import TaskIntentionInput from '$lib/features/task-intention/components/TaskIntentionInput.svelte';
 	import ThemeSelector from '$lib/app/ThemeSelector.svelte';
 	import { applyTheme, loadTheme, type ThemeId } from '$lib/app/theme';
 
@@ -35,7 +34,6 @@
 	let timerFinishSound: HTMLAudioElement | null = null;
 	let theme = $state<ThemeId>('soft-daylight');
 
-	let canEditIntention = $derived(phase === 'idle');
 	let activeTitle = $derived(getSessionTitle(intention));
 	let segmentProgress = $derived.by(() => {
 		if (phase === 'contract-complete') return 100;
@@ -236,12 +234,6 @@
 		</header>
 
 		<div class="grid gap-7 px-6 py-7 sm:px-10 sm:py-9">
-			<TaskIntentionInput
-				value={intention}
-				disabled={!canEditIntention}
-				onchange={(nextValue) => (intention = nextValue)}
-			/>
-
 			<FocusTimer
 				{remainingSeconds}
 				progress={segmentProgress}
@@ -249,6 +241,8 @@
 				{completedContracts}
 				{extensionCount}
 				intention={activeTitle}
+				intentionValue={intention}
+				onIntentionChange={(nextValue) => (intention = nextValue)}
 				onStart={startSession}
 				onAddFive={addFiveMinutes}
 				onPause={pauseSession}

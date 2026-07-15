@@ -4,6 +4,7 @@
 	import { Check, CircleStop, Pause, Play, Plus } from '@lucide/svelte';
 	import EndOfTimerPrompt from './EndOfTimerPrompt.svelte';
 	import type { FocusPhase } from '$lib/features/focus-session/focusSession.types';
+	import TaskIntentionInput from '$lib/features/task-intention/components/TaskIntentionInput.svelte';
 
 	let {
 		remainingSeconds,
@@ -12,6 +13,8 @@
 		completedContracts,
 		extensionCount,
 		intention,
+		intentionValue,
+		onIntentionChange,
 		onStart,
 		onAddFive,
 		onPause,
@@ -25,6 +28,8 @@
 		completedContracts: number;
 		extensionCount: number;
 		intention: string;
+		intentionValue: string;
+		onIntentionChange: (value: string) => void;
 		onStart: () => void;
 		onAddFive: () => void;
 		onPause: () => void;
@@ -87,7 +92,7 @@
 				{/each}
 			</div>
 		{/if}
-		<div class="relative z-10 h-56" aria-live="polite">
+		<div class="relative z-10 h-48" aria-live="polite">
 			{#if phase === 'contract-complete'}
 				<EndOfTimerPrompt {intention} {completedContracts} {extensionCount} />
 			{:else}
@@ -106,7 +111,11 @@
 			{/if}
 		</div>
 
-		<div class="relative z-10 mt-5">
+		<div class="relative z-10 -mt-1">
+			<TaskIntentionInput value={intentionValue} onchange={onIntentionChange} />
+		</div>
+
+		<div class="relative z-10 mt-7">
 			{#if phase === 'idle'}
 				<button class="flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-moss px-5 py-4 text-base font-extrabold text-on-accent shadow-[0_8px_0_var(--color-moss-pressed)] transition hover:-translate-y-0.5 hover:bg-moss-dark hover:shadow-[0_8px_0_var(--color-moss-hover-pressed)] active:translate-y-1 active:shadow-none" type="button" use:buttonSplash onclick={onStart}>
 					<Play size={18} fill="currentColor" aria-hidden="true" />
