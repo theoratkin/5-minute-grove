@@ -26,9 +26,9 @@
 	let remainingSeconds = $state(FIVE_MINUTES_SECONDS);
 	let completedContracts = $state(0);
 	let extensionCount = $state(0);
-	let elapsedSprintSeconds = $state(0);
+	let elapsedSessionSeconds = $state(0);
 	let sessionStartedAt = $state<string | null>(null);
-	let activeSprintId = $state<string | null>(null);
+	let activeSessionId = $state<string | null>(null);
 	let segmentEndsAt = $state<number | null>(null);
 	let history = $state<FocusSessionRecord[]>([]);
 	let startOrExtendSound: HTMLAudioElement | null = null;
@@ -41,10 +41,10 @@
 		if (phase === 'contract-complete') return 100;
 		return ((FIVE_MINUTES_SECONDS - remainingSeconds) / FIVE_MINUTES_SECONDS) * 100;
 	});
-	let sprintTimeSeconds = $derived(
+	let sessionTimeSeconds = $derived(
 		phase === 'idle'
 			? 0
-			: elapsedSprintSeconds +
+			: elapsedSessionSeconds +
 				(phase === 'contract-complete' ? 0 : FIVE_MINUTES_SECONDS - remainingSeconds)
 	);
 	let pageTitle = $derived(
@@ -54,17 +54,17 @@
 				? 'Paused - Just 5 More Minutes'
 				: 'Just 5 More Minutes'
 	);
-	let currentSprint = $derived<FocusSessionRecord | null>(
-		phase === 'idle' || !sessionStartedAt || !activeSprintId
+	let currentSession = $derived<FocusSessionRecord | null>(
+		phase === 'idle' || !sessionStartedAt || !activeSessionId
 			? null
 			: {
-				id: activeSprintId,
+				id: activeSessionId,
 				title: activeTitle,
 				startedAt: sessionStartedAt,
 				endedAt: new Date().toISOString(),
 				completedContracts,
 				extensionCount,
-				totalSeconds: sprintTimeSeconds
+				totalSeconds: sessionTimeSeconds
 			}
 	);
 
@@ -72,7 +72,7 @@
 		if (phase !== 'running' && phase !== 'paused') return;
 
 		const nextCompletedContracts = completedContracts + 1;
-		elapsedSprintSeconds += FIVE_MINUTES_SECONDS - remainingSeconds;
+		elapsedSessionSeconds += FIVE_MINUTES_SECONDS - remainingSeconds;
 
 		remainingSeconds = 0;
 		completedContracts = nextCompletedContracts;
@@ -118,10 +118,10 @@
 		playSound(startOrExtendSound);
 
 		sessionStartedAt = new Date().toISOString();
-		activeSprintId = createSessionId();
+		activeSessionId = createSessionId();
 		completedContracts = 0;
 		extensionCount = 0;
-		elapsedSprintSeconds = 0;
+		elapsedSessionSeconds = 0;
 		remainingSeconds = FIVE_MINUTES_SECONDS;
 		segmentEndsAt = Date.now() + FIVE_MINUTES_SECONDS * 1000;
 		phase = 'running';
@@ -153,34 +153,34 @@
 	}
 
 	function finishSession() {
-		if (!sessionStartedAt || !activeSprintId || completedContracts === 0) return;
+		if (!sessionStartedAt || !activeSessionId || completedContracts === 0) return;
 
 		const record: FocusSessionRecord = {
-			id: activeSprintId,
+			id: activeSessionId,
 			title: activeTitle,
 			startedAt: sessionStartedAt,
 			endedAt: new Date().toISOString(),
 			completedContracts,
 			extensionCount,
-			totalSeconds: sprintTimeSeconds
+			totalSeconds: sessionTimeSeconds
 		};
 
-		history = [...history.filter((sprint) => sprint.id !== record.id), record]
+		history = [...history.filter((session) => session.id !== record.id), record]
 			.sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime())
 			.slice(0, 12);
 		saveSessionHistory(history);
 		resetSession();
 	}
 
-	function resumeSprint(record: FocusSessionRecord) {
+	function resumeSavedSession(record: FocusSessionRecord) {
 		if (phase !== 'idle') return;
 
-		intention = record.title === 'Sprint' ? '' : record.title;
-		activeSprintId = record.id;
+		intention = record.title === 'Session' || record.title === 'Sprint' ? '' : record.title;
+		activeSessionId = record.id;
 		sessionStartedAt = record.startedAt;
 		completedContracts = record.completedContracts || Math.round(record.totalSeconds / FIVE_MINUTES_SECONDS);
 		extensionCount = record.extensionCount;
-		elapsedSprintSeconds = record.totalSeconds;
+		elapsedSessionSeconds = record.totalSeconds;
 		remainingSeconds = FIVE_MINUTES_SECONDS;
 		segmentEndsAt = Date.now() + FIVE_MINUTES_SECONDS * 1000;
 		phase = 'running';
@@ -188,9 +188,9 @@
 		playSound(startOrExtendSound);
 	}
 
-	function deleteSprint(id: string) {
-		if (id === activeSprintId) return;
-		history = history.filter((sprint) => sprint.id !== id);
+	function deleteSession(id: string) {
+		if (id === activeSessionId) return;
+		history = history.filter((session) => session.id !== id);
 		saveSessionHistory(history);
 	}
 
@@ -199,9 +199,9 @@
 		remainingSeconds = FIVE_MINUTES_SECONDS;
 		completedContracts = 0;
 		extensionCount = 0;
-		elapsedSprintSeconds = 0;
+		elapsedSessionSeconds = 0;
 		sessionStartedAt = null;
-		activeSprintId = null;
+		activeSessionId = null;
 		segmentEndsAt = null;
 
 		if (clearIntention) {
@@ -257,10 +257,10 @@
 				onDone={finishSession}
 			/>
 
-			<div class="grid grid-cols-2 gap-3" aria-label="Current sprint progress">
+			<div class="grid grid-cols-2 gap-3" aria-label="Current session progress">
 				<div class="rounded-2xl border border-moss/10 bg-mist/60 p-4">
-					<strong class="block text-2xl leading-none font-extrabold text-moss-dark">{formatClock(sprintTimeSeconds)}</strong>
-					<span class="mt-1 block text-xs font-bold tracking-wide text-ink-muted uppercase">sprint time</span>
+					<strong class="block text-2xl leading-none font-extrabold text-moss-dark">{formatClock(sessionTimeSeconds)}</strong>
+					<span class="mt-1 block text-xs font-bold tracking-wide text-ink-muted uppercase">session time</span>
 				</div>
 				<div class="rounded-2xl border border-moss/10 bg-mist/60 p-4">
 					<strong class="block text-2xl leading-none font-extrabold text-moss-dark">{extensionCount}</strong>
@@ -273,6 +273,6 @@
 	<aside class="rounded-[1.5rem] border border-surface/90 bg-paper/80 p-5 shadow-[0_18px_50px_rgb(0_0_0/8%)] backdrop-blur lg:sticky lg:top-8">
 		<ThemeSelector value={theme} onchange={changeTheme} />
 		<div class="my-5 border-t border-moss/10"></div>
-			<SessionHistory records={history} {currentSprint} onresume={resumeSprint} {deleteSprint} />
+			<SessionHistory records={history} {currentSession} onresume={resumeSavedSession} {deleteSession} />
 	</aside>
 </main>

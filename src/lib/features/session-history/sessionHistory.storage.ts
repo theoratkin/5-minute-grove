@@ -12,7 +12,10 @@ export function loadSessionHistory(): FocusSessionRecord[] {
 		.filter((record) => record && typeof record.id === 'string' && typeof record.startedAt === 'string')
 		.map((record) => ({
 			id: record.id,
-			title: record.title?.trim() || record.intention?.trim() || 'Sprint',
+			title:
+				record.title?.trim() === 'Sprint'
+					? 'Session'
+					: record.title?.trim() || record.intention?.trim() || 'Session',
 			startedAt: record.startedAt,
 			endedAt: record.endedAt || record.startedAt,
 			completedContracts: Math.max(0, record.completedContracts || 0),

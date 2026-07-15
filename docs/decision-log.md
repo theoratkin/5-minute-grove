@@ -10,6 +10,6 @@
 - Scaffolded the SvelteKit TypeScript app with the current `sv` CLI.
 - Built the first local-first MVP as a single route with a 5-minute timer, voluntary +5 continuation, valid stop/break/switch outcomes, and local recent session history.
 - Added optional desktop notifications for completed 5-minute contracts, requested from Start/Add 5 user actions and treated as nonessential when unsupported or denied.
-- Redesigned completed-session history as resumable local sprints: titles are optional (default "Sprint"), current sprint time and extensions are visible, and history is grouped by sprint start date with resume and delete actions.
+- Renamed the accumulated optional block from "Sprint" to "Session": titles are optional (default "Session"), current session time and extensions are visible, and history is grouped by session start date with resume and delete actions.
 - Added a locally persisted theme preference with Soft daylight as the default and Gruvbox Dark as the first alternate theme.
 - Added Quiet night, a subdued blue-charcoal dark theme designed as the calmer counterpart to Soft daylight; retained Gruvbox Dark as an existing, higher-saturation option.

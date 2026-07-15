@@ -6,5 +6,5 @@ export function createSessionId(): string {
 
 export function getSessionTitle(intention: string): string {
 	const trimmed = intention.trim();
-	return trimmed.length > 0 ? trimmed : 'Sprint';
+	return trimmed.length > 0 ? trimmed : 'Session';
 }

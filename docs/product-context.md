@@ -29,12 +29,12 @@ The more nuanced opportunity is making the repeated, consent-based "+5 minutes" 
 
 The first usable version should likely include:
 
-- An optional sprint title, defaulting simply to "Sprint".
+- An optional session title, defaulting simply to "Session".
 - A default 5-minute timer.
 - A clear end-of-contract state.
 - A prominent "Add 5 minutes" action.
 - Equally valid options to stop, break, or switch.
-- A local sprint history grouped by the day each sprint began, with options to resume or delete a sprint.
+- A local session history grouped by the day each session began, with options to resume or delete a session.
 
 Possible later layers:
 
