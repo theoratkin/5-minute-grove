@@ -43,6 +43,28 @@
 	--splash-fade: rgb(184 187 38 / 5%);
 }
 
+/* A low-contrast evening counterpart to Soft daylight: steady, not stimulating. */
+:root[data-theme='quiet-night'] {
+	color-scheme: dark;
+	--color-ink: #e3e8e5;
+	--color-ink-muted: #aeb9b4;
+	--color-paper: #202725;
+	--color-mist: #151a19;
+	--color-surface: #2a3430;
+	--color-on-accent: #102019;
+	--color-moss: #739b86;
+	--color-moss-dark: #96bda9;
+	--color-moss-pressed: #4f7664;
+	--color-moss-hover-pressed: #648d78;
+	--color-sprout: #34453e;
+	--color-sun: #d1ad72;
+	--color-clay: #cf8c7e;
+	--splash-color: rgb(150 189 169 / 68%);
+	--splash-fill: rgb(115 155 134 / 11%);
+	--splash-glow: rgb(150 189 169 / 18%);
+	--splash-fade: rgb(115 155 134 / 5%);
+}
+
 @layer base {
 	:root {
 		font-synthesis: none;
@@ -72,7 +94,8 @@
 			var(--grid-major-gap) var(--grid-major-gap);
 	}
 
-	:root[data-theme='gruvbox-dark'] body {
+	:root[data-theme='gruvbox-dark'] body,
+	:root[data-theme='quiet-night'] body {
 		--grid-minor: color-mix(in srgb, var(--color-ink) 9%, transparent);
 		--grid-major: color-mix(in srgb, var(--color-ink) 17%, transparent);
 	}

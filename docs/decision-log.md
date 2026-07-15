@@ -12,3 +12,4 @@
 - Added optional desktop notifications for completed 5-minute contracts, requested from Start/Add 5 user actions and treated as nonessential when unsupported or denied.
 - Redesigned completed-session history as resumable local sprints: titles are optional (default "Sprint"), current sprint time and extensions are visible, and history is grouped by sprint start date with resume and delete actions.
 - Added a locally persisted theme preference with Soft daylight as the default and Gruvbox Dark as the first alternate theme.
+- Added Quiet night, a subdued blue-charcoal dark theme designed as the calmer counterpart to Soft daylight; retained Gruvbox Dark as an existing, higher-saturation option.

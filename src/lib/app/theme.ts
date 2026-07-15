@@ -2,6 +2,7 @@ import { browser } from '$app/environment';
 
 export const themes = [
 	{ id: 'soft-daylight', label: 'Soft daylight' },
+	{ id: 'quiet-night', label: 'Quiet night' },
 	{ id: 'gruvbox-dark', label: 'Gruvbox Dark' }
 ] as const;
 
