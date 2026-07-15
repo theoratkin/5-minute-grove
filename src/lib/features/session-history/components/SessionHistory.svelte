@@ -169,7 +169,11 @@
 							</li>
 						{/each}
 					</ul>
-	</section>
+				</section>
+			{/each}
+		</div>
+	{/if}
+</section>
 
 <style>
 	.session-title,
@@ -264,7 +268,3 @@
 		}
 	}
 </style>
-			{/each}
-		</div>
-	{/if}
-</section>
