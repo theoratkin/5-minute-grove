@@ -71,7 +71,7 @@
 		<span class="rounded-full bg-sprout/60 px-3 py-1 text-moss">{Math.max(0, progress)}%</span>
 	</div>
 
-	<div class:timer-complete={phase === 'contract-complete'} class="relative overflow-hidden rounded-[1.5rem] border border-moss/10 bg-surface px-4 py-7 shadow-inner">
+	<div class:timer-complete={phase === 'contract-complete'} class:timer-paused={phase === 'paused'} class="relative overflow-hidden rounded-[1.5rem] border border-moss/10 bg-surface px-4 py-7 shadow-inner">
 		{#if phase === 'contract-complete'}
 			<div class="confetti" aria-hidden="true">
 				{#each confetti as piece}
@@ -85,8 +85,17 @@
 			{#if phase === 'contract-complete'}
 				<EndOfTimerPrompt {intention} {completedContracts} {extensionCount} />
 			{:else}
-				<div class="grid h-full place-items-center font-display text-[clamp(4.5rem,18vw,8rem)] leading-none font-semibold tracking-[-0.065em] text-moss-dark">
+				<div class:paused-readout={phase === 'paused'} class="grid h-full place-items-center font-display text-[clamp(4.5rem,18vw,8rem)] leading-none font-semibold tracking-[-0.065em] text-moss-dark">
+					{#if phase === 'paused'}
+						<div class="paused-badge font-sans text-xs font-black tracking-[0.14em] uppercase">
+							<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.5v9M11 3.5v9" /></svg>
+							Paused
+						</div>
+					{/if}
 					<span>{formatClock(remainingSeconds)}</span>
+					{#if phase === 'paused'}
+						<p class="paused-message font-sans text-center text-sm leading-relaxed text-ink-muted">Take your time. Resume when ready.</p>
+					{/if}
 				</div>
 			{/if}
 		</div>
@@ -103,7 +112,7 @@
 				</div>
 			{:else if phase === 'paused'}
 				<div class="grid min-h-14 grid-cols-2 gap-3" aria-label="Paused timer controls">
-					<button class="rounded-2xl bg-moss px-4 font-extrabold text-on-accent shadow-[0_5px_0_var(--color-moss-pressed)] transition hover:-translate-y-0.5 hover:bg-moss-dark hover:shadow-[0_5px_0_var(--color-moss-hover-pressed)]" type="button" onclick={onResume}>Resume</button>
+					<button class="rounded-2xl bg-moss px-4 font-extrabold text-on-accent shadow-[0_6px_0_var(--color-moss-pressed)] transition hover:-translate-y-0.5 hover:bg-moss-dark hover:shadow-[0_6px_0_var(--color-moss-hover-pressed)]" type="button" onclick={onResume}>Resume timer</button>
 					<button class="rounded-2xl border border-clay/30 bg-surface px-4 font-bold text-clay transition hover:bg-clay/10" type="button" onclick={onFinish}>Finish</button>
 				</div>
 			{:else}
@@ -116,7 +125,7 @@
 	</div>
 
 	<div class="h-3 overflow-hidden rounded-full bg-mist" aria-hidden="true">
-		<div class="h-full rounded-full bg-[linear-gradient(90deg,var(--color-moss),var(--color-moss-dark))] transition-[width] duration-200 ease-out" style={`width: ${Math.max(0, Math.min(100, progress))}%`}></div>
+		<div class:paused-progress={phase === 'paused'} class="h-full rounded-full bg-[linear-gradient(90deg,var(--color-moss),var(--color-moss-dark))] transition-[width] duration-200 ease-out" style={`width: ${Math.max(0, Math.min(100, progress))}%`}></div>
 	</div>
 
 </section>
@@ -124,6 +133,55 @@
 <style>
 	.timer-complete {
 		background: linear-gradient(145deg, color-mix(in srgb, var(--color-sprout) 45%, var(--color-surface)), var(--color-surface) 62%);
+	}
+
+	.timer-paused {
+		border-color: color-mix(in srgb, var(--color-clay) 42%, transparent);
+		background:
+			repeating-linear-gradient(-45deg, color-mix(in srgb, var(--color-clay) 7%, transparent) 0 0.7rem, transparent 0.7rem 1.4rem),
+			linear-gradient(145deg, color-mix(in srgb, var(--color-clay) 12%, var(--color-surface)), var(--color-surface) 64%);
+	}
+
+	.paused-readout {
+		position: relative;
+	}
+
+	.paused-badge {
+		display: inline-flex;
+		position: absolute;
+		top: 0.25rem;
+		left: 50%;
+		align-items: center;
+		gap: 0.4rem;
+		border: 1px solid color-mix(in srgb, var(--color-clay) 46%, transparent);
+		border-radius: 9999px;
+		padding: 0.35rem 0.65rem;
+		color: var(--color-clay);
+		background: color-mix(in srgb, var(--color-surface) 78%, var(--color-clay));
+		transform: translateX(-50%);
+	}
+
+	.paused-badge svg {
+		width: 0.9rem;
+		height: 0.9rem;
+		fill: none;
+		stroke: currentColor;
+		stroke-linecap: round;
+		stroke-width: 2.1;
+	}
+
+	.paused-message {
+		position: absolute;
+		bottom: 0;
+		left: 50%;
+		max-width: 17rem;
+		font-weight: 400;
+		letter-spacing: normal;
+		transform: translateX(-50%);
+	}
+
+	.paused-progress {
+		background: color-mix(in srgb, var(--color-clay) 72%, var(--color-mist));
 	}
 
 	.confetti {
