@@ -6,10 +6,8 @@ export function formatClock(totalSeconds: number): string {
 	return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 }
 
-export function formatShortDateTime(value: string): string {
+export function formatTime(value: string): string {
 	return new Intl.DateTimeFormat(undefined, {
-		month: 'short',
-		day: 'numeric',
 		hour: 'numeric',
 		minute: '2-digit'
 	}).format(new Date(value));

@@ -177,7 +177,7 @@
 
 		intention = record.title === 'Session' || record.title === 'Sprint' ? '' : record.title;
 		activeSessionId = record.id;
-		sessionStartedAt = record.startedAt;
+		sessionStartedAt = new Date().toISOString();
 		completedContracts = record.completedContracts || Math.round(record.totalSeconds / FIVE_MINUTES_SECONDS);
 		extensionCount = record.extensionCount;
 		elapsedSessionSeconds = record.totalSeconds;

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { formatMinutes } from '$lib/app/time';
+	import { formatMinutes, formatTime } from '$lib/app/time';
 	import type { FocusSessionRecord } from '$lib/features/focus-session/focusSession.types';
 	import { Play, Trash2 } from '@lucide/svelte';
 
@@ -70,7 +70,10 @@
 						{#each group.sessions as record (record.id)}
 							<li class="grid gap-3 rounded-2xl border border-moss/10 bg-surface/75 p-3">
 								<div class="flex items-start justify-between gap-3">
-									<strong class="max-w-48 wrap-anywhere text-sm font-extrabold text-ink">{record.title}</strong>
+									<div class="grid min-w-0 gap-1">
+										<strong class="max-w-48 wrap-anywhere text-sm font-extrabold text-ink">{record.title}</strong>
+										<span class="text-xs font-bold text-ink-muted">{formatTime(record.startedAt)}</span>
+									</div>
 									<div class="grid flex-none justify-items-end">
 										<span class="text-sm font-extrabold text-moss">{formatMinutes(record.totalSeconds)}</span>
 										<span class="mt-1 text-xs font-bold text-ink-muted">{record.extensionCount} extensions</span>
