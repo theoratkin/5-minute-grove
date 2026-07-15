@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onDestroy } from 'svelte';
 	import { formatClock } from '$lib/app/time';
 	import { buttonSplash } from '$lib/actions/buttonSplash';
 	import EndOfTimerPrompt from './EndOfTimerPrompt.svelte';
@@ -37,6 +38,11 @@
 		onDone: () => void;
 	} = $props();
 
+	let isStarting = $state(false);
+	let isExtending = $state(false);
+	let startTimeout: ReturnType<typeof setTimeout> | undefined;
+	let extendTimeout: ReturnType<typeof setTimeout> | undefined;
+
 	let statusText = $derived.by(() => {
 		if (phase === 'running') return 'Contract in progress';
 		if (phase === 'paused') return 'Contract paused';
@@ -65,6 +71,31 @@
 		[68, 2.9, 7.2, -3.9, 7, 'var(--color-moss)'],
 		[83, 4.4, 6.0, -2.0, 10, 'var(--color-sun)']
 	] as const;
+
+	function startWithCommitment() {
+		if (isStarting) return;
+
+		isStarting = true;
+		startTimeout = setTimeout(() => {
+			isStarting = false;
+			onStart();
+		}, 420);
+	}
+
+	function extendWithCommitment() {
+		if (isExtending) return;
+
+		isExtending = true;
+		extendTimeout = setTimeout(() => {
+			isExtending = false;
+			onAddFive();
+		}, 420);
+	}
+
+	onDestroy(() => {
+		if (startTimeout) clearTimeout(startTimeout);
+		if (extendTimeout) clearTimeout(extendTimeout);
+	});
 </script>
 
 <section class="grid gap-5" aria-label="Focus timer">
@@ -73,7 +104,10 @@
 		<span class="rounded-full bg-sprout/60 px-3 py-1 text-moss">{Math.round(Math.max(0, progress))}%</span>
 	</div>
 
-	<div class:timer-complete={phase === 'contract-complete'} class:timer-paused={phase === 'paused'} class="relative overflow-hidden rounded-[1.5rem] border border-moss/10 bg-surface px-4 py-7 shadow-inner">
+	<div class:timer-complete={phase === 'contract-complete'} class:timer-paused={phase === 'paused'} class:timer-starting={isStarting || isExtending} class="relative overflow-hidden rounded-[1.5rem] border border-moss/10 bg-surface px-4 py-7 shadow-inner">
+		{#if isStarting || isExtending}
+			<div class="start-commit-glow" aria-hidden="true"></div>
+		{/if}
 		{#if phase !== 'contract-complete'}
 			<div
 				class:paused-fill={phase === 'paused'}
@@ -116,15 +150,15 @@
 
 		<div class="relative z-10 mt-7">
 			{#if phase === 'idle'}
-				<button class="flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-moss px-5 py-4 text-base font-extrabold text-on-accent shadow-[0_8px_0_var(--color-moss-pressed)] transition hover:-translate-y-0.5 hover:bg-moss-dark hover:shadow-[0_8px_0_var(--color-moss-hover-pressed)] active:translate-y-1 active:shadow-none" type="button" use:buttonSplash onclick={onStart}>
-					<i class="ph-fill ph-play text-lg" aria-hidden="true"></i>
-					<span>Start 5 minutes</span>
+				<button class:starting={isStarting} class="start-button flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-moss px-5 py-4 text-base font-extrabold text-on-accent shadow-[0_8px_0_var(--color-moss-pressed)] transition hover:-translate-y-0.5 hover:bg-moss-dark hover:shadow-[0_8px_0_var(--color-moss-hover-pressed)] active:translate-y-1 active:shadow-none" type="button" use:buttonSplash onclick={startWithCommitment} disabled={isStarting}>
+					<i class:starting={isStarting} class="start-icon ph-fill ph-play text-lg" aria-hidden="true"></i>
+					<span>{isStarting ? 'Here we go' : 'Start 5 minutes'}</span>
 				</button>
 			{:else if phase === 'contract-complete'}
 				<div class="flex gap-2.5" aria-label="Completed timer controls">
-					<button class="flex min-h-14 min-w-0 flex-1 items-center justify-center gap-2 rounded-2xl bg-moss px-4 font-extrabold text-on-accent shadow-[0_5px_0_var(--color-moss-pressed)] transition hover:-translate-y-0.5 hover:bg-moss-dark hover:shadow-[0_5px_0_var(--color-moss-hover-pressed)]" type="button" use:buttonSplash onclick={onAddFive}>
-						<i class="ph-bold ph-plus text-lg" aria-hidden="true"></i>
-						<span>Add 5 minutes</span>
+					<button class:starting={isExtending} class="extend-button flex min-h-14 min-w-0 flex-1 items-center justify-center gap-2 rounded-2xl bg-moss px-4 font-extrabold text-on-accent shadow-[0_5px_0_var(--color-moss-pressed)] transition hover:-translate-y-0.5 hover:bg-moss-dark hover:shadow-[0_5px_0_var(--color-moss-hover-pressed)]" type="button" use:buttonSplash onclick={extendWithCommitment} disabled={isExtending}>
+						<i class:starting={isExtending} class="extend-icon ph-bold ph-plus text-lg" aria-hidden="true"></i>
+						<span>{isExtending ? 'Another 5 minutes' : 'Add 5 minutes'}</span>
 					</button>
 					<button class="flex min-h-14 shrink-0 items-center justify-center gap-1.5 rounded-2xl border border-moss/15 bg-surface px-5 text-sm font-extrabold text-moss transition hover:bg-mist" type="button" onclick={onDone}>
 						<i class="ph-bold ph-check text-[1.0625rem]" aria-hidden="true"></i>
@@ -171,6 +205,40 @@
 			var(--progress-color)
 		);
 		transition: width 200ms ease-out;
+	}
+
+	.timer-starting {
+		animation: timer-commit 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
+	}
+
+	.start-commit-glow {
+		position: absolute;
+		z-index: 0;
+		inset: auto 50% 1.5rem;
+		width: 2rem;
+		height: 2rem;
+		border-radius: 9999px;
+		background: color-mix(in srgb, var(--color-sprout) 78%, transparent);
+		transform: translateX(-50%);
+		animation: commit-glow 420ms ease-out forwards;
+	}
+
+	.start-button.starting {
+		pointer-events: none;
+		animation: start-press 420ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+	}
+
+	.extend-button.starting {
+		pointer-events: none;
+		animation: extend-press 420ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+	}
+
+	.start-icon.starting {
+		animation: play-forward 420ms ease-out forwards;
+	}
+
+	.extend-icon.starting {
+		animation: plus-forward 420ms ease-out forwards;
 	}
 
 	.paused-fill {
@@ -257,7 +325,51 @@
 		}
 	}
 
+	@keyframes timer-commit {
+		0% { transform: scale(1); }
+		35% { transform: scale(0.988); }
+		100% { transform: scale(1); }
+	}
+
+	@keyframes start-press {
+		0% { transform: translateY(0); }
+		28% { transform: translateY(0.45rem); box-shadow: none; }
+		70% { transform: translateY(0.1rem); box-shadow: 0 0 0 var(--color-moss-pressed); }
+		100% { transform: translateY(0); }
+	}
+
+	@keyframes extend-press {
+		0% { transform: translateY(0); }
+		28% { transform: translateY(0.3rem); box-shadow: none; }
+		70% { transform: translateY(0.05rem); box-shadow: 0 0 0 var(--color-moss-pressed); }
+		100% { transform: translateY(0); }
+	}
+
+	@keyframes commit-glow {
+		0% { transform: translateX(-50%) scale(0); opacity: 0.72; }
+		100% { transform: translateX(-50%) scale(18); opacity: 0; }
+	}
+
+	@keyframes play-forward {
+		35% { transform: translateX(0.16rem); }
+		100% { transform: translateX(0); }
+	}
+
+	@keyframes plus-forward {
+		35% { transform: rotate(90deg) scale(1.12); }
+		100% { transform: rotate(0) scale(1); }
+	}
+
 	@media (prefers-reduced-motion: reduce) {
+		.timer-starting,
+		.start-button.starting,
+		.start-icon.starting,
+		.extend-button.starting,
+		.extend-icon.starting,
+		.start-commit-glow {
+			animation: none;
+		}
+
 		.confetti span {
 			animation: none;
 			opacity: 0.32;
