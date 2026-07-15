@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { formatMinutes } from '$lib/app/time';
 	import type { FocusSessionRecord } from '$lib/features/focus-session/focusSession.types';
+	import { Play, Trash2 } from '@lucide/svelte';
 
 	let {
 		records,
@@ -75,9 +76,13 @@
 										<span class="mt-1 text-xs font-bold text-ink-muted">{record.extensionCount} extensions</span>
 									</div>
 								</div>
-								<div class="grid grid-cols-2 gap-2">
-									<button class="min-h-9 rounded-xl bg-moss px-3 text-xs font-extrabold text-on-accent transition hover:bg-moss-dark" type="button" onclick={() => onresume(record)}>Resume</button>
-									<button class="min-h-9 rounded-xl border border-clay/25 px-3 text-xs font-bold text-clay transition hover:bg-clay/10" type="button" onclick={() => deleteSession(record.id)}>Delete</button>
+								<div class="flex justify-end gap-2">
+									<button class="grid size-9 place-items-center rounded-xl bg-moss text-on-accent transition hover:bg-moss-dark" type="button" aria-label={`Resume ${record.title}`} title="Resume session" onclick={() => onresume(record)}>
+										<Play size={16} fill="currentColor" aria-hidden="true" />
+									</button>
+									<button class="grid size-9 place-items-center rounded-xl border border-clay/25 text-clay transition hover:bg-clay/10" type="button" aria-label={`Delete ${record.title}`} title="Delete session" onclick={() => deleteSession(record.id)}>
+										<Trash2 size={16} strokeWidth={2.25} aria-hidden="true" />
+									</button>
 								</div>
 							</li>
 						{/each}
