@@ -95,6 +95,7 @@ When implementation begins, a pragmatic MVP would be:
 - Starting should take as few interactions as possible.
 - The "+5 minutes" action should be easy to choose, but stopping should remain legitimate.
 - Avoid visual or copy patterns that imply failure when the user stops.
+- Keep stop feedback neutral and concise; let the completed-timer copy gently invite continuation without over-explaining either choice.
 - Keep controls stable in size so timer transitions do not shift the layout.
 - Use restrained, task-focused UI rather than a marketing page.
 - Do not put the changing once-per-second timer value in a live region; announce meaningful phase changes instead.

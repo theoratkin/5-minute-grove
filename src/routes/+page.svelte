@@ -218,7 +218,7 @@
 		phase = 'running';
 	}
 
-	function finishSession(message = 'Five minutes counts. You finished here.', clearIntention = false) {
+	function finishSession(message = 'Session saved.', clearIntention = false) {
 		if (!sessionStartedAt || !activeSessionId || sessionTimeSeconds <= 0) return;
 
 		const record: FocusSessionRecord = {
@@ -243,15 +243,15 @@
 	}
 
 	function stopSessionEarly() {
-		finishSession('You stopped when you needed to. The time you spent still counts.');
+		finishSession();
 	}
 
 	function takeBreak() {
-		finishSession('Contract complete. Enjoy a guilt-free break.');
+		finishSession();
 	}
 
 	function switchTask() {
-		finishSession('Contract complete. Name the next small thing when you are ready.', true);
+		finishSession('Session saved.', true);
 	}
 
 	function resumeSavedSession(record: FocusSessionRecord) {
@@ -343,8 +343,6 @@
 				{remainingSeconds}
 				progress={segmentProgress}
 				{phase}
-				{completedContracts}
-				{extensionCount}
 				intention={activeTitle}
 				intentionValue={intention}
 				onIntentionChange={(nextValue) => (intention = nextValue)}

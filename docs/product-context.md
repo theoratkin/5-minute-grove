@@ -12,7 +12,7 @@ The product is not primarily a timer. It is a momentum loop:
 
 Start tiny -> complete contract -> allow stopping -> invite +5 -> repeat.
 
-The app should make "I worked for 5 minutes" feel complete and successful. Continuing is a bonus, not an obligation.
+The app should treat a finished five-minute block as a neutral decision point and gently invite another five minutes. Stopping is a normal option and does not need praise, reassurance, or justification.
 
 ## Differentiation
 
@@ -50,5 +50,6 @@ Possible later layers:
 - Do not make this a generic Pomodoro clone.
 - Do not require long up-front planning.
 - Do not punish stopping after the first 5 minutes.
+- Do not over-encourage or congratulate users for stopping; acknowledge the saved session plainly.
 - Do not describe a partial block as a completed five-minute contract; encouragement should remain truthful.
 - Do not overbuild accounts, social features, or heavy analytics early.

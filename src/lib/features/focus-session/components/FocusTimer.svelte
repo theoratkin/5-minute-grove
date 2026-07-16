@@ -10,8 +10,6 @@
 		remainingSeconds,
 		progress,
 		phase,
-		completedContracts,
-		extensionCount,
 		intention,
 		intentionValue,
 		onIntentionChange,
@@ -27,8 +25,6 @@
 		remainingSeconds: number;
 		progress: number;
 		phase: FocusPhase;
-		completedContracts: number;
-		extensionCount: number;
 		intention: string;
 		intentionValue: string;
 		onIntentionChange: (value: string) => void;
@@ -138,7 +134,7 @@
 		{/if}
 		<div class="relative z-10 h-48">
 			{#if phase === 'contract-complete'}
-				<div aria-live="polite"><EndOfTimerPrompt {intention} {completedContracts} {extensionCount} /></div>
+				<div aria-live="polite"><EndOfTimerPrompt /></div>
 			{:else}
 				<div class:paused-readout={phase === 'paused'} class="grid h-full place-items-center font-display text-[clamp(4.5rem,18vw,8rem)] leading-none font-semibold tracking-[-0.065em] text-moss-dark">
 					{#if phase === 'paused'}

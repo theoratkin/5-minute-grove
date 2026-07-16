@@ -2,7 +2,7 @@
 	<title>About - Just 5 More Minutes</title>
 	<meta
 		name="description"
-		content="Why Just 5 More Minutes makes starting small and stopping without guilt the whole point."
+		content="Why Just 5 More Minutes makes starting small and choosing another five minutes the whole point."
 	/>
 </svelte:head>
 
@@ -18,10 +18,10 @@
 				Just 5 More Minutes is a focus timer for the moment when starting feels harder than doing. You make one honest, five-minute commitment—small enough to believe.
 			</p>
 			<p>
-				When the timer ends, the contract is complete. You can stop, without guilt. If momentum has arrived, adding another five minutes is one small choice away.
+				When the timer ends, the app asks whether you want another five minutes. You can continue, finish, take a break, or switch tasks.
 			</p>
 			<p class="rounded-2xl border border-moss/10 bg-mist/60 p-5 font-semibold text-ink">
-				Stopping after five minutes counts. Continuing is always a bonus, never an obligation.
+				The choice stays small: another five minutes, or move on.
 			</p>
 		</div>
 
