@@ -1,0 +1,21 @@
+/* A low-contrast evening counterpart to Soft daylight: steady, not stimulating. */
+:root[data-theme='quiet-night'] {
+	color-scheme: dark;
+	--theme-color-ink: #e3e8e5;
+	--theme-color-ink-muted: #aeb9b4;
+	--theme-color-paper: #202725;
+	--theme-color-mist: #151a19;
+	--theme-color-surface: #2a3430;
+	--theme-color-on-accent: #102019;
+	--theme-color-moss: #739b86;
+	--theme-color-moss-dark: #96bda9;
+	--theme-color-moss-pressed: #4f7664;
+	--theme-color-moss-hover-pressed: #648d78;
+	--theme-color-sprout: #34453e;
+	--theme-color-sun: #d1ad72;
+	--theme-color-clay: #cf8c7e;
+	--splash-color: rgb(150 189 169 / 68%);
+	--splash-fill: rgb(115 155 134 / 11%);
+	--splash-glow: rgb(150 189 169 / 18%);
+	--splash-fade: rgb(115 155 134 / 5%);
+}

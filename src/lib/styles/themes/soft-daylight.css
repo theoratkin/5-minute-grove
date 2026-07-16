@@ -1,0 +1,21 @@
+:root,
+:root[data-theme='soft-daylight'] {
+	color-scheme: light;
+	--theme-color-ink: #243029;
+	--theme-color-ink-muted: #68736b;
+	--theme-color-paper: #fbfaf5;
+	--theme-color-mist: #eef1ea;
+	--theme-color-surface: #ffffff;
+	--theme-color-on-accent: #ffffff;
+	--theme-color-moss: #315e4c;
+	--theme-color-moss-dark: #204536;
+	--theme-color-moss-pressed: #204536;
+	--theme-color-moss-hover-pressed: #204536;
+	--theme-color-sprout: #d7e6ac;
+	--theme-color-sun: #f4c96b;
+	--theme-color-clay: #d78267;
+	--splash-color: rgb(49 94 76 / 72%);
+	--splash-fill: rgb(49 94 76 / 12%);
+	--splash-glow: rgb(49 94 76 / 24%);
+	--splash-fade: rgb(49 94 76 / 5%);
+}

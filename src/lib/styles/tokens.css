@@ -1,110 +1,26 @@
 @import 'tailwindcss';
+@import './themes/soft-daylight.css';
+@import './themes/cozy-light.css';
+@import './themes/cozy-dark.css';
+@import './themes/gruvbox-dark.css';
+@import './themes/quiet-night.css';
 
-@theme {
+@theme inline {
 	--font-sans: 'Avenir Next', Avenir, 'Segoe UI', sans-serif;
 	--font-display: Georgia, 'Times New Roman', serif;
-	--color-ink: #243029;
-	--color-ink-muted: #68736b;
-	--color-paper: #fbfaf5;
-	--color-mist: #eef1ea;
-	--color-surface: #ffffff;
-	--color-on-accent: #ffffff;
-	--color-moss: #315e4c;
-	--color-moss-dark: #204536;
-	--color-moss-pressed: #204536;
-	--color-moss-hover-pressed: #204536;
-	--color-sprout: #d7e6ac;
-	--color-sun: #f4c96b;
-	--color-clay: #d78267;
-	--splash-color: rgb(49 94 76 / 72%);
-	--splash-fill: rgb(49 94 76 / 12%);
-	--splash-glow: rgb(49 94 76 / 24%);
-	--splash-fade: rgb(49 94 76 / 5%);
-}
-
-:root[data-theme='cozy-light'] {
-	color-scheme: light;
-	--color-ink: #352925;
-	--color-ink-muted: #796a63;
-	--color-paper: #f5f0e4;
-	--color-mist: #e9dece;
-	--color-surface: #fffaf1;
-	--color-on-accent: #fffaf3;
-	--color-moss: #75552d;
-	--color-moss-dark: #5e421f;
-	--color-moss-pressed: #543919;
-	--color-moss-hover-pressed: #452d12;
-	--color-sprout: #ead9a9;
-	--color-sun: #d99c43;
-	--color-clay: #a65f52;
-	--splash-color: rgb(117 85 45 / 70%);
-	--splash-fill: rgb(217 156 67 / 13%);
-	--splash-glow: rgb(217 156 67 / 24%);
-	--splash-fade: rgb(217 156 67 / 6%);
-}
-
-:root[data-theme='cozy-dark'] {
-	color-scheme: dark;
-	--color-ink: #eee9dc;
-	--color-ink-muted: #b8aba1;
-	--color-paper: #24201f;
-	--color-mist: #181615;
-	--color-surface: #322b29;
-	--color-on-accent: #2a2115;
-	--color-moss: #d6ae68;
-	--color-moss-dark: #edc77e;
-	--color-moss-pressed: #8c6935;
-	--color-moss-hover-pressed: #a17a3d;
-	--color-sprout: #4e412b;
-	--color-sun: #e0a753;
-	--color-clay: #dc9589;
-	--splash-color: rgb(237 199 126 / 68%);
-	--splash-fill: rgb(214 174 104 / 12%);
-	--splash-glow: rgb(237 199 126 / 22%);
-	--splash-fade: rgb(214 174 104 / 6%);
-}
-
-:root[data-theme='gruvbox-dark'] {
-	color-scheme: dark;
-	--color-ink: #ebdbb2;
-	--color-ink-muted: #bdae93;
-	--color-paper: #3c3836;
-	--color-mist: #282828;
-	--color-surface: #504945;
-	--color-on-accent: #282828;
-	--color-moss: #b8bb26;
-	--color-moss-dark: #fabd2f;
-	--color-moss-pressed: #98971a;
-	--color-moss-hover-pressed: #d79921;
-	--color-sprout: #504945;
-	--color-sun: #fabd2f;
-	--color-clay: #fb4934;
-	--splash-color: rgb(250 189 47 / 72%);
-	--splash-fill: rgb(184 187 38 / 10%);
-	--splash-glow: rgb(250 189 47 / 20%);
-	--splash-fade: rgb(184 187 38 / 5%);
-}
-
-/* A low-contrast evening counterpart to Soft daylight: steady, not stimulating. */
-:root[data-theme='quiet-night'] {
-	color-scheme: dark;
-	--color-ink: #e3e8e5;
-	--color-ink-muted: #aeb9b4;
-	--color-paper: #202725;
-	--color-mist: #151a19;
-	--color-surface: #2a3430;
-	--color-on-accent: #102019;
-	--color-moss: #739b86;
-	--color-moss-dark: #96bda9;
-	--color-moss-pressed: #4f7664;
-	--color-moss-hover-pressed: #648d78;
-	--color-sprout: #34453e;
-	--color-sun: #d1ad72;
-	--color-clay: #cf8c7e;
-	--splash-color: rgb(150 189 169 / 68%);
-	--splash-fill: rgb(115 155 134 / 11%);
-	--splash-glow: rgb(150 189 169 / 18%);
-	--splash-fade: rgb(115 155 134 / 5%);
+	--color-ink: var(--theme-color-ink);
+	--color-ink-muted: var(--theme-color-ink-muted);
+	--color-paper: var(--theme-color-paper);
+	--color-mist: var(--theme-color-mist);
+	--color-surface: var(--theme-color-surface);
+	--color-on-accent: var(--theme-color-on-accent);
+	--color-moss: var(--theme-color-moss);
+	--color-moss-dark: var(--theme-color-moss-dark);
+	--color-moss-pressed: var(--theme-color-moss-pressed);
+	--color-moss-hover-pressed: var(--theme-color-moss-hover-pressed);
+	--color-sprout: var(--theme-color-sprout);
+	--color-sun: var(--theme-color-sun);
+	--color-clay: var(--theme-color-clay);
 }
 
 @layer base {
