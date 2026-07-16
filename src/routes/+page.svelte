@@ -17,8 +17,6 @@
 		prepareTimerNotifications
 	} from '$lib/app/notifications';
 	import { formatClock } from '$lib/app/time';
-	import ThemeSelector from '$lib/app/ThemeSelector.svelte';
-	import { applyTheme, loadTheme, type ThemeId } from '$lib/app/theme';
 
 	let intention = $state('');
 	let phase = $state<FocusPhase>('idle');
@@ -32,7 +30,6 @@
 	let history = $state<FocusSessionRecord[]>([]);
 	let startOrExtendSound: HTMLAudioElement | null = null;
 	let timerFinishSound: HTMLAudioElement | null = null;
-	let theme = $state<ThemeId>('soft-daylight');
 
 	let activeTitle = $derived(getSessionTitle(intention));
 	let segmentProgress = $derived.by(() => {
@@ -84,8 +81,6 @@
 	}
 
 	onMount(() => {
-		theme = loadTheme();
-		applyTheme(theme);
 		history = loadSessionHistory();
 		startOrExtendSound = new Audio('/sounds/start-or-extend.mp3');
 		timerFinishSound = new Audio('/sounds/timer-finish.mp3');
@@ -105,11 +100,6 @@
 
 		return () => window.clearInterval(interval);
 	});
-
-	function changeTheme(nextTheme: ThemeId) {
-		theme = nextTheme;
-		applyTheme(theme);
-	}
 
 	function startSession() {
 		void prepareTimerNotifications();
@@ -236,13 +226,9 @@
 </svelte:head>
 
 
-<main class="relative z-10 mx-auto grid min-h-screen w-full max-w-6xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start lg:px-8 lg:py-10">
+<main class="relative z-10 mx-auto grid min-h-[calc(100vh-5rem)] w-full max-w-6xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start lg:px-8 lg:py-10">
+	<h1 class="sr-only">Just 5 More Minutes focus timer</h1>
 	<section class="overflow-hidden rounded-[2rem] border border-surface/80 bg-paper/90 shadow-[0_24px_70px_rgb(0_0_0/12%)] backdrop-blur" aria-label="Just 5 More Minutes workspace">
-		<header class="border-b border-moss/10 bg-[linear-gradient(120deg,var(--color-sprout),transparent_62%)] px-6 py-7 sm:px-10 sm:py-9">
-			<p class="mb-3 flex items-center gap-2 text-xs font-black tracking-[0.18em] text-moss uppercase before:h-2 before:w-2 before:rounded-full before:bg-sun before:content-['']">Just 5 More Minutes</p>
-			<h1 class="max-w-xl font-display text-5xl leading-[0.94] font-semibold tracking-[-0.045em] text-moss-dark sm:text-6xl">{phase === 'contract-complete' ? 'You can stop here.' : 'Start small.'}</h1>
-		</header>
-
 		<div class="grid gap-7 px-6 py-7 sm:px-10 sm:py-9">
 			<FocusTimer
 				{remainingSeconds}
@@ -275,8 +261,6 @@
 	</section>
 
 	<aside class="rounded-[1.5rem] border border-surface/90 bg-paper/80 p-5 shadow-[0_18px_50px_rgb(0_0_0/8%)] backdrop-blur lg:sticky lg:top-8">
-		<ThemeSelector value={theme} onchange={changeTheme} />
-		<div class="my-5 border-t border-moss/10"></div>
-			<SessionHistory records={history} {currentSession} onresume={resumeSavedSession} {deleteSession} {updateSessionTitle} />
+		<SessionHistory records={history} {currentSession} onresume={resumeSavedSession} {deleteSession} {updateSessionTitle} />
 	</aside>
 </main>

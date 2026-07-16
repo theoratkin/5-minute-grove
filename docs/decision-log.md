@@ -13,3 +13,8 @@
 - Renamed the accumulated optional block from "Sprint" to "Session": titles are optional (default "Session"), current session time and extensions are visible, and history is grouped by session start date with resume and delete actions.
 - Added a locally persisted theme preference with Soft daylight as the default and Gruvbox Dark as the first alternate theme.
 - Added Quiet night, a subdued blue-charcoal dark theme designed as the calmer counterpart to Soft daylight; retained Gruvbox Dark as an existing, higher-saturation option.
+
+## 2026-07-16
+
+- Replaced the timer card's large introductory banner with a lean global header that keeps the product title, About navigation, and theme settings available across routes.
+- Moved the persisted theme selector into a focused settings modal and added a concise About page centered on the permission-to-stop product contract.
