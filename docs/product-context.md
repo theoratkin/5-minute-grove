@@ -35,6 +35,8 @@ The first usable version should likely include:
 - A prominent "Add 5 minutes" action.
 - Equally valid options to stop, break, or switch.
 - A local session history grouped by the day each session began, with options to resume or delete a session.
+- Honest accounting when a session ends early: partial time is saved without awarding a completed contract.
+- Recovery of an in-progress session after a refresh or accidental tab close.
 
 Possible later layers:
 
@@ -48,4 +50,5 @@ Possible later layers:
 - Do not make this a generic Pomodoro clone.
 - Do not require long up-front planning.
 - Do not punish stopping after the first 5 minutes.
+- Do not describe a partial block as a completed five-minute contract; encouragement should remain truthful.
 - Do not overbuild accounts, social features, or heavy analytics early.

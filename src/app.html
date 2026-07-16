@@ -4,6 +4,15 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="text-scale" content="scale" />
+		<script>
+			try {
+				const theme = localStorage.getItem('just-5-more-minutes:theme');
+				const themes = ['soft-daylight', 'cozy-light', 'cozy-dark', 'quiet-night', 'gruvbox-dark'];
+				document.documentElement.dataset.theme = themes.includes(theme) ? theme : 'soft-daylight';
+			} catch {
+				document.documentElement.dataset.theme = 'soft-daylight';
+			}
+		</script>
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">

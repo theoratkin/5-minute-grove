@@ -20,5 +20,6 @@ Run checks:
 
 ```sh
 npm run check
+npm test
 npm run build
 ```

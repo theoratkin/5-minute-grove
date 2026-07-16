@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onDestroy, tick } from 'svelte';
+	import { onDestroy, onMount, tick } from 'svelte';
 	import { buttonSplash } from '$lib/actions/buttonSplash';
 	import { formatMinutes, formatTime } from '$lib/app/time';
 	import type { FocusSessionRecord } from '$lib/features/focus-session/focusSession.types';
@@ -22,16 +22,16 @@
 	let editingId = $state<string | null>(null);
 	let titleDraft = $state('');
 	let titleInput = $state<HTMLInputElement | undefined>();
-	let resumeTimeout: ReturnType<typeof setTimeout> | undefined;
+	let compactHistory = $state(false);
+	let historyExpanded = $state(false);
+	let resumeResetTimeout: ReturnType<typeof setTimeout> | undefined;
 
 	function resumeWithCommitment(record: FocusSessionRecord) {
 		if (resumingId !== null) return;
 
 		resumingId = record.id;
-		resumeTimeout = setTimeout(() => {
-			resumingId = null;
-			onresume(record);
-		}, 420);
+		onresume(record);
+		resumeResetTimeout = setTimeout(() => (resumingId = null), 420);
 	}
 
 	async function startEditing(record: FocusSessionRecord) {
@@ -57,9 +57,21 @@
 		titleDraft = '';
 	}
 
-	onDestroy(() => {
-		if (resumeTimeout) clearTimeout(resumeTimeout);
+	onMount(() => {
+		const media = window.matchMedia('(max-width: 639px)');
+		const updateCompactHistory = () => (compactHistory = media.matches);
+		updateCompactHistory();
+		media.addEventListener('change', updateCompactHistory);
+		return () => media.removeEventListener('change', updateCompactHistory);
 	});
+
+	onDestroy(() => {
+		if (resumeResetTimeout) clearTimeout(resumeResetTimeout);
+	});
+
+	function extensionLabel(count: number): string {
+		return `${count} ${count === 1 ? 'extension' : 'extensions'}`;
+	}
 
 	function dayLabel(value: string): string {
 		const date = new Date(value);
@@ -72,9 +84,13 @@
 		return new Intl.DateTimeFormat(undefined, { month: 'long', day: 'numeric', year: 'numeric' }).format(date);
 	}
 
+	let availableRecords = $derived(records.filter((record) => record.id !== currentSession?.id));
+	let visibleRecords = $derived(
+		compactHistory && !historyExpanded ? availableRecords.slice(0, 4) : availableRecords
+	);
 	let groups = $derived.by(() => {
 		const grouped = new Map<string, FocusSessionRecord[]>();
-		for (const record of records.filter((record) => record.id !== currentSession?.id)) {
+		for (const record of visibleRecords) {
 			const key = new Date(record.startedAt).toDateString();
 			grouped.set(key, [...(grouped.get(key) ?? []), record]);
 		}
@@ -91,7 +107,7 @@
 	</div>
 
 	{#if currentSession === null && records.length === 0}
-		<p class="rounded-2xl border border-dashed border-moss/20 bg-mist/50 p-4 text-sm leading-relaxed text-ink-muted">No sessions yet. Completed five-minute blocks will be saved here.</p>
+			<p class="rounded-2xl border border-dashed border-moss/20 bg-mist/50 p-4 text-sm leading-relaxed text-ink-muted">No sessions yet. Time you choose to save will appear here.</p>
 	{:else}
 		<div class="grid gap-5">
 			{#if currentSession}
@@ -118,7 +134,7 @@
 							</div>
 							<div class="grid flex-none justify-items-end">
 								<span class="text-sm font-extrabold text-moss">{formatMinutes(currentSession.totalSeconds)}</span>
-								<span class="mt-1 text-xs font-bold text-ink-muted">{currentSession.extensionCount} extensions</span>
+								<span class="mt-1 text-xs font-bold text-ink-muted">{extensionLabel(currentSession.extensionCount)}</span>
 							</div>
 						</div>
 						<span class="text-xs font-bold text-moss">Current session</span>
@@ -155,14 +171,14 @@
 									</div>
 									<div class="grid flex-none justify-items-end">
 										<span class="text-sm font-extrabold text-moss">{formatMinutes(record.totalSeconds)}</span>
-										<span class="mt-1 text-xs font-bold text-ink-muted">{record.extensionCount} extensions</span>
+										<span class="mt-1 text-xs font-bold text-ink-muted">{extensionLabel(record.extensionCount)}</span>
 									</div>
 								</div>
 								<div class="relative z-10 flex justify-end gap-2">
-									<button class:resuming={resumingId === record.id} class="resume-button grid size-9 place-items-center rounded-xl bg-moss text-on-accent transition hover:bg-moss-dark" type="button" aria-label={resumingId === record.id ? `Resuming ${record.title}` : `Resume ${record.title}`} title="Resume session" use:buttonSplash onclick={() => resumeWithCommitment(record)} disabled={resumingId !== null}>
+									<button class:resuming={resumingId === record.id} class="resume-button grid size-11 place-items-center rounded-xl bg-moss text-on-accent transition hover:bg-moss-dark" type="button" aria-label={resumingId === record.id ? `Continuing ${record.title}` : `Continue ${record.title} with a new five-minute contract`} title="Continue with a new five-minute contract" use:buttonSplash onclick={() => resumeWithCommitment(record)} disabled={resumingId !== null}>
 										<i class:resuming={resumingId === record.id} class="resume-icon ph-fill ph-play text-base" aria-hidden="true"></i>
 									</button>
-									<button class="grid size-9 place-items-center rounded-xl border border-clay/25 text-clay transition hover:bg-clay/10" type="button" aria-label={`Delete ${record.title}`} title="Delete session" onclick={() => deleteSession(record.id)}>
+									<button class="grid size-11 place-items-center rounded-xl border border-clay/25 text-clay transition hover:bg-clay/10" type="button" aria-label={`Remove ${record.title}; this can be undone`} title="Remove session" onclick={() => deleteSession(record.id)}>
 										<i class="ph-fill ph-trash text-base" aria-hidden="true"></i>
 									</button>
 								</div>
@@ -171,6 +187,11 @@
 					</ul>
 				</section>
 			{/each}
+			{#if compactHistory && availableRecords.length > 4}
+				<button class="min-h-11 w-full rounded-xl text-sm font-extrabold text-moss transition hover:bg-mist" type="button" onclick={() => (historyExpanded = !historyExpanded)}>
+					{historyExpanded ? 'Show fewer sessions' : `Show ${availableRecords.length - 4} older sessions`}
+				</button>
+			{/if}
 		</div>
 	{/if}
 </section>

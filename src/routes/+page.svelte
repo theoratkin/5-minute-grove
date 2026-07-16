@@ -10,13 +10,25 @@
 	import SessionHistory from '$lib/features/session-history/components/SessionHistory.svelte';
 	import {
 		loadSessionHistory,
-		saveSessionHistory
+		saveSessionHistory,
+		removeSessionById,
+		restoreSessionRecord
 	} from '$lib/features/session-history/sessionHistory.storage';
 	import {
 		notifyContractComplete,
 		prepareTimerNotifications
 	} from '$lib/app/notifications';
 	import { formatClock } from '$lib/app/time';
+	import { usePreferences } from '$lib/app/preferences.svelte';
+	import {
+		clearActiveSession,
+		loadActiveSession,
+		saveActiveSession
+	} from '$lib/features/focus-session/focusSession.storage';
+	import {
+		elapsedInCurrentContract,
+		restoreFocusSession
+	} from '$lib/features/focus-session/focusSession.state';
 
 	let intention = $state('');
 	let phase = $state<FocusPhase>('idle');
@@ -30,6 +42,11 @@
 	let history = $state<FocusSessionRecord[]>([]);
 	let startOrExtendSound: HTMLAudioElement | null = null;
 	let timerFinishSound: HTMLAudioElement | null = null;
+	let hydrated = $state(false);
+	let toastMessage = $state('');
+	let deletedRecord = $state<FocusSessionRecord | null>(null);
+	let deleteTimeout: ReturnType<typeof setTimeout> | undefined;
+	const preferences = usePreferences();
 
 	let activeTitle = $derived(getSessionTitle(intention));
 	let segmentProgress = $derived.by(() => {
@@ -40,7 +57,7 @@
 		phase === 'idle'
 			? 0
 			: elapsedSessionSeconds +
-				(phase === 'contract-complete' ? 0 : FIVE_MINUTES_SECONDS - remainingSeconds)
+				(phase === 'contract-complete' ? 0 : elapsedInCurrentContract(remainingSeconds))
 	);
 	let pageTitle = $derived(
 		phase === 'running'
@@ -63,21 +80,19 @@
 			}
 	);
 
-	function finishCurrentTurn() {
-		if (phase !== 'running' && phase !== 'paused') return;
+	function completeCurrentContract() {
+		if (phase !== 'running') return;
 
 		const nextCompletedContracts = completedContracts + 1;
-		elapsedSessionSeconds += FIVE_MINUTES_SECONDS - remainingSeconds;
-
+		elapsedSessionSeconds += FIVE_MINUTES_SECONDS;
 		remainingSeconds = 0;
 		completedContracts = nextCompletedContracts;
 		phase = 'contract-complete';
 		segmentEndsAt = null;
 		playSound(timerFinishSound);
-		notifyContractComplete({
-			intention: activeTitle,
-			completedContracts: nextCompletedContracts
-		});
+		if (preferences.notificationsEnabled) {
+			notifyContractComplete({ intention: activeTitle, completedContracts: nextCompletedContracts });
+		}
 	}
 
 	onMount(() => {
@@ -87,22 +102,85 @@
 		startOrExtendSound.preload = 'auto';
 		timerFinishSound.preload = 'auto';
 
-		const interval = window.setInterval(() => {
+		const savedSession = loadActiveSession();
+		if (savedSession) {
+			const restored = restoreFocusSession(savedSession);
+			intention = restored.intention;
+			phase = restored.phase;
+			remainingSeconds = restored.remainingSeconds;
+			completedContracts = restored.completedContracts;
+			extensionCount = restored.extensionCount;
+			elapsedSessionSeconds = restored.elapsedSessionSeconds;
+			sessionStartedAt = restored.sessionStartedAt;
+			activeSessionId = restored.activeSessionId;
+			segmentEndsAt = restored.segmentEndsAt;
+			toastMessage = restored.completedWhileAway
+				? 'Your five-minute contract finished while you were away.'
+				: 'Your session was restored.';
+			if (restored.completedWhileAway && preferences.notificationsEnabled) {
+				notifyContractComplete({ intention: activeTitle, completedContracts: restored.completedContracts });
+			}
+		}
+		hydrated = true;
+
+		function syncTimer() {
 			if (phase !== 'running' || segmentEndsAt === null) return;
 
-			const nextRemaining = Math.max(0, Math.ceil((segmentEndsAt - Date.now()) / 1000));
-			remainingSeconds = nextRemaining;
+			remainingSeconds = Math.max(0, Math.ceil((segmentEndsAt - Date.now()) / 1000));
+			if (remainingSeconds === 0) completeCurrentContract();
+		}
 
-			if (nextRemaining === 0) {
-				finishCurrentTurn();
+		const interval = window.setInterval(syncTimer, 250);
+		document.addEventListener('visibilitychange', syncTimer);
+
+		function handleKeyboard(event: KeyboardEvent) {
+			const target = event.target as HTMLElement;
+			if (event.repeat || target.matches('input, textarea, select, button, a, summary, [contenteditable="true"]')) return;
+
+			if (event.code === 'Space' && (phase === 'running' || phase === 'paused')) {
+				event.preventDefault();
+				phase === 'running' ? pauseSession() : resumeSession();
+			} else if (event.key === 'Enter' && phase === 'idle') {
+				event.preventDefault();
+				startSession();
+			} else if ((event.key === '+' || event.key === '=') && phase === 'contract-complete') {
+				event.preventDefault();
+				addFiveMinutes();
 			}
-		}, 250);
+		}
+		window.addEventListener('keydown', handleKeyboard);
 
-		return () => window.clearInterval(interval);
+		return () => {
+			window.clearInterval(interval);
+			document.removeEventListener('visibilitychange', syncTimer);
+			window.removeEventListener('keydown', handleKeyboard);
+			if (deleteTimeout) window.clearTimeout(deleteTimeout);
+		};
+	});
+
+	$effect(() => {
+		if (!hydrated) return;
+		if (phase === 'idle' || !sessionStartedAt || !activeSessionId) {
+			clearActiveSession();
+			return;
+		}
+
+		saveActiveSession({
+			version: 1,
+			intention,
+			phase,
+			remainingSeconds,
+			completedContracts,
+			extensionCount,
+			elapsedSessionSeconds,
+			sessionStartedAt,
+			activeSessionId,
+			segmentEndsAt
+		});
 	});
 
 	function startSession() {
-		void prepareTimerNotifications();
+		if (preferences.notificationsEnabled) void prepareTimerNotifications();
 		playSound(startOrExtendSound);
 
 		sessionStartedAt = new Date().toISOString();
@@ -116,7 +194,7 @@
 	}
 
 	function addFiveMinutes() {
-		void prepareTimerNotifications();
+		if (preferences.notificationsEnabled) void prepareTimerNotifications();
 		playSound(startOrExtendSound);
 
 		extensionCount += 1;
@@ -140,8 +218,8 @@
 		phase = 'running';
 	}
 
-	function finishSession() {
-		if (!sessionStartedAt || !activeSessionId || completedContracts === 0) return;
+	function finishSession(message = 'Five minutes counts. You finished here.', clearIntention = false) {
+		if (!sessionStartedAt || !activeSessionId || sessionTimeSeconds <= 0) return;
 
 		const record: FocusSessionRecord = {
 			id: activeSessionId,
@@ -157,7 +235,23 @@
 			.sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime())
 			.slice(0, 12);
 		saveSessionHistory(history);
-		resetSession();
+		resetSession(clearIntention);
+		toastMessage = message;
+		if (clearIntention) {
+			requestAnimationFrame(() => document.querySelector<HTMLInputElement>('[data-session-name]')?.focus());
+		}
+	}
+
+	function stopSessionEarly() {
+		finishSession('You stopped when you needed to. The time you spent still counts.');
+	}
+
+	function takeBreak() {
+		finishSession('Contract complete. Enjoy a guilt-free break.');
+	}
+
+	function switchTask() {
+		finishSession('Contract complete. Name the next small thing when you are ready.', true);
 	}
 
 	function resumeSavedSession(record: FocusSessionRecord) {
@@ -172,14 +266,29 @@
 		remainingSeconds = FIVE_MINUTES_SECONDS;
 		segmentEndsAt = Date.now() + FIVE_MINUTES_SECONDS * 1000;
 		phase = 'running';
-		void prepareTimerNotifications();
+		if (preferences.notificationsEnabled) void prepareTimerNotifications();
 		playSound(startOrExtendSound);
 	}
 
 	function deleteSession(id: string) {
 		if (id === activeSessionId) return;
-		history = history.filter((session) => session.id !== id);
+		const result = removeSessionById(history, id);
+		if (!result.removed) return;
+		history = result.records;
+		deletedRecord = result.removed;
 		saveSessionHistory(history);
+		toastMessage = `Removed “${result.removed.title}”.`;
+		if (deleteTimeout) window.clearTimeout(deleteTimeout);
+		deleteTimeout = window.setTimeout(() => (deletedRecord = null), 6000);
+	}
+
+	function undoDelete() {
+		if (!deletedRecord) return;
+		history = restoreSessionRecord(history, deletedRecord);
+		saveSessionHistory(history);
+		toastMessage = `Restored “${deletedRecord.title}”.`;
+		deletedRecord = null;
+		if (deleteTimeout) window.clearTimeout(deleteTimeout);
 	}
 
 	function updateSessionTitle(id: string, title: string) {
@@ -208,7 +317,7 @@
 	}
 
 	function playSound(sound: HTMLAudioElement | null) {
-		if (!sound) return;
+		if (!sound || !preferences.soundEnabled) return;
 
 		sound.currentTime = 0;
 		void sound.play().catch(() => {
@@ -243,9 +352,15 @@
 				onAddFive={addFiveMinutes}
 				onPause={pauseSession}
 				onResume={resumeSession}
-				onFinish={finishCurrentTurn}
-				onDone={finishSession}
+				onStop={stopSessionEarly}
+				onDone={() => finishSession()}
+				onBreak={takeBreak}
+				onSwitch={switchTask}
 			/>
+
+			<p class="hidden text-center text-xs text-ink-muted sm:block" aria-label="Keyboard shortcuts">
+				{#if phase === 'idle'}Press <kbd>Enter</kbd> to start{:else if phase === 'contract-complete'}Press <kbd>+</kbd> to add five minutes{:else}Press <kbd>Space</kbd> to {phase === 'paused' ? 'resume' : 'pause'}{/if}
+			</p>
 
 			<div class="grid grid-cols-2 gap-3" aria-label="Current session progress">
 				<div class="rounded-2xl border border-moss/10 bg-mist/60 p-4">
@@ -264,3 +379,14 @@
 		<SessionHistory records={history} {currentSession} onresume={resumeSavedSession} {deleteSession} {updateSessionTitle} />
 	</aside>
 </main>
+
+{#if toastMessage}
+	<div class="fixed right-4 bottom-4 left-4 z-50 mx-auto flex min-h-12 max-w-md items-center justify-between gap-4 rounded-2xl border border-moss/15 bg-paper px-4 py-3 text-sm font-semibold text-ink shadow-[0_16px_45px_rgb(0_0_0/18%)]" role="status">
+		<span>{toastMessage}</span>
+		{#if deletedRecord}
+			<button class="min-h-11 shrink-0 rounded-xl px-3 font-extrabold text-moss transition hover:bg-mist" type="button" onclick={undoDelete}>Undo</button>
+		{:else}
+			<button class="grid size-11 shrink-0 place-items-center rounded-xl text-ink-muted transition hover:bg-mist" type="button" aria-label="Dismiss message" onclick={() => (toastMessage = '')}><i class="ph-bold ph-x" aria-hidden="true"></i></button>
+		{/if}
+	</div>
+{/if}

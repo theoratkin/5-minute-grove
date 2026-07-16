@@ -1,16 +1,21 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { themes, type ThemeId } from '$lib/app/theme';
+	import type { AppPreferences } from '$lib/app/preferences.svelte';
+	import { prepareTimerNotifications } from '$lib/app/notifications';
 
 	let {
 		theme,
+		preferences,
 		onThemeChange
 	}: {
 		theme: ThemeId;
+		preferences: AppPreferences;
 		onThemeChange: (theme: ThemeId) => void;
 	} = $props();
 
 	let themeMenu: HTMLDetailsElement;
+	let notificationNote = $state('');
 
 	onMount(() => {
 		function closeThemeMenu(event: PointerEvent) {
@@ -19,14 +24,41 @@
 			}
 		}
 
-		document.addEventListener('pointerdown', closeThemeMenu);
+		function closeThemeMenuWithEscape(event: KeyboardEvent) {
+			if (event.key === 'Escape' && themeMenu.open) {
+				themeMenu.open = false;
+				themeMenu.querySelector('summary')?.focus();
+			}
+		}
 
-		return () => document.removeEventListener('pointerdown', closeThemeMenu);
+		document.addEventListener('pointerdown', closeThemeMenu);
+		document.addEventListener('keydown', closeThemeMenuWithEscape);
+
+		return () => {
+			document.removeEventListener('pointerdown', closeThemeMenu);
+			document.removeEventListener('keydown', closeThemeMenuWithEscape);
+		};
 	});
 
 	function selectTheme(nextTheme: ThemeId) {
 		onThemeChange(nextTheme);
-		themeMenu.open = false;
+	}
+
+	async function toggleNotifications(enabled: boolean) {
+		if (!enabled) {
+			preferences.setNotifications(false);
+			notificationNote = '';
+			return;
+		}
+
+		const permission = await prepareTimerNotifications();
+		const available = permission === 'granted';
+		preferences.setNotifications(available);
+		notificationNote = available
+			? 'Timer-finish alerts are on.'
+			: permission === 'unsupported'
+				? 'Notifications are not available in this browser.'
+				: 'Notifications remain off because permission was not granted.';
 	}
 </script>
 
@@ -41,12 +73,15 @@
 			<details bind:this={themeMenu} class="group relative">
 				<summary
 					class="grid size-10 cursor-pointer list-none place-items-center rounded-xl text-ink-muted transition marker:hidden hover:bg-mist hover:text-moss group-open:bg-mist group-open:text-moss"
-					aria-label="Choose theme"
+					aria-label="Open preferences"
 				>
-					<i class="ph-bold ph-palette text-xl" aria-hidden="true"></i>
+					<i class="ph-bold ph-sliders-horizontal text-xl" aria-hidden="true"></i>
 				</summary>
 
-				<div class="absolute top-[calc(100%+0.5rem)] right-0 z-30 grid min-w-48 gap-1 rounded-2xl border border-surface/90 bg-paper p-2 shadow-[0_16px_45px_rgb(0_0_0/18%)]">
+				<div class="absolute top-[calc(100%+0.5rem)] right-0 z-30 grid w-[min(20rem,calc(100vw-2rem))] gap-4 rounded-2xl border border-surface/90 bg-paper p-4 shadow-[0_16px_45px_rgb(0_0_0/18%)]">
+					<div>
+						<p class="mb-2 px-1 text-xs font-extrabold tracking-[0.12em] text-ink-muted uppercase">Theme</p>
+						<div class="grid gap-1">
 					{#each themes as option (option.id)}
 						<button
 							class={`flex w-full items-center justify-between gap-4 rounded-xl px-3 py-2.5 text-left text-sm font-bold transition hover:bg-mist ${theme === option.id ? 'bg-sprout/50 text-moss' : 'text-ink-muted'}`}
@@ -70,6 +105,21 @@
 							{/if}
 						</button>
 					{/each}
+						</div>
+					</div>
+
+					<div class="grid gap-2 border-t border-moss/10 pt-4">
+						<p class="px-1 text-xs font-extrabold tracking-[0.12em] text-ink-muted uppercase">Timer feedback</p>
+						<label class="flex min-h-11 cursor-pointer items-center justify-between gap-4 rounded-xl px-3 py-2 text-sm font-bold text-ink transition hover:bg-mist">
+							<span class="flex items-center gap-2"><i class="ph-bold ph-speaker-high text-lg text-moss" aria-hidden="true"></i> Sounds</span>
+							<input class="size-5 accent-moss" type="checkbox" checked={preferences.soundEnabled} onchange={(event) => preferences.setSound(event.currentTarget.checked)} />
+						</label>
+						<label class="flex min-h-11 cursor-pointer items-center justify-between gap-4 rounded-xl px-3 py-2 text-sm font-bold text-ink transition hover:bg-mist">
+							<span class="flex items-center gap-2"><i class="ph-bold ph-bell text-lg text-moss" aria-hidden="true"></i> Notifications</span>
+							<input class="size-5 accent-moss" type="checkbox" checked={preferences.notificationsEnabled} onchange={(event) => void toggleNotifications(event.currentTarget.checked)} />
+						</label>
+						{#if notificationNote}<p class="px-3 text-xs leading-relaxed text-ink-muted" aria-live="polite">{notificationNote}</p>{/if}
+					</div>
 				</div>
 			</details>
 		</nav>

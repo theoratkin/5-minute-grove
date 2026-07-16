@@ -9,14 +9,15 @@ function canUseNotifications() {
 	return browser && 'Notification' in window;
 }
 
-export async function prepareTimerNotifications() {
-	if (!canUseNotifications()) return;
-	if (Notification.permission !== 'default') return;
+export async function prepareTimerNotifications(): Promise<NotificationPermission | 'unsupported'> {
+	if (!canUseNotifications()) return 'unsupported';
+	if (Notification.permission !== 'default') return Notification.permission;
 
 	try {
-		await Notification.requestPermission();
+		return await Notification.requestPermission();
 	} catch {
 		// Notification permission is optional; the timer still works without it.
+		return Notification.permission;
 	}
 }
 

@@ -67,4 +67,9 @@
 	input:disabled {
 		@apply cursor-not-allowed opacity-65;
 	}
+
+	:where(a, button, input, select, summary):focus-visible {
+		outline: 3px solid color-mix(in srgb, var(--color-moss) 62%, transparent);
+		outline-offset: 3px;
+	}
 }

@@ -16,7 +16,7 @@
 		<h2 class="font-display text-3xl leading-none font-semibold tracking-[-0.04em] text-moss-dark">Five minutes counts.</h2>
 		<p class="mt-3 leading-relaxed text-ink-muted">
 			{intention || 'This session'} has {completedContracts === 1 ? 'one finished block' : `${completedContracts} finished blocks`}
-			{extensionCount > 0 ? ` and ${extensionCount} voluntary extensions` : ''}.
+				{extensionCount > 0 ? ` and ${extensionCount} voluntary ${extensionCount === 1 ? 'extension' : 'extensions'}` : ''}.
 		</p>
 	</div>
 </section>

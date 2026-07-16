@@ -9,3 +9,16 @@ export interface FocusSessionRecord {
 	extensionCount: number;
 	totalSeconds: number;
 }
+
+export interface ActiveFocusSession {
+	version: 1;
+	intention: string;
+	phase: Exclude<FocusPhase, 'idle'>;
+	remainingSeconds: number;
+	completedContracts: number;
+	extensionCount: number;
+	elapsedSessionSeconds: number;
+	sessionStartedAt: string;
+	activeSessionId: string;
+	segmentEndsAt: number | null;
+}

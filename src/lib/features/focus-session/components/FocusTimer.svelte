@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onDestroy } from 'svelte';
+	import { onDestroy, tick } from 'svelte';
 	import { formatClock } from '$lib/app/time';
 	import { buttonSplash } from '$lib/actions/buttonSplash';
 	import EndOfTimerPrompt from './EndOfTimerPrompt.svelte';
@@ -19,8 +19,10 @@
 		onAddFive,
 		onPause,
 		onResume,
-		onFinish,
-		onDone
+		onStop,
+		onDone,
+		onBreak,
+		onSwitch
 	}: {
 		remainingSeconds: number;
 		progress: number;
@@ -34,14 +36,17 @@
 		onAddFive: () => void;
 		onPause: () => void;
 		onResume: () => void;
-		onFinish: () => void;
+		onStop: () => void;
 		onDone: () => void;
+		onBreak: () => void;
+		onSwitch: () => void;
 	} = $props();
 
 	let isStarting = $state(false);
 	let isExtending = $state(false);
 	let startTimeout: ReturnType<typeof setTimeout> | undefined;
 	let extendTimeout: ReturnType<typeof setTimeout> | undefined;
+	let primaryCompletionAction = $state<HTMLButtonElement | undefined>();
 
 	let statusText = $derived.by(() => {
 		if (phase === 'running') return 'Contract in progress';
@@ -76,9 +81,9 @@
 		if (isStarting) return;
 
 		isStarting = true;
+		onStart();
 		startTimeout = setTimeout(() => {
 			isStarting = false;
-			onStart();
 		}, 420);
 	}
 
@@ -86,11 +91,17 @@
 		if (isExtending) return;
 
 		isExtending = true;
+		onAddFive();
 		extendTimeout = setTimeout(() => {
 			isExtending = false;
-			onAddFive();
 		}, 420);
 	}
+
+	$effect(() => {
+		if (phase === 'contract-complete') {
+			void tick().then(() => primaryCompletionAction?.focus());
+		}
+	});
 
 	onDestroy(() => {
 		if (startTimeout) clearTimeout(startTimeout);
@@ -100,7 +111,7 @@
 
 <section class="grid gap-5" aria-label="Focus timer">
 	<div class="flex items-center justify-between gap-4 text-xs font-extrabold tracking-[0.12em] text-ink-muted uppercase">
-		<span>{statusText}</span>
+		<span aria-live="polite">{statusText}</span>
 		<span class="rounded-full bg-sprout/60 px-3 py-1 text-moss">{Math.round(Math.max(0, progress))}%</span>
 	</div>
 
@@ -125,9 +136,9 @@
 				{/each}
 			</div>
 		{/if}
-		<div class="relative z-10 h-48" aria-live="polite">
+		<div class="relative z-10 h-48">
 			{#if phase === 'contract-complete'}
-				<EndOfTimerPrompt {intention} {completedContracts} {extensionCount} />
+				<div aria-live="polite"><EndOfTimerPrompt {intention} {completedContracts} {extensionCount} /></div>
 			{:else}
 				<div class:paused-readout={phase === 'paused'} class="grid h-full place-items-center font-display text-[clamp(4.5rem,18vw,8rem)] leading-none font-semibold tracking-[-0.065em] text-moss-dark">
 					{#if phase === 'paused'}
@@ -136,7 +147,7 @@
 							Paused
 						</div>
 					{/if}
-					<span>{formatClock(remainingSeconds)}</span>
+					<span role="timer" aria-label={`${formatClock(remainingSeconds)} remaining`}>{formatClock(remainingSeconds)}</span>
 				</div>
 			{/if}
 		</div>
@@ -152,15 +163,16 @@
 					<span>{isStarting ? 'Here we go' : 'Start 5 minutes'}</span>
 				</button>
 			{:else if phase === 'contract-complete'}
-				<div class="flex gap-2.5" aria-label="Completed timer controls">
-					<button class:starting={isExtending} class="extend-button flex min-h-14 min-w-0 flex-1 items-center justify-center gap-2 rounded-2xl bg-moss px-4 font-extrabold text-on-accent shadow-[0_5px_0_var(--color-moss-pressed)] transition hover:-translate-y-0.5 hover:bg-moss-dark hover:shadow-[0_5px_0_var(--color-moss-hover-pressed)]" type="button" use:buttonSplash onclick={extendWithCommitment} disabled={isExtending}>
+				<div class="grid gap-3" aria-label="Completed timer controls">
+					<button bind:this={primaryCompletionAction} class:starting={isExtending} class="extend-button flex min-h-14 min-w-0 items-center justify-center gap-2 rounded-2xl bg-moss px-4 font-extrabold text-on-accent shadow-[0_5px_0_var(--color-moss-pressed)] transition hover:-translate-y-0.5 hover:bg-moss-dark hover:shadow-[0_5px_0_var(--color-moss-hover-pressed)]" type="button" use:buttonSplash onclick={extendWithCommitment} disabled={isExtending}>
 						<i class:starting={isExtending} class="extend-icon ph-bold ph-plus text-lg" aria-hidden="true"></i>
 						<span>{isExtending ? 'Another 5 minutes' : 'Add 5 minutes'}</span>
 					</button>
-					<button class="flex min-h-14 shrink-0 items-center justify-center gap-1.5 rounded-2xl border border-moss/15 bg-surface px-5 text-sm font-extrabold text-moss transition hover:bg-mist" type="button" onclick={onDone}>
-						<i class="ph-bold ph-check text-[1.0625rem]" aria-hidden="true"></i>
-						<span>Done</span>
-					</button>
+					<div class="grid grid-cols-3 gap-2">
+						<button class="flex min-h-12 items-center justify-center gap-1.5 rounded-xl border border-moss/15 bg-surface px-2 text-xs font-extrabold text-moss transition hover:bg-mist sm:text-sm" type="button" onclick={onDone} title="Save this session and finish here"><i class="ph-bold ph-check" aria-hidden="true"></i><span>Finish here</span></button>
+						<button class="flex min-h-12 items-center justify-center gap-1.5 rounded-xl border border-moss/15 bg-surface px-2 text-xs font-bold text-ink-muted transition hover:bg-mist hover:text-moss sm:text-sm" type="button" onclick={onBreak} title="Save this session and take a break"><i class="ph-bold ph-coffee" aria-hidden="true"></i><span>Take a break</span></button>
+						<button class="flex min-h-12 items-center justify-center gap-1.5 rounded-xl border border-moss/15 bg-surface px-2 text-xs font-bold text-ink-muted transition hover:bg-mist hover:text-moss sm:text-sm" type="button" onclick={onSwitch} title="Save this session and name another task"><i class="ph-bold ph-arrows-left-right" aria-hidden="true"></i><span>Switch task</span></button>
+					</div>
 				</div>
 			{:else if phase === 'paused'}
 				<div class="grid min-h-14 grid-cols-2 gap-3" aria-label="Paused timer controls">
@@ -168,9 +180,9 @@
 						<i class="ph-fill ph-play text-[1.0625rem]" aria-hidden="true"></i>
 						<span>Resume timer</span>
 					</button>
-					<button class="flex items-center justify-center gap-2 rounded-2xl border border-clay/30 bg-surface px-4 font-bold text-clay transition hover:bg-clay/10" type="button" onclick={onFinish}>
+					<button class="flex items-center justify-center gap-2 rounded-2xl border border-clay/30 bg-surface px-4 font-bold text-clay transition hover:bg-clay/10" type="button" onclick={onStop}>
 						<i class="ph-fill ph-stop-circle text-[1.0625rem]" aria-hidden="true"></i>
-						<span>Finish</span>
+						<span>End session</span>
 					</button>
 				</div>
 			{:else}
@@ -179,9 +191,9 @@
 						<i class="ph-fill ph-pause text-[1.0625rem]" aria-hidden="true"></i>
 						<span>Pause</span>
 					</button>
-					<button class="flex items-center justify-center gap-2 rounded-2xl border border-clay/30 bg-surface px-4 font-bold text-clay transition hover:bg-clay/10" type="button" onclick={onFinish}>
+					<button class="flex items-center justify-center gap-2 rounded-2xl border border-clay/30 bg-surface px-4 font-bold text-clay transition hover:bg-clay/10" type="button" onclick={onStop}>
 						<i class="ph-fill ph-stop-circle text-[1.0625rem]" aria-hidden="true"></i>
-						<span>Finish</span>
+						<span>End session</span>
 					</button>
 				</div>
 			{/if}

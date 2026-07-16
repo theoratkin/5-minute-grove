@@ -7,7 +7,7 @@ Use SvelteKit when the user asks to start implementation.
 Suggested initial shape:
 
 - SvelteKit app with TypeScript.
-- Local-first state using browser storage for early MVP persistence.
+- Local-first state using browser storage for history, preferences, and active-session recovery.
 - Minimal dependencies until concrete needs appear.
 - Responsive web UI for desktop and mobile.
 
@@ -88,6 +88,7 @@ When implementation begins, a pragmatic MVP would be:
   - Switch task
 - Current session summary with total elapsed time and extension count.
 - Local persistence for recent sessions, grouped by start date and resumable in place.
+- Absolute end timestamps for timer accuracy across throttled background tabs and refresh recovery.
 
 ## UX Constraints
 
@@ -96,6 +97,8 @@ When implementation begins, a pragmatic MVP would be:
 - Avoid visual or copy patterns that imply failure when the user stops.
 - Keep controls stable in size so timer transitions do not shift the layout.
 - Use restrained, task-focused UI rather than a marketing page.
+- Do not put the changing once-per-second timer value in a live region; announce meaningful phase changes instead.
+- Respect reduced-motion preferences for decorative and interaction animation.
 
 ## Future Technical Questions
 

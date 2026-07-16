@@ -3,16 +3,20 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import GlobalHeader from '$lib/app/GlobalHeader.svelte';
 	import { applyTheme, loadTheme, type ThemeId } from '$lib/app/theme';
+	import { AppPreferences, providePreferences } from '$lib/app/preferences.svelte';
 	import '$lib/styles/tokens.css';
 	import '@phosphor-icons/web/bold';
 	import '@phosphor-icons/web/fill';
 
 	let { children } = $props();
 	let theme = $state<ThemeId>('soft-daylight');
+	const preferences = new AppPreferences();
+	providePreferences(preferences);
 
 	onMount(() => {
 		theme = loadTheme();
 		applyTheme(theme);
+		preferences.load();
 	});
 
 	function changeTheme(nextTheme: ThemeId) {
@@ -27,7 +31,7 @@
 
 <div id="button-splash-background" class="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden="true"></div>
 
-<GlobalHeader {theme} onThemeChange={changeTheme} />
+<GlobalHeader {theme} {preferences} onThemeChange={changeTheme} />
 {@render children()}
 
 <footer class="relative z-10 mx-auto w-full max-w-6xl px-4 pb-6 text-center text-xs sm:px-6 lg:px-8">
@@ -35,6 +39,6 @@
 		by Theo Ratkin (<a
 			class="font-semibold text-ink transition hover:text-moss focus-visible:text-moss"
 			href="https://theoratkin.com"
-		>https://theoratkin.com</a>)
+		>theoratkin.com</a>)
 	</p>
 </footer>

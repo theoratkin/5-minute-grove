@@ -29,9 +29,8 @@ export const buttonSplash: Action<HTMLElement, ButtonSplashOptions | undefined> 
 	}
 
 	function runSplash(event: MouseEvent) {
-		runPulse();
-
 		if (reducedMotion.matches) return;
+		runPulse();
 
 		const rect = node.getBoundingClientRect();
 		const originX = event.clientX > 0 ? event.clientX : rect.left + rect.width / 2;
