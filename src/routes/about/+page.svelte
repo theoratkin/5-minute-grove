@@ -18,7 +18,7 @@
 				Just 5 More Minutes is a focus timer for the moment when starting feels harder than doing. You make one honest, five-minute commitment—small enough to believe.
 			</p>
 			<p>
-				When the timer ends, the app asks whether you want another five minutes. You can continue, finish, take a break, or switch tasks.
+				When the timer ends, the app asks whether you want another five minutes. You can continue, finish, or switch tasks.
 			</p>
 			<p class="rounded-2xl border border-moss/10 bg-mist/60 p-5 font-semibold text-ink">
 				The choice stays small: another five minutes, or move on.

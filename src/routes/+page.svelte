@@ -246,10 +246,6 @@
 		finishSession();
 	}
 
-	function takeBreak() {
-		finishSession();
-	}
-
 	function switchTask() {
 		finishSession('Session saved.', true);
 	}
@@ -352,7 +348,6 @@
 				onResume={resumeSession}
 				onStop={stopSessionEarly}
 				onDone={() => finishSession()}
-				onBreak={takeBreak}
 				onSwitch={switchTask}
 			/>
 

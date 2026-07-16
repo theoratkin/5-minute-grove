@@ -84,7 +84,6 @@ When implementation begins, a pragmatic MVP would be:
 - End-of-timer decision screen with:
   - Add 5 minutes
   - Done
-  - Break
   - Switch task
 - Current session summary with total elapsed time and extension count.
 - Local persistence for recent sessions, grouped by start date and resumable in place.

@@ -19,7 +19,6 @@
 		onResume,
 		onStop,
 		onDone,
-		onBreak,
 		onSwitch
 	}: {
 		remainingSeconds: number;
@@ -34,7 +33,6 @@
 		onResume: () => void;
 		onStop: () => void;
 		onDone: () => void;
-		onBreak: () => void;
 		onSwitch: () => void;
 	} = $props();
 
@@ -164,9 +162,8 @@
 						<i class:starting={isExtending} class="extend-icon ph-bold ph-plus text-lg" aria-hidden="true"></i>
 						<span>{isExtending ? 'Another 5 minutes' : 'Add 5 minutes'}</span>
 					</button>
-					<div class="grid grid-cols-3 gap-2">
+					<div class="grid grid-cols-2 gap-2">
 						<button class="flex min-h-12 items-center justify-center gap-1.5 rounded-xl border border-moss/15 bg-surface px-2 text-xs font-extrabold text-moss transition hover:bg-mist sm:text-sm" type="button" onclick={onDone} title="Save this session and finish here"><i class="ph-bold ph-check" aria-hidden="true"></i><span>Finish here</span></button>
-						<button class="flex min-h-12 items-center justify-center gap-1.5 rounded-xl border border-moss/15 bg-surface px-2 text-xs font-bold text-ink-muted transition hover:bg-mist hover:text-moss sm:text-sm" type="button" onclick={onBreak} title="Save this session and take a break"><i class="ph-bold ph-coffee" aria-hidden="true"></i><span>Take a break</span></button>
 						<button class="flex min-h-12 items-center justify-center gap-1.5 rounded-xl border border-moss/15 bg-surface px-2 text-xs font-bold text-ink-muted transition hover:bg-mist hover:text-moss sm:text-sm" type="button" onclick={onSwitch} title="Save this session and name another task"><i class="ph-bold ph-arrows-left-right" aria-hidden="true"></i><span>Switch task</span></button>
 					</div>
 				</div>

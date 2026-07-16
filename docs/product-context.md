@@ -33,7 +33,7 @@ The first usable version should likely include:
 - A default 5-minute timer.
 - A clear end-of-contract state.
 - A prominent "Add 5 minutes" action.
-- Equally valid options to stop, break, or switch.
+- Equally valid options to finish or switch tasks.
 - A local session history grouped by the day each session began, with options to resume or delete a session.
 - Honest accounting when a session ends early: partial time is saved without awarding a completed contract.
 - Recovery of an in-progress session after a refresh or accidental tab close.
