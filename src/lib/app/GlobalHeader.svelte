@@ -54,7 +54,17 @@
 							onclick={() => selectTheme(option.id)}
 							aria-pressed={theme === option.id}
 						>
-							<span>{option.label}</span>
+							<span class="flex items-center gap-2.5">
+								<span class="flex -space-x-1" aria-hidden="true">
+									{#each option.swatches as color}
+										<span
+											class="size-4 rounded-full border border-ink/20 shadow-sm ring-1 ring-paper"
+											style:background-color={color}
+										></span>
+									{/each}
+								</span>
+								<span>{option.label}</span>
+							</span>
 							{#if theme === option.id}
 								<i class="ph-bold ph-check text-base" aria-hidden="true"></i>
 							{/if}
