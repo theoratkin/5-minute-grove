@@ -18,3 +18,4 @@
 
 - Replaced the timer card's large introductory banner with a lean global header that keeps the product title, About navigation, and theme settings available across routes.
 - Moved the persisted theme selector into a focused settings modal and added a concise About page centered on the permission-to-stop product contract.
+- Added Warm linen and Cocoa night themes, pairing warm paper and charcoal surfaces with honey-gold controls and restrained terracotta accents while retaining the app's existing semantic color roles and accessible primary-action contrast.

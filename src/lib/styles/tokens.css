@@ -22,6 +22,48 @@
 	--splash-fade: rgb(49 94 76 / 5%);
 }
 
+:root[data-theme='cozy-light'] {
+	color-scheme: light;
+	--color-ink: #352925;
+	--color-ink-muted: #796a63;
+	--color-paper: #f5f0e4;
+	--color-mist: #e9dece;
+	--color-surface: #fffaf1;
+	--color-on-accent: #fffaf3;
+	--color-moss: #75552d;
+	--color-moss-dark: #5e421f;
+	--color-moss-pressed: #543919;
+	--color-moss-hover-pressed: #452d12;
+	--color-sprout: #ead9a9;
+	--color-sun: #d99c43;
+	--color-clay: #a65f52;
+	--splash-color: rgb(117 85 45 / 70%);
+	--splash-fill: rgb(217 156 67 / 13%);
+	--splash-glow: rgb(217 156 67 / 24%);
+	--splash-fade: rgb(217 156 67 / 6%);
+}
+
+:root[data-theme='cozy-dark'] {
+	color-scheme: dark;
+	--color-ink: #eee9dc;
+	--color-ink-muted: #b8aba1;
+	--color-paper: #24201f;
+	--color-mist: #181615;
+	--color-surface: #322b29;
+	--color-on-accent: #2a2115;
+	--color-moss: #d6ae68;
+	--color-moss-dark: #edc77e;
+	--color-moss-pressed: #8c6935;
+	--color-moss-hover-pressed: #a17a3d;
+	--color-sprout: #4e412b;
+	--color-sun: #e0a753;
+	--color-clay: #dc9589;
+	--splash-color: rgb(237 199 126 / 68%);
+	--splash-fill: rgb(214 174 104 / 12%);
+	--splash-glow: rgb(237 199 126 / 22%);
+	--splash-fade: rgb(214 174 104 / 6%);
+}
+
 :root[data-theme='gruvbox-dark'] {
 	color-scheme: dark;
 	--color-ink: #ebdbb2;
@@ -95,7 +137,8 @@
 	}
 
 	:root[data-theme='gruvbox-dark'] body,
-	:root[data-theme='quiet-night'] body {
+	:root[data-theme='quiet-night'] body,
+	:root[data-theme='cozy-dark'] body {
 		--grid-minor: color-mix(in srgb, var(--color-ink) 9%, transparent);
 		--grid-major: color-mix(in srgb, var(--color-ink) 17%, transparent);
 	}
