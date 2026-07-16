@@ -137,9 +137,6 @@
 						</div>
 					{/if}
 					<span>{formatClock(remainingSeconds)}</span>
-					{#if phase === 'paused'}
-						<p class="paused-message font-sans text-center text-sm leading-relaxed text-ink-muted">Take your time. Resume when ready.</p>
-					{/if}
 				</div>
 			{/if}
 		</div>
@@ -277,16 +274,6 @@
 		padding: 0.35rem 0.65rem;
 		color: var(--color-clay);
 		background: color-mix(in srgb, var(--color-surface) 78%, var(--color-clay));
-		transform: translateX(-50%);
-	}
-
-	.paused-message {
-		position: absolute;
-		bottom: 0;
-		left: 50%;
-		max-width: 17rem;
-		font-weight: 400;
-		letter-spacing: normal;
 		transform: translateX(-50%);
 	}
 

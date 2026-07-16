@@ -1,9 +1,11 @@
 export function formatClock(totalSeconds: number): string {
 	const safeSeconds = Math.max(0, Math.floor(totalSeconds));
-	const minutes = Math.floor(safeSeconds / 60);
+	const hours = Math.floor(safeSeconds / 3600);
+	const minutes = Math.floor((safeSeconds % 3600) / 60);
 	const seconds = safeSeconds % 60;
+	const clock = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
-	return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+	return hours > 0 ? `${hours.toString().padStart(2, '0')}:${clock}` : clock;
 }
 
 export function formatTime(value: string): string {
