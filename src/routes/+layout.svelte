@@ -29,3 +29,12 @@
 
 <GlobalHeader {theme} onThemeChange={changeTheme} />
 {@render children()}
+
+<footer class="relative z-10 mx-auto w-full max-w-6xl px-4 pb-6 text-center text-xs sm:px-6 lg:px-8">
+	<p class="inline-block rounded-full border border-surface/90 bg-paper/95 px-4 py-2 text-ink-muted shadow-sm backdrop-blur">
+		by Theo Ratkin (<a
+			class="font-semibold text-ink transition hover:text-moss focus-visible:text-moss"
+			href="https://theoratkin.com"
+		>https://theoratkin.com</a>)
+	</p>
+</footer>
