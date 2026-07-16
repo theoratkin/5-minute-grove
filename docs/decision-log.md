@@ -24,6 +24,7 @@
 - Expanded the completed-contract decision into Add 5 minutes, Finish here, Take a break, and Switch task while preserving Add 5 as the primary invitation.
 - Added persisted sound and notification preferences; notification permission is requested only when the user explicitly enables alerts.
 - Added keyboard shortcuts, completion-state focus management, consistent focus rings and touch targets, reduced-motion handling, a pre-hydration theme restore, mobile history disclosure, and undoable session deletion.
+- Added a development-only `F` shortcut that fast-forwards a running or paused timer through the normal contract-completion path for testing the finish UI.
 - Added Node-based unit coverage for timer restoration/background expiry, partial-time accounting, history migration, and delete undo behavior.
 - Reframed timer completion copy as a calm invitation to add another five minutes and replaced reassuring stop/break messages with neutral session-saved feedback, while retaining the confetti animation.
 - Removed the redundant Take a break completion action; Finish here already provides the same permission-to-stop outcome.

@@ -95,6 +95,14 @@
 		}
 	}
 
+	function fastForwardCurrentContract() {
+		if (!import.meta.env.DEV || (phase !== 'running' && phase !== 'paused')) return;
+
+		// Use the normal completion path so the development shortcut exercises the real finish UI.
+		if (phase === 'paused') phase = 'running';
+		completeCurrentContract();
+	}
+
 	onMount(() => {
 		history = loadSessionHistory();
 		startOrExtendSound = new Audio('/sounds/start-or-extend.mp3');
@@ -146,6 +154,9 @@
 			} else if ((event.key === '+' || event.key === '=') && phase === 'contract-complete') {
 				event.preventDefault();
 				addFiveMinutes();
+			} else if (import.meta.env.DEV && event.key.toLowerCase() === 'f' && (phase === 'running' || phase === 'paused')) {
+				event.preventDefault();
+				fastForwardCurrentContract();
 			}
 		}
 		window.addEventListener('keydown', handleKeyboard);
@@ -352,7 +363,7 @@
 			/>
 
 			<p class="hidden text-center text-xs text-ink-muted sm:block" aria-label="Keyboard shortcuts">
-				{#if phase === 'idle'}Press <kbd>Enter</kbd> to start{:else if phase === 'contract-complete'}Press <kbd>+</kbd> to add five minutes{:else}Press <kbd>Space</kbd> to {phase === 'paused' ? 'resume' : 'pause'}{/if}
+				{#if phase === 'idle'}Press <kbd>Enter</kbd> to start{:else if phase === 'contract-complete'}Press <kbd>+</kbd> to add five minutes{:else}Press <kbd>Space</kbd> to {phase === 'paused' ? 'resume' : 'pause'}{#if import.meta.env.DEV} · <kbd>F</kbd> to fast-forward{/if}{/if}
 			</p>
 
 			<div class="grid grid-cols-2 gap-3" aria-label="Current session progress">
