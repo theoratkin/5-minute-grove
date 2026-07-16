@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { themes, type ThemeId } from '$lib/app/theme';
 
 	let {
@@ -10,6 +11,18 @@
 	} = $props();
 
 	let themeMenu: HTMLDetailsElement;
+
+	onMount(() => {
+		function closeThemeMenu(event: PointerEvent) {
+			if (themeMenu.open && !themeMenu.contains(event.target as Node)) {
+				themeMenu.open = false;
+			}
+		}
+
+		document.addEventListener('pointerdown', closeThemeMenu);
+
+		return () => document.removeEventListener('pointerdown', closeThemeMenu);
+	});
 
 	function selectTheme(nextTheme: ThemeId) {
 		onThemeChange(nextTheme);
@@ -27,7 +40,7 @@
 			<a class="rounded-xl px-3 py-2 text-sm font-bold text-ink-muted transition hover:bg-mist hover:text-moss" href="/about">About</a>
 			<details bind:this={themeMenu} class="group relative">
 				<summary
-					class="grid size-10 list-none place-items-center rounded-xl text-ink-muted transition marker:hidden hover:bg-mist hover:text-moss group-open:bg-mist group-open:text-moss"
+					class="grid size-10 cursor-pointer list-none place-items-center rounded-xl text-ink-muted transition marker:hidden hover:bg-mist hover:text-moss group-open:bg-mist group-open:text-moss"
 					aria-label="Choose theme"
 				>
 					<i class="ph-bold ph-palette text-xl" aria-hidden="true"></i>
