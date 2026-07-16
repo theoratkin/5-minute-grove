@@ -1,0 +1,370 @@
+import { getContext, setContext } from 'svelte';
+import type { AppPreferences } from '$lib/app/preferences.svelte';
+import { notifyContractComplete, prepareTimerNotifications } from '$lib/app/notifications';
+import { formatClock } from '$lib/app/time';
+import {
+	clearActiveSession,
+	loadActiveSession,
+	saveActiveSession
+} from './focusSession.storage';
+import { elapsedInCurrentContract, restoreFocusSession } from './focusSession.state';
+import type { FocusPhase, FocusSessionRecord } from './focusSession.types';
+import { FIVE_MINUTES_SECONDS, createSessionId, getSessionTitle } from './focusSession.utils';
+import {
+	loadSessionHistory,
+	removeSessionById,
+	restoreSessionRecord,
+	saveSessionHistory
+} from '$lib/features/session-history/sessionHistory.storage';
+
+const FOCUS_WORKSPACE_CONTEXT = Symbol('focus-workspace');
+
+export class FocusWorkspace {
+	intention = $state('');
+	phase = $state<FocusPhase>('idle');
+	remainingSeconds = $state(FIVE_MINUTES_SECONDS);
+	completedContracts = $state(0);
+	extensionCount = $state(0);
+	elapsedSessionSeconds = $state(0);
+	sessionStartedAt = $state<string | null>(null);
+	activeSessionId = $state<string | null>(null);
+	segmentEndsAt = $state<number | null>(null);
+	history = $state<FocusSessionRecord[]>([]);
+	hydrated = $state(false);
+	toastMessage = $state('');
+	deletedRecord = $state<FocusSessionRecord | null>(null);
+
+	private startOrExtendSound: HTMLAudioElement | null = null;
+	private timerFinishSound: HTMLAudioElement | null = null;
+	private timerInterval: ReturnType<typeof setInterval> | undefined;
+	private deleteTimeout: ReturnType<typeof setTimeout> | undefined;
+
+	constructor(private preferences: AppPreferences) {}
+
+	get activeTitle() {
+		return getSessionTitle(this.intention);
+	}
+
+	get segmentProgress() {
+		if (this.phase === 'contract-complete') return 100;
+		return ((FIVE_MINUTES_SECONDS - this.remainingSeconds) / FIVE_MINUTES_SECONDS) * 100;
+	}
+
+	get sessionTimeSeconds() {
+		return this.phase === 'idle'
+			? 0
+			: this.elapsedSessionSeconds +
+					(this.phase === 'contract-complete'
+						? 0
+						: elapsedInCurrentContract(this.remainingSeconds));
+	}
+
+	get pageTitle() {
+		if (this.phase === 'running') {
+			return `${formatClock(this.remainingSeconds)} - Just 5 More Minutes`;
+		}
+		if (this.phase === 'paused') return 'Paused - Just 5 More Minutes';
+		return 'Just 5 More Minutes';
+	}
+
+	get currentSession(): FocusSessionRecord | null {
+		if (this.phase === 'idle' || !this.sessionStartedAt || !this.activeSessionId) return null;
+
+		return {
+			id: this.activeSessionId,
+			title: this.activeTitle,
+			startedAt: this.sessionStartedAt,
+			endedAt: new Date().toISOString(),
+			completedContracts: this.completedContracts,
+			extensionCount: this.extensionCount,
+			totalSeconds: this.sessionTimeSeconds
+		};
+	}
+
+	setup() {
+		this.history = loadSessionHistory();
+		this.startOrExtendSound = new Audio('/sounds/start-or-extend.mp3');
+		this.timerFinishSound = new Audio('/sounds/timer-finish.mp3');
+		this.startOrExtendSound.preload = 'auto';
+		this.timerFinishSound.preload = 'auto';
+
+		const savedSession = loadActiveSession();
+		if (savedSession) {
+			const restored = restoreFocusSession(savedSession);
+			this.intention = restored.intention;
+			this.phase = restored.phase;
+			this.remainingSeconds = restored.remainingSeconds;
+			this.completedContracts = restored.completedContracts;
+			this.extensionCount = restored.extensionCount;
+			this.elapsedSessionSeconds = restored.elapsedSessionSeconds;
+			this.sessionStartedAt = restored.sessionStartedAt;
+			this.activeSessionId = restored.activeSessionId;
+			this.segmentEndsAt = restored.segmentEndsAt;
+			this.toastMessage = restored.completedWhileAway
+				? 'Your five-minute contract finished while you were away.'
+				: 'Your session was restored.';
+			if (restored.completedWhileAway && this.preferences.notificationsEnabled) {
+				notifyContractComplete({
+					intention: this.activeTitle,
+					completedContracts: restored.completedContracts
+				});
+			}
+		}
+
+		this.hydrated = true;
+		this.timerInterval = window.setInterval(() => this.syncTimer(), 250);
+		document.addEventListener('visibilitychange', this.syncTimer);
+	}
+
+	dispose() {
+		if (this.timerInterval) window.clearInterval(this.timerInterval);
+		if (this.deleteTimeout) window.clearTimeout(this.deleteTimeout);
+		document.removeEventListener('visibilitychange', this.syncTimer);
+	}
+
+	persistActiveSession() {
+		if (!this.hydrated) return;
+		if (this.phase === 'idle' || !this.sessionStartedAt || !this.activeSessionId) {
+			clearActiveSession();
+			return;
+		}
+
+		saveActiveSession({
+			version: 1,
+			intention: this.intention,
+			phase: this.phase,
+			remainingSeconds: this.remainingSeconds,
+			completedContracts: this.completedContracts,
+			extensionCount: this.extensionCount,
+			elapsedSessionSeconds: this.elapsedSessionSeconds,
+			sessionStartedAt: this.sessionStartedAt,
+			activeSessionId: this.activeSessionId,
+			segmentEndsAt: this.segmentEndsAt
+		});
+	}
+
+	handleKeyboard(event: KeyboardEvent) {
+		const target = event.target as HTMLElement;
+		if (
+			event.repeat ||
+			target.matches('input, textarea, select, button, a, summary, [contenteditable="true"]')
+		) {
+			return;
+		}
+
+		if (event.code === 'Space' && (this.phase === 'running' || this.phase === 'paused')) {
+			event.preventDefault();
+			this.phase === 'running' ? this.pauseSession() : this.resumeSession();
+		} else if (event.key === 'Enter' && this.phase === 'idle') {
+			event.preventDefault();
+			this.startSession();
+		} else if (
+			(event.key === '+' || event.key === '=') &&
+			this.phase === 'contract-complete'
+		) {
+			event.preventDefault();
+			this.addFiveMinutes();
+		} else if (
+			import.meta.env.DEV &&
+			event.key.toLowerCase() === 'f' &&
+			(this.phase === 'running' || this.phase === 'paused')
+		) {
+			event.preventDefault();
+			this.fastForwardCurrentContract();
+		}
+	}
+
+	startSession() {
+		if (this.preferences.notificationsEnabled) void prepareTimerNotifications();
+		this.playSound(this.startOrExtendSound);
+
+		this.sessionStartedAt = new Date().toISOString();
+		this.activeSessionId = createSessionId();
+		this.completedContracts = 0;
+		this.extensionCount = 0;
+		this.elapsedSessionSeconds = 0;
+		this.remainingSeconds = FIVE_MINUTES_SECONDS;
+		this.segmentEndsAt = Date.now() + FIVE_MINUTES_SECONDS * 1000;
+		this.phase = 'running';
+	}
+
+	addFiveMinutes() {
+		if (this.preferences.notificationsEnabled) void prepareTimerNotifications();
+		this.playSound(this.startOrExtendSound);
+
+		this.extensionCount += 1;
+		this.remainingSeconds = FIVE_MINUTES_SECONDS;
+		this.segmentEndsAt = Date.now() + FIVE_MINUTES_SECONDS * 1000;
+		this.phase = 'running';
+	}
+
+	pauseSession() {
+		if (this.phase !== 'running' || this.segmentEndsAt === null) return;
+		this.remainingSeconds = Math.max(
+			1,
+			Math.ceil((this.segmentEndsAt - Date.now()) / 1000)
+		);
+		this.segmentEndsAt = null;
+		this.phase = 'paused';
+	}
+
+	resumeSession() {
+		if (this.phase !== 'paused') return;
+		this.segmentEndsAt = Date.now() + this.remainingSeconds * 1000;
+		this.phase = 'running';
+	}
+
+	finishSession(message = 'Session saved.', clearIntention = false) {
+		if (!this.sessionStartedAt || !this.activeSessionId || this.sessionTimeSeconds <= 0) return;
+
+		const record: FocusSessionRecord = {
+			id: this.activeSessionId,
+			title: this.activeTitle,
+			startedAt: this.sessionStartedAt,
+			endedAt: new Date().toISOString(),
+			completedContracts: this.completedContracts,
+			extensionCount: this.extensionCount,
+			totalSeconds: this.sessionTimeSeconds
+		};
+
+		this.history = [...this.history.filter((session) => session.id !== record.id), record]
+			.sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime())
+			.slice(0, 12);
+		saveSessionHistory(this.history);
+		this.resetSession(clearIntention);
+		this.toastMessage = message;
+		if (clearIntention) {
+			requestAnimationFrame(() =>
+				document.querySelector<HTMLInputElement>('[data-session-name]')?.focus()
+			);
+		}
+	}
+
+	stopSessionEarly() {
+		this.finishSession();
+	}
+
+	switchTask() {
+		this.finishSession('Session saved.', true);
+	}
+
+	resumeSavedSession(record: FocusSessionRecord) {
+		if (this.phase !== 'idle') {
+			this.toastMessage = 'Finish your current session before continuing another one.';
+			return false;
+		}
+
+		this.intention = record.title === 'Session' || record.title === 'Sprint' ? '' : record.title;
+		this.activeSessionId = record.id;
+		this.sessionStartedAt = new Date().toISOString();
+		this.completedContracts =
+			record.completedContracts || Math.round(record.totalSeconds / FIVE_MINUTES_SECONDS);
+		this.extensionCount = record.extensionCount;
+		this.elapsedSessionSeconds = record.totalSeconds;
+		this.remainingSeconds = FIVE_MINUTES_SECONDS;
+		this.segmentEndsAt = Date.now() + FIVE_MINUTES_SECONDS * 1000;
+		this.phase = 'running';
+		if (this.preferences.notificationsEnabled) void prepareTimerNotifications();
+		this.playSound(this.startOrExtendSound);
+		return true;
+	}
+
+	deleteSession(id: string) {
+		if (id === this.activeSessionId) return;
+		const result = removeSessionById(this.history, id);
+		if (!result.removed) return;
+
+		this.history = result.records;
+		this.deletedRecord = result.removed;
+		saveSessionHistory(this.history);
+		this.toastMessage = `Removed “${result.removed.title}”.`;
+		if (this.deleteTimeout) window.clearTimeout(this.deleteTimeout);
+		this.deleteTimeout = window.setTimeout(() => (this.deletedRecord = null), 6000);
+	}
+
+	undoDelete() {
+		if (!this.deletedRecord) return;
+		this.history = restoreSessionRecord(this.history, this.deletedRecord);
+		saveSessionHistory(this.history);
+		this.toastMessage = `Restored “${this.deletedRecord.title}”.`;
+		this.deletedRecord = null;
+		if (this.deleteTimeout) window.clearTimeout(this.deleteTimeout);
+	}
+
+	updateSessionTitle(id: string, title: string) {
+		if (id === this.activeSessionId) {
+			this.intention = title === 'Session' ? '' : title;
+			return;
+		}
+
+		this.history = this.history.map((session) =>
+			session.id === id ? { ...session, title } : session
+		);
+		saveSessionHistory(this.history);
+	}
+
+	dismissToast() {
+		this.toastMessage = '';
+	}
+
+	private syncTimer = () => {
+		if (this.phase !== 'running' || this.segmentEndsAt === null) return;
+		this.remainingSeconds = Math.max(
+			0,
+			Math.ceil((this.segmentEndsAt - Date.now()) / 1000)
+		);
+		if (this.remainingSeconds === 0) this.completeCurrentContract();
+	};
+
+	private completeCurrentContract() {
+		if (this.phase !== 'running') return;
+
+		const nextCompletedContracts = this.completedContracts + 1;
+		this.elapsedSessionSeconds += FIVE_MINUTES_SECONDS;
+		this.remainingSeconds = 0;
+		this.completedContracts = nextCompletedContracts;
+		this.phase = 'contract-complete';
+		this.segmentEndsAt = null;
+		this.playSound(this.timerFinishSound);
+		if (this.preferences.notificationsEnabled) {
+			notifyContractComplete({
+				intention: this.activeTitle,
+				completedContracts: nextCompletedContracts
+			});
+		}
+	}
+
+	private fastForwardCurrentContract() {
+		if (!import.meta.env.DEV || (this.phase !== 'running' && this.phase !== 'paused')) return;
+		if (this.phase === 'paused') this.phase = 'running';
+		this.completeCurrentContract();
+	}
+
+	private resetSession(clearIntention = false) {
+		this.phase = 'idle';
+		this.remainingSeconds = FIVE_MINUTES_SECONDS;
+		this.completedContracts = 0;
+		this.extensionCount = 0;
+		this.elapsedSessionSeconds = 0;
+		this.sessionStartedAt = null;
+		this.activeSessionId = null;
+		this.segmentEndsAt = null;
+		if (clearIntention) this.intention = '';
+	}
+
+	private playSound(sound: HTMLAudioElement | null) {
+		if (!sound || !this.preferences.soundEnabled) return;
+		sound.currentTime = 0;
+		void sound.play().catch(() => {
+			// Some browsers may block non-gesture audio if autoplay permission is unavailable.
+		});
+	}
+}
+
+export function provideFocusWorkspace(workspace: FocusWorkspace) {
+	setContext(FOCUS_WORKSPACE_CONTEXT, workspace);
+}
+
+export function useFocusWorkspace(): FocusWorkspace {
+	return getContext<FocusWorkspace>(FOCUS_WORKSPACE_CONTEXT);
+}

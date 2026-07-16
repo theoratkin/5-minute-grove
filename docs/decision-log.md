@@ -18,6 +18,7 @@
 
 - Replaced the timer card's large introductory banner with a lean global header that keeps the product title, About navigation, and theme settings available across routes.
 - Moved the persisted theme selector into a focused settings modal and added a concise About page centered on the permission-to-stop product contract.
+- Promoted focus and history state into a layout-scoped workspace, keeping one actionable recent-sessions sidebar across the timer and About routes while an active timer continues through navigation.
 - Added Warm linen and Cocoa night themes, pairing warm paper and charcoal surfaces with honey-gold controls and restrained terracotta accents while retaining the app's existing semantic color roles and accessible primary-action contrast.
 - Added durable active-session recovery using an absolute segment end time, including honest completion when a contract expires while the page is suspended or closed.
 - Split natural contract completion from ending a session early. Partial work is now saved without incrementing the completed-contract count.
