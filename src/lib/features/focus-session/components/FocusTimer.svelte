@@ -5,10 +5,12 @@
 	import EndOfTimerPrompt from './EndOfTimerPrompt.svelte';
 	import type { FocusPhase } from '$lib/features/focus-session/focusSession.types';
 	import TaskIntentionInput from '$lib/features/task-intention/components/TaskIntentionInput.svelte';
+	import CozyVignette from './CozyVignette.svelte';
 
 	let {
 		remainingSeconds,
 		progress,
+		extensionCount,
 		phase,
 		intention,
 		intentionValue,
@@ -23,6 +25,7 @@
 	}: {
 		remainingSeconds: number;
 		progress: number;
+		extensionCount: number;
 		phase: FocusPhase;
 		intention: string;
 		intentionValue: string;
@@ -43,10 +46,17 @@
 	let primaryCompletionAction = $state<HTMLButtonElement | undefined>();
 
 	let statusText = $derived.by(() => {
-		if (phase === 'running') return 'Contract in progress';
-		if (phase === 'paused') return 'Contract paused';
-		if (phase === 'contract-complete') return 'Contract complete';
+		if (phase === 'running') return 'Five quiet minutes';
+		if (phase === 'paused') return 'Taking a breath';
+		if (phase === 'contract-complete') return 'That’s five minutes';
 		return 'Ready when you are';
+	});
+
+	let companionText = $derived.by(() => {
+		if (phase === 'contract-complete') return 'The choice is yours';
+		if (phase === 'paused') return 'Here when you’re ready';
+		if (phase === 'running') return 'Settling in';
+		return 'A small beginning';
 	});
 
 	const confetti = [
@@ -104,12 +114,12 @@
 </script>
 
 <section class="grid gap-5" aria-label="Focus timer">
-	<div class="flex items-center justify-between gap-4 text-xs font-extrabold tracking-[0.12em] text-ink-muted uppercase">
+	<div class="flex items-center justify-between gap-4 text-sm font-semibold text-ink-muted">
 		<span aria-live="polite">{statusText}</span>
-		<span class="rounded-full bg-sprout/60 px-3 py-1 text-moss">{Math.round(Math.max(0, progress))}%</span>
+		<span class="flex items-center gap-1.5 text-xs"><i class="ph-fill ph-leaf text-moss" aria-hidden="true"></i> {companionText}</span>
 	</div>
 
-	<div class:timer-complete={phase === 'contract-complete'} class:timer-paused={phase === 'paused'} class:timer-starting={isStarting || isExtending} class="relative overflow-hidden rounded-[1.5rem] border border-moss/10 bg-surface px-4 py-7 shadow-inner">
+	<div class:timer-complete={phase === 'contract-complete'} class:timer-paused={phase === 'paused'} class:timer-starting={isStarting || isExtending} class="relative overflow-hidden rounded-[1.35rem_2.25rem_1.5rem_2rem] border border-moss/10 bg-surface px-4 py-5 shadow-inner">
 		{#if isStarting || isExtending}
 			<div class="start-commit-glow" aria-hidden="true"></div>
 		{/if}
@@ -130,13 +140,16 @@
 				{/each}
 			</div>
 		{/if}
+		{#if phase !== 'contract-complete'}
+			<div class="relative z-10 mb-3"><CozyVignette {progress} {extensionCount} paused={phase === 'paused'} /></div>
+		{/if}
 		<div class="relative z-10 h-48">
 			{#if phase === 'contract-complete'}
 				<div aria-live="polite"><EndOfTimerPrompt /></div>
 			{:else}
 				<div class:paused-readout={phase === 'paused'} class="grid h-full place-items-center font-display text-[clamp(4.5rem,18vw,8rem)] leading-none font-semibold tracking-[-0.065em] text-moss-dark">
 					{#if phase === 'paused'}
-						<div class="paused-badge font-sans text-xs font-black tracking-[0.14em] uppercase">
+						<div class="paused-badge font-sans text-xs font-bold">
 							<i class="ph-fill ph-pause text-sm" aria-hidden="true"></i>
 							Paused
 						</div>

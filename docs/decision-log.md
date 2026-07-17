@@ -29,3 +29,4 @@
 - Added Node-based unit coverage for timer restoration/background expiry, partial-time accounting, history migration, and delete undo behavior.
 - Reframed timer completion copy as a calm invitation to add another five minutes and replaced reassuring stop/break messages with neutral session-saved feedback, while retaining the confetti animation.
 - Removed the redundant Take a break completion action; Finish here already provides the same permission-to-stop outcome.
+- Shifted the interface away from productivity-dashboard styling toward a quiet windowsill-and-session-notes metaphor: ambient paper light replaces the graph grid, a CSS vignette grows with voluntary extensions, status copy is more conversational, and surfaces are less rigid. Session time and extension counts remain prominent.

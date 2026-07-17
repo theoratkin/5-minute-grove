@@ -22,11 +22,12 @@
 </svelte:head>
 
 <h1 class="sr-only">Just 5 More Minutes focus timer</h1>
-<section class="overflow-hidden rounded-[2rem] border border-surface/80 bg-paper/90 shadow-[0_24px_70px_rgb(0_0_0/12%)] backdrop-blur" aria-label="Just 5 More Minutes workspace">
+<section class="workspace-card overflow-hidden border border-surface/80 bg-paper/90 shadow-[0_24px_70px_rgb(0_0_0/12%)] backdrop-blur" aria-label="Just 5 More Minutes workspace">
 	<div class="grid gap-7 px-6 py-7 sm:px-10 sm:py-9">
 		<FocusTimer
 			remainingSeconds={workspace.remainingSeconds}
 			progress={workspace.segmentProgress}
+			extensionCount={workspace.extensionCount}
 			phase={workspace.phase}
 			intention={workspace.activeTitle}
 			intentionValue={workspace.intention}
@@ -45,14 +46,21 @@
 		</p>
 
 		<div class="grid grid-cols-2 gap-3" aria-label="Current session progress">
-			<div class="rounded-2xl border border-moss/10 bg-mist/60 p-4">
+			<div class="metric-card metric-card-time border border-moss/10 bg-mist/60 p-4">
 				<strong class="block text-2xl leading-none font-extrabold text-moss-dark">{formatClock(workspace.sessionTimeSeconds)}</strong>
-				<span class="mt-1 block text-xs font-bold tracking-wide text-ink-muted uppercase">session time</span>
+				<span class="mt-1 block text-xs font-bold text-ink-muted">Session time</span>
 			</div>
-			<div class="rounded-2xl border border-moss/10 bg-mist/60 p-4">
+			<div class="metric-card metric-card-extensions border border-moss/10 bg-mist/60 p-4">
 				<strong class="block text-2xl leading-none font-extrabold text-moss-dark">{workspace.extensionCount}</strong>
-				<span class="mt-1 block text-xs font-bold tracking-wide text-ink-muted uppercase">extensions</span>
+				<span class="mt-1 block text-xs font-bold text-ink-muted">Extensions</span>
 			</div>
 		</div>
 	</div>
 </section>
+
+<style>
+	.workspace-card { border-radius: 2.4rem 1.8rem 2.15rem 1.65rem; }
+	.metric-card { box-shadow: inset 0 1px color-mix(in srgb, var(--color-surface) 70%, transparent); }
+	.metric-card-time { border-radius: 1.55rem 1rem 1.35rem 1rem; }
+	.metric-card-extensions { border-radius: 1rem 1.55rem 1rem 1.35rem; }
+</style>

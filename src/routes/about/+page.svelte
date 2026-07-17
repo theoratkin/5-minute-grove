@@ -6,8 +6,8 @@
 	/>
 </svelte:head>
 
-<article class="rounded-[2rem] border border-surface/80 bg-paper/90 p-7 shadow-[0_24px_70px_rgb(0_0_0/12%)] backdrop-blur sm:p-10">
-	<p class="mb-3 text-xs font-black tracking-[0.16em] text-moss uppercase">About</p>
+<article class="rounded-[2.4rem_1.8rem_2.15rem_1.65rem] border border-surface/80 bg-paper/90 p-7 shadow-[0_24px_70px_rgb(0_0_0/12%)] backdrop-blur sm:p-10">
+	<p class="mb-3 text-sm font-bold text-moss">About this little timer</p>
 	<h1 class="font-display text-4xl leading-tight font-semibold tracking-[-0.045em] text-moss-dark sm:text-5xl">
 		A tiny contract to help you begin.
 	</h1>

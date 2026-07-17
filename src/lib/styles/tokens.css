@@ -33,30 +33,12 @@
 
 	body {
 		@apply min-w-80 bg-mist font-sans text-ink;
-		--grid-gap: 12px;
-		--grid-major-gap: calc(var(--grid-gap) * 5);
-		--grid-minor: color-mix(in srgb, var(--color-ink) 7%, transparent);
-		--grid-major: color-mix(in srgb, var(--color-ink) 13%, transparent);
-
-		/* A quiet sheet of graph paper: structured enough to invite a small start. */
+		/* Soft, uneven light gives the workspace warmth without adding visual tasks. */
 		background-image:
-			linear-gradient(var(--grid-minor) 1px, transparent 1px),
-			linear-gradient(90deg, var(--grid-minor) 1px, transparent 1px),
-			linear-gradient(var(--grid-major) 1px, transparent 1px),
-			linear-gradient(90deg, var(--grid-major) 1px, transparent 1px);
-		background-position: 16px 16px;
-		background-size:
-			var(--grid-gap) var(--grid-gap),
-			var(--grid-gap) var(--grid-gap),
-			var(--grid-major-gap) var(--grid-major-gap),
-			var(--grid-major-gap) var(--grid-major-gap);
-	}
-
-	:root[data-theme='gruvbox-dark'] body,
-	:root[data-theme='quiet-night'] body,
-	:root[data-theme='cozy-dark'] body {
-		--grid-minor: color-mix(in srgb, var(--color-ink) 9%, transparent);
-		--grid-major: color-mix(in srgb, var(--color-ink) 17%, transparent);
+			radial-gradient(ellipse at 12% 8%, color-mix(in srgb, var(--color-sun) 19%, transparent), transparent 34rem),
+			radial-gradient(ellipse at 92% 36%, color-mix(in srgb, var(--color-sprout) 28%, transparent), transparent 32rem),
+			repeating-linear-gradient(100deg, transparent 0 7px, color-mix(in srgb, var(--color-ink) 1.5%, transparent) 8px 9px);
+		background-attachment: fixed;
 	}
 
 	button:not(:disabled) {

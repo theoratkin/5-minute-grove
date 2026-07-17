@@ -62,7 +62,7 @@
 	}
 </script>
 
-<header class="relative z-20 mx-auto mt-4 w-[calc(100%-2rem)] max-w-6xl rounded-2xl border border-surface/90 bg-paper/85 shadow-[0_12px_36px_rgb(0_0_0/10%)] backdrop-blur sm:w-[calc(100%-3rem)] lg:w-[calc(100%-4rem)]">
+<header class="relative z-20 mx-auto mt-4 w-[calc(100%-2rem)] max-w-6xl rounded-[1.1rem_1.7rem_1.25rem_1.5rem] border border-surface/90 bg-paper/85 shadow-[0_12px_36px_rgb(0_0_0/10%)] backdrop-blur sm:w-[calc(100%-3rem)] lg:w-[calc(100%-4rem)]">
 	<div class="flex min-h-16 w-full items-center justify-between gap-5 px-4 sm:px-6 lg:px-8">
 		<a class="font-display text-xl font-semibold tracking-[-0.025em] text-moss-dark transition hover:text-moss" href="/">
 			Just 5 More Minutes
@@ -80,7 +80,7 @@
 
 				<div class="absolute top-[calc(100%+0.5rem)] right-0 z-30 grid w-[min(20rem,calc(100vw-2rem))] gap-4 rounded-2xl border border-surface/90 bg-paper p-4 shadow-[0_16px_45px_rgb(0_0_0/18%)]">
 					<div>
-						<p class="mb-2 px-1 text-xs font-extrabold tracking-[0.12em] text-ink-muted uppercase">Theme</p>
+						<p class="mb-2 px-1 text-sm font-bold text-ink-muted">Theme</p>
 						<div class="grid gap-1">
 					{#each themes as option (option.id)}
 						<button
@@ -109,7 +109,7 @@
 					</div>
 
 					<div class="grid gap-2 border-t border-moss/10 pt-4">
-						<p class="px-1 text-xs font-extrabold tracking-[0.12em] text-ink-muted uppercase">Timer feedback</p>
+						<p class="px-1 text-sm font-bold text-ink-muted">Timer feedback</p>
 						<label class="flex min-h-11 cursor-pointer items-center justify-between gap-4 rounded-xl px-3 py-2 text-sm font-bold text-ink transition hover:bg-mist">
 							<span class="flex items-center gap-2"><i class="ph-bold ph-speaker-high text-lg text-moss" aria-hidden="true"></i> Sounds</span>
 							<input class="size-5 accent-moss" type="checkbox" checked={preferences.soundEnabled} onchange={(event) => preferences.setSound(event.currentTarget.checked)} />

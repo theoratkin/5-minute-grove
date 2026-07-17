@@ -100,20 +100,20 @@
 	let sessionCount = $derived(records.filter((record) => record.id !== currentSession?.id).length + Number(currentSession !== null));
 </script>
 
-<section class="grid gap-4" aria-label="Recent sessions">
+<section class="journal grid gap-4" aria-label="Recent sessions">
 	<div class="flex items-center justify-between gap-4">
-		<h2 class="font-display text-2xl font-semibold tracking-[-0.03em] text-moss-dark">Recent sessions</h2>
-		<span class="min-w-8 rounded-full bg-sprout px-2 py-0.5 text-center text-sm font-extrabold text-moss">{sessionCount}</span>
+		<h2 class="font-display text-2xl font-semibold tracking-[-0.03em] text-moss-dark">Session journal</h2>
+		<span class="min-w-8 rounded-full bg-sprout/65 px-2 py-0.5 text-center text-sm font-bold text-moss">{sessionCount}</span>
 	</div>
 
 	{#if currentSession === null && records.length === 0}
-			<p class="rounded-2xl border border-dashed border-moss/20 bg-mist/50 p-4 text-sm leading-relaxed text-ink-muted">No sessions yet. Time you choose to save will appear here.</p>
+			<p class="rounded-[1.25rem_1.7rem_1.2rem_1.5rem] border border-dashed border-moss/20 bg-mist/50 p-4 text-sm leading-relaxed text-ink-muted">No notes yet. Time you choose to save will appear here.</p>
 	{:else}
 		<div class="grid gap-5">
 			{#if currentSession}
 				<section class="grid gap-2.5" aria-label="Current session">
-					<h3 class="text-xs font-extrabold tracking-[0.12em] text-moss uppercase">In progress</h3>
-					<div class="grid gap-3 rounded-2xl border border-moss/20 bg-sprout/25 p-3">
+					<h3 class="date-heading text-sm font-bold text-moss">In progress</h3>
+					<div class="journal-entry current-entry grid gap-3 border border-moss/20 bg-sprout/20 p-3">
 						<div class="flex items-start justify-between gap-3">
 							<div class="min-w-0">
 								{#if editingId === currentSession.id}
@@ -143,10 +143,10 @@
 			{/if}
 			{#each groups as group (group.key)}
 				<section class="grid gap-2.5" aria-label={group.label}>
-					<h3 class="text-xs font-extrabold tracking-[0.12em] text-ink-muted uppercase">{group.label}</h3>
+					<h3 class="date-heading text-sm font-bold text-ink-muted">{group.label}</h3>
 					<ul class="grid gap-2.5 p-0">
 						{#each group.sessions as record (record.id)}
-							<li class:resuming-session={resumingId === record.id} class="relative grid gap-3 overflow-hidden rounded-2xl border border-moss/10 bg-surface/75 p-3">
+							<li class:resuming-session={resumingId === record.id} class="journal-entry relative grid gap-3 overflow-hidden border border-moss/10 bg-surface/60 p-3">
 								{#if resumingId === record.id}
 									<div class="resume-commit-glow" aria-hidden="true"></div>
 								{/if}
@@ -174,8 +174,8 @@
 										<span class="mt-1 text-xs font-bold text-ink-muted">{extensionLabel(record.extensionCount)}</span>
 									</div>
 								</div>
-								<div class="relative z-10 flex justify-end gap-2">
-									<button class:resuming={resumingId === record.id} class="resume-button grid size-11 place-items-center rounded-xl bg-moss text-on-accent transition hover:bg-moss-dark" type="button" aria-label={resumingId === record.id ? `Continuing ${record.title}` : `Continue ${record.title} with a new five-minute contract`} title="Continue with a new five-minute contract" use:buttonSplash onclick={() => resumeWithCommitment(record)} disabled={resumingId !== null}>
+								<div class="entry-actions relative z-10 flex justify-end gap-2">
+									<button class:resuming={resumingId === record.id} class="resume-button grid size-11 place-items-center rounded-xl border border-moss/20 bg-paper/60 text-moss transition hover:border-moss/35 hover:bg-sprout/35" type="button" aria-label={resumingId === record.id ? `Continuing ${record.title}` : `Continue ${record.title} with a new five-minute contract`} title="Continue with a new five-minute contract" use:buttonSplash onclick={() => resumeWithCommitment(record)} disabled={resumingId !== null}>
 										<i class:resuming={resumingId === record.id} class="resume-icon ph-fill ph-play text-base" aria-hidden="true"></i>
 									</button>
 									<button class="grid size-11 place-items-center rounded-xl border border-clay/25 text-clay transition hover:bg-clay/10" type="button" aria-label={`Remove ${record.title}; this can be undone`} title="Remove session" onclick={() => deleteSession(record.id)}>
@@ -197,6 +197,16 @@
 </section>
 
 <style>
+	.journal-entry {
+		border-radius: 0.85rem 1.35rem 1rem 0.75rem;
+		box-shadow: 0 0.3rem 0.8rem color-mix(in srgb, var(--color-ink) 4%, transparent);
+	}
+
+	.current-entry { border-radius: 1.25rem 0.9rem 1.35rem 0.8rem; }
+
+	.entry-actions { opacity: 0.58; transition: opacity 180ms ease; }
+	.journal-entry:hover .entry-actions, .journal-entry:focus-within .entry-actions { opacity: 1; }
+
 	.session-title,
 	.session-title-input {
 		display: block;
@@ -287,5 +297,9 @@
 		.resume-icon.resuming {
 			animation: none;
 		}
+	}
+
+	@media (max-width: 639px) {
+		.entry-actions { opacity: 1; }
 	}
 </style>

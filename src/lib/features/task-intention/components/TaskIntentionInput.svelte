@@ -18,7 +18,7 @@
 			{disabled}
 			maxlength="80"
 			autocomplete="off"
-		placeholder="Name this session (optional)"
+		placeholder="What would you like to begin?"
 		value={value}
 		oninput={(event) => onchange?.(event.currentTarget.value)}
 	/>
