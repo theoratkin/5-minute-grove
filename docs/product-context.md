@@ -46,7 +46,7 @@ Possible later layers:
 
 ## Persistent Grove
 
-The timer includes a local, persistent grove as a living record of focused time. Each completed minute adds one leaf to the current tree in real time. A tree matures at 60 leaves—one focused hour—and remains in the foreground for the end-of-timer choice. If the user voluntarily adds five minutes, or later starts a new session, it joins the background grove and makes room for another tree.
+The timer includes a local, persistent grove as a living record of focused time. Each completed minute adds one leaf to the current tree in real time. The foreground plant begins as a pointed green stem, stays branchless through its sprout stage, then develops one branch as a sapling and three as a young tree before taking on the full tree silhouette. A tree matures at 60 leaves—one focused hour—and remains in the foreground for the end-of-timer choice. If the user voluntarily adds five minutes, or later starts a new session, it joins the background grove and makes room for another tree.
 
 The grove is a keepsake rather than an economy: it has no streaks, decay, spending, optimization, or missed-day states. Completed whole minutes remain honestly represented even when a session ends before its five-minute contract; incomplete minutes do not add leaves, and deleting a session-history entry does not erase growth that already happened.
 
