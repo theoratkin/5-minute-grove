@@ -35,4 +35,4 @@
 ## 2026-07-17
 
 - Increased grove growth to five leaves per completed five-minute contract—one leaf per completed minute, awarded together when the contract finishes. Existing credited contracts migrate to the new rate without double-counting.
-- Changed grove growth to happen live at one leaf per completed minute and raised tree maturity to 60 leaves so one focused hour grows a full tree. A full foreground tree now waits until the next new session before joining the background grove.
+- Changed grove growth to happen live at one leaf per completed minute and raised tree maturity to 60 leaves so one focused hour grows a full tree. A full foreground tree remains visible for the end-of-timer choice, then joins the background grove when the user chooses Add 5 minutes or starts a new session.

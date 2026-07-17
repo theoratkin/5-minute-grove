@@ -79,7 +79,7 @@ test('normalizes invalid storage and migrates contract credits to elapsed minute
 	assert.equal(state.settledMatureTreeCount, 0);
 });
 
-test('holds a full tree in the foreground until a new session settles it', () => {
+test('holds a full tree in the foreground until the next start or continuation settles it', () => {
 	const fullTree = {
 		version: 2 as const,
 		totalLeaves: 60,

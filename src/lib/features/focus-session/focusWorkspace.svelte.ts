@@ -210,11 +210,7 @@ export class FocusWorkspace {
 	startSession() {
 		if (this.preferences.notificationsEnabled) void prepareTimerNotifications();
 		this.playSound(this.startOrExtendSound);
-		const settledGrove = settleMatureTrees(this.groveState);
-		if (settledGrove !== this.groveState) {
-			this.groveState = settledGrove;
-			saveGroveState(this.groveState);
-		}
+		this.settleGrove();
 
 		this.sessionStartedAt = new Date().toISOString();
 		this.activeSessionId = createSessionId();
@@ -229,6 +225,7 @@ export class FocusWorkspace {
 	addFiveMinutes() {
 		if (this.preferences.notificationsEnabled) void prepareTimerNotifications();
 		this.playSound(this.startOrExtendSound);
+		this.settleGrove();
 
 		this.extensionCount += 1;
 		this.remainingSeconds = FIVE_MINUTES_SECONDS;
@@ -416,6 +413,14 @@ export class FocusWorkspace {
 		if (nextProgress.currentTreeLeaves !== previousProgress.currentTreeLeaves) {
 			this.groveGrowthToken += 1;
 		}
+		saveGroveState(this.groveState);
+	}
+
+	private settleGrove() {
+		const settledGrove = settleMatureTrees(this.groveState);
+		if (settledGrove === this.groveState) return;
+
+		this.groveState = settledGrove;
 		saveGroveState(this.groveState);
 	}
 
