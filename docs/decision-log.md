@@ -37,3 +37,4 @@
 - Increased grove growth to five leaves per completed five-minute contract—one leaf per completed minute, awarded together when the contract finishes. Existing credited contracts migrate to the new rate without double-counting.
 - Changed grove growth to happen live at one leaf per completed minute and raised tree maturity to 60 leaves so one focused hour grows a full tree. A full foreground tree remains visible for the end-of-timer choice, then joins the background grove when the user chooses Add 5 minutes or starts a new session.
 - Renamed the product from "Just 5 More Minutes" to "Five Minute Grove" to reflect its calm, cumulative growth metaphor while preserving the five-minute contract. Existing local-storage keys remain stable so the rename does not reset local data.
+- Added a confirmed grove reset in settings. Resetting clears visible growth while preserving session history and its credit baseline, so old sessions do not regrow the grove after a reload.

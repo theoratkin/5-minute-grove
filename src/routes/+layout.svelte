@@ -52,7 +52,12 @@
 
 <div id="button-splash-background" class="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden="true"></div>
 
-<GlobalHeader {theme} {preferences} onThemeChange={changeTheme} />
+<GlobalHeader
+	{theme}
+	{preferences}
+	onThemeChange={changeTheme}
+	onResetGrove={() => workspace.resetGrove()}
+/>
 
 <main class="relative z-10 mx-auto grid min-h-[calc(100vh-5rem)] w-full max-w-6xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start lg:px-8 lg:py-10">
 	{@render children()}

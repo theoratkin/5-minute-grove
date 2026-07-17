@@ -20,6 +20,7 @@ import {
 	creditElapsedMinutes,
 	deriveGroveProgress,
 	emptyGroveState,
+	resetGroveState,
 	settleMatureTrees
 } from '$lib/features/grove/grove.state';
 import { loadOrInitializeGrove, saveGroveState } from '$lib/features/grove/grove.storage';
@@ -340,6 +341,26 @@ export class FocusWorkspace {
 
 	dismissToast() {
 		this.toastMessage = '';
+	}
+
+	resetGrove() {
+		const groveSeeds = this.history.map((record) => ({
+			id: record.id,
+			completedContracts: record.completedContracts,
+			totalSeconds: record.totalSeconds
+		}));
+		if (this.activeSessionId) {
+			groveSeeds.push({
+				id: this.activeSessionId,
+				completedContracts: this.completedContracts,
+				totalSeconds: this.sessionTimeSeconds
+			});
+		}
+
+		this.groveState = resetGroveState(groveSeeds);
+		this.groveGrowthToken += 1;
+		saveGroveState(this.groveState);
+		this.toastMessage = 'Your grove has been reset.';
 	}
 
 	private syncTimer = () => {

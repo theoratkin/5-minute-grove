@@ -7,11 +7,13 @@
 	let {
 		theme,
 		preferences,
-		onThemeChange
+		onThemeChange,
+		onResetGrove
 	}: {
 		theme: ThemeId;
 		preferences: AppPreferences;
 		onThemeChange: (theme: ThemeId) => void;
+		onResetGrove: () => void;
 	} = $props();
 
 	let themeMenu: HTMLDetailsElement;
@@ -59,6 +61,16 @@
 			: permission === 'unsupported'
 				? 'Notifications are not available in this browser.'
 				: 'Notifications remain off because permission was not granted.';
+	}
+
+	function confirmGroveReset() {
+		const confirmed = window.confirm(
+			'Reset your grove? This removes all trees and leaves. Your session history will stay, and this cannot be undone.'
+		);
+		if (!confirmed) return;
+
+		onResetGrove();
+		themeMenu.open = false;
 	}
 </script>
 
@@ -119,6 +131,27 @@
 							<input class="size-5 accent-moss" type="checkbox" checked={preferences.notificationsEnabled} onchange={(event) => void toggleNotifications(event.currentTarget.checked)} />
 						</label>
 						{#if notificationNote}<p class="px-3 text-xs leading-relaxed text-ink-muted" aria-live="polite">{notificationNote}</p>{/if}
+					</div>
+
+					<div class="grid gap-2 border-t border-moss/10 pt-4">
+						<div class="px-1">
+							<p class="text-sm font-bold text-ink-muted">Grove</p>
+							<p class="mt-1 text-xs leading-relaxed text-ink-muted">
+								Start the grove over without removing session history.
+							</p>
+						</div>
+						<button
+							class="min-h-11 rounded-xl border border-ink/15 px-3 py-2 text-left text-sm font-bold text-ink-muted transition hover:border-ink/25 hover:bg-mist hover:text-ink"
+							type="button"
+							onclick={confirmGroveReset}
+						>
+							<span class="flex items-center gap-2"
+								><i
+									class="ph-bold ph-arrow-counter-clockwise text-lg"
+									aria-hidden="true"
+								></i> Reset grove</span
+							>
+						</button>
 					</div>
 				</div>
 			</details>

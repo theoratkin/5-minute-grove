@@ -32,7 +32,10 @@ export function normalizeGroveState(value: unknown): GroveState {
 		typeof candidate.totalLeaves === 'number' && Number.isFinite(candidate.totalLeaves)
 			? Math.max(0, Math.floor(candidate.totalLeaves))
 			: 0;
-	const totalLeaves = Math.max(storedTotal, creditedLeafTotal);
+	// The visible total is independent from the credit ledger in version 2. That lets a
+	// reset keep old sessions credited without growing their leaves again after reload.
+	const totalLeaves =
+		candidate.version === 1 ? Math.max(storedTotal, creditedLeafTotal) : storedTotal;
 	const settledMatureTreeCount =
 		candidate.version === 2
 			? Math.min(
@@ -51,6 +54,14 @@ export function normalizeGroveState(value: unknown): GroveState {
 
 export function seedGroveState(records: GroveSeedRecord[]): GroveState {
 	return reconcileGroveState(emptyGroveState(), records);
+}
+
+export function resetGroveState(records: GroveSeedRecord[]): GroveState {
+	const creditedState = seedGroveState(records);
+	return {
+		...emptyGroveState(),
+		creditedMinutesBySession: creditedState.creditedMinutesBySession
+	};
 }
 
 export function reconcileGroveState(state: GroveState, records: GroveSeedRecord[]): GroveState {

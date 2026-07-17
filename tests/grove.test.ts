@@ -4,6 +4,8 @@ import {
 	creditElapsedMinutes,
 	deriveGroveProgress,
 	normalizeGroveState,
+	reconcileGroveState,
+	resetGroveState,
 	seedGroveState,
 	settleMatureTrees
 } from '../src/lib/features/grove/grove.state.ts';
@@ -101,4 +103,21 @@ test('holds a full tree in the foreground until the next start or continuation s
 		currentTreeNumber: 2,
 		currentTreeLeaves: 0
 	});
+});
+
+test('resets visible growth without allowing history to backfill it again', () => {
+	const records = [
+		{ id: 'saved', completedContracts: 2, totalSeconds: 600 },
+		{ id: 'active', completedContracts: 0, totalSeconds: 125 }
+	];
+	const reset = resetGroveState(records);
+
+	assert.equal(reset.totalLeaves, 0);
+	assert.deepEqual(reset.creditedMinutesBySession, { saved: 10, active: 2 });
+	assert.equal(normalizeGroveState(reset).totalLeaves, 0);
+	assert.equal(reconcileGroveState(reset, records).totalLeaves, 0);
+
+	const later = creditElapsedMinutes(reset, 'active', 3);
+	assert.equal(later.addedLeaves, 1);
+	assert.equal(later.state.totalLeaves, 1);
 });
