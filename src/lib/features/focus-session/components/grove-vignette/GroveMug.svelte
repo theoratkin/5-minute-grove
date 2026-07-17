@@ -10,10 +10,7 @@
 
 <style>
 	.mug {
-		position: absolute;
-		right: 1.35rem;
-		bottom: 1.05rem;
-		z-index: 7;
+		position: relative;
 		width: 2.25rem;
 		height: 1.75rem;
 		border-radius: 0.35rem 0.35rem 0.8rem 0.8rem;

@@ -20,6 +20,10 @@
 
 	.sun.paused { animation-play-state: paused; }
 
+	@media (min-width: 640px) {
+		.sun { right: 9rem; }
+	}
+
 	@keyframes glow {
 		50% {
 			transform: scale(1.08);
