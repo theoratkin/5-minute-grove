@@ -175,16 +175,20 @@
 
 		<div class="relative z-10 mt-7">
 			{#if phase === 'idle'}
-				<button class:starting={isStarting} class="start-button flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-moss px-5 py-4 text-base font-extrabold text-on-accent shadow-[0_8px_0_var(--color-moss-pressed)] transition hover:-translate-y-0.5 hover:bg-moss-dark hover:shadow-[0_8px_0_var(--color-moss-hover-pressed)] active:translate-y-1 active:shadow-none" type="button" use:buttonSplash onclick={startWithCommitment} disabled={isStarting}>
-					<i class:starting={isStarting} class="start-icon ph-fill ph-play text-lg" aria-hidden="true"></i>
-					<span>{isStarting ? 'Here we go' : 'Start 5 minutes'}</span>
-				</button>
+				<div class="raised-button raised-button-start">
+					<button class:starting={isStarting} class="start-button relative z-10 flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-moss px-5 py-4 text-base font-extrabold text-on-accent transition hover:bg-moss-dark active:translate-y-1" type="button" use:buttonSplash onclick={startWithCommitment} disabled={isStarting}>
+						<i class:starting={isStarting} class="start-icon ph-fill ph-play text-lg" aria-hidden="true"></i>
+						<span>{isStarting ? 'Here we go' : 'Start 5 minutes'}</span>
+					</button>
+				</div>
 			{:else if phase === 'contract-complete'}
 				<div class="grid gap-3" aria-label="Completed timer controls">
-					<button bind:this={primaryCompletionAction} class:starting={isExtending} class="extend-button flex min-h-14 min-w-0 items-center justify-center gap-2 rounded-2xl bg-moss px-4 font-extrabold text-on-accent shadow-[0_5px_0_var(--color-moss-pressed)] transition hover:-translate-y-0.5 hover:bg-moss-dark hover:shadow-[0_5px_0_var(--color-moss-hover-pressed)]" type="button" use:buttonSplash onclick={extendWithCommitment} disabled={isExtending}>
-						<i class:starting={isExtending} class="extend-icon ph-bold ph-plus text-lg" aria-hidden="true"></i>
-						<span>{isExtending ? 'Another 5 minutes' : 'Add 5 minutes'}</span>
-					</button>
+					<div class="raised-button raised-button-extend">
+						<button bind:this={primaryCompletionAction} class:starting={isExtending} class="extend-button relative z-10 flex min-h-14 w-full min-w-0 items-center justify-center gap-2 rounded-2xl bg-moss px-4 font-extrabold text-on-accent transition hover:bg-moss-dark active:translate-y-1" type="button" use:buttonSplash onclick={extendWithCommitment} disabled={isExtending}>
+							<i class:starting={isExtending} class="extend-icon ph-bold ph-plus text-lg" aria-hidden="true"></i>
+							<span>{isExtending ? 'Another 5 minutes' : 'Add 5 minutes'}</span>
+						</button>
+					</div>
 					<div class="grid grid-cols-2 gap-2">
 						<button class="flex min-h-12 items-center justify-center gap-1.5 rounded-xl border border-moss/15 bg-surface px-2 text-xs font-extrabold text-moss transition hover:bg-mist sm:text-sm" type="button" onclick={onDone} title="Save this session and finish here"><i class="ph-bold ph-check" aria-hidden="true"></i><span>Finish here</span></button>
 						<button class="flex min-h-12 items-center justify-center gap-1.5 rounded-xl border border-moss/15 bg-surface px-2 text-xs font-bold text-ink-muted transition hover:bg-mist hover:text-moss sm:text-sm" type="button" onclick={onSwitch} title="Save this session and name another task"><i class="ph-bold ph-arrows-left-right" aria-hidden="true"></i><span>Switch task</span></button>
@@ -192,10 +196,12 @@
 				</div>
 			{:else if phase === 'paused'}
 				<div class="grid min-h-14 grid-cols-2 gap-3" aria-label="Paused timer controls">
-					<button class="flex items-center justify-center gap-2 rounded-2xl bg-moss px-4 font-extrabold text-on-accent shadow-[0_6px_0_var(--color-moss-pressed)] transition hover:-translate-y-0.5 hover:bg-moss-dark hover:shadow-[0_6px_0_var(--color-moss-hover-pressed)]" type="button" onclick={onResume}>
-						<i class="ph-fill ph-play text-[1.0625rem]" aria-hidden="true"></i>
-						<span>Resume timer</span>
-					</button>
+					<div class="raised-button raised-button-resume">
+						<button class="relative z-10 flex h-full w-full items-center justify-center gap-2 rounded-2xl bg-moss px-4 font-extrabold text-on-accent transition hover:bg-moss-dark active:translate-y-1" type="button" onclick={onResume}>
+							<i class="ph-fill ph-play text-[1.0625rem]" aria-hidden="true"></i>
+							<span>Resume timer</span>
+						</button>
+					</div>
 					<button class="flex items-center justify-center gap-2 rounded-2xl border border-clay/30 bg-surface px-4 font-bold text-clay transition hover:bg-clay/10" type="button" onclick={onStop}>
 						<i class="ph-fill ph-stop-circle text-[1.0625rem]" aria-hidden="true"></i>
 						<span>End session</span>
@@ -251,6 +257,37 @@
 	.start-button.starting {
 		pointer-events: none;
 		animation: start-press 420ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+	}
+
+	.raised-button {
+		position: relative;
+		isolation: isolate;
+		transition: transform 150ms;
+	}
+
+	.raised-button::before {
+		position: absolute;
+		z-index: 0;
+		inset: 0 0 -0.5rem;
+		border-radius: 1rem;
+		background: var(--color-moss-pressed);
+		content: '';
+	}
+
+	.raised-button-extend::before {
+		bottom: -0.3125rem;
+	}
+
+	.raised-button-resume::before {
+		bottom: -0.375rem;
+	}
+
+	.raised-button:hover {
+		transform: translateY(-0.125rem);
+	}
+
+	.raised-button:hover::before {
+		background: var(--color-moss-hover-pressed);
 	}
 
 	.extend-button.starting {
