@@ -79,10 +79,10 @@ export class FocusWorkspace {
 
 	get pageTitle() {
 		if (this.phase === 'running') {
-			return `${formatClock(this.remainingSeconds)} - Just 5 More Minutes`;
+			return `${formatClock(this.remainingSeconds)} - Five Minute Grove`;
 		}
-		if (this.phase === 'paused') return 'Paused - Just 5 More Minutes';
-		return 'Just 5 More Minutes';
+		if (this.phase === 'paused') return 'Paused - Five Minute Grove';
+		return 'Five Minute Grove';
 	}
 
 	get currentSession(): FocusSessionRecord | null {

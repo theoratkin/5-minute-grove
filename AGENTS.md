@@ -8,7 +8,7 @@
 
 # Agent Context
 
-This repository is for a planned SvelteKit web app called "Just 5 More Minutes".
+This repository is for a SvelteKit web app called "Five Minute Grove".
 
 ## Current State
 

@@ -2,7 +2,7 @@
 
 ## Core Idea
 
-"Just 5 More Minutes" is a focus web app centered on tiny work contracts and voluntary continuation.
+"Five Minute Grove" is a focus web app centered on tiny work contracts, voluntary continuation, and a grove that grows with focused time.
 
 The user found that ordinary Pomodoro, stopwatch, and timer workflows do not work well for them because getting started is the hardest part. A 5-minute timer works better because it creates a small, believable commitment with permission to quit afterward. In Virtual Cottage 2, the end-of-timer "Add 5 minutes" button creates a useful loop: once started, clicking another 5 minutes is easy enough to keep momentum going.
 

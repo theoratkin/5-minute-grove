@@ -21,8 +21,8 @@
 	/>
 </svelte:head>
 
-<h1 class="sr-only">Just 5 More Minutes focus timer</h1>
-<section class="workspace-card overflow-hidden border border-surface/80 bg-paper/90 shadow-[0_24px_70px_rgb(0_0_0/12%)] backdrop-blur" aria-label="Just 5 More Minutes workspace">
+<h1 class="sr-only">Five Minute Grove focus timer</h1>
+<section class="workspace-card overflow-hidden border border-surface/80 bg-paper/90 shadow-[0_24px_70px_rgb(0_0_0/12%)] backdrop-blur" aria-label="Five Minute Grove workspace">
 	<div class="grid gap-7 px-6 py-7 sm:px-10 sm:py-9">
 		<FocusTimer
 			remainingSeconds={workspace.remainingSeconds}

@@ -1,8 +1,8 @@
 <svelte:head>
-	<title>About - Just 5 More Minutes</title>
+	<title>About - Five Minute Grove</title>
 	<meta
 		name="description"
-		content="Why Just 5 More Minutes makes starting small and choosing another five minutes the whole point."
+		content="Why Five Minute Grove makes starting small and choosing another five minutes the whole point."
 	/>
 </svelte:head>
 
@@ -14,7 +14,7 @@
 
 	<div class="mt-8 grid gap-5 text-base leading-relaxed text-ink-muted sm:text-lg">
 		<p>
-			Just 5 More Minutes is a focus timer for the moment when starting feels harder than doing. You make one honest, five-minute commitment—small enough to believe.
+			Five Minute Grove is a focus timer for the moment when starting feels harder than doing. You make one honest, five-minute commitment—small enough to believe.
 		</p>
 		<p>
 			When the timer ends, the app asks whether you want another five minutes. You can continue, finish, or switch tasks.
