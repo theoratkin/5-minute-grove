@@ -121,7 +121,7 @@
 	}
 	.green-stem { fill: var(--color-moss); }
 	.stage-trunk, .trunk { fill: color-mix(in srgb, var(--color-clay) 62%, var(--color-moss-dark)); }
-	.stage-branch, .branch { fill: none; stroke: color-mix(in srgb, var(--color-clay) 62%, var(--color-moss-dark)); stroke-linecap: round; }
+	.stage-branch, .branch { fill: none; stroke: color-mix(in srgb, var(--color-clay) 62%, var(--color-moss-dark)); stroke-linecap: butt; }
 	.stage-branch { stroke-width: 2.8; }
 	.branch { stroke-width: 3.2; }
 	.stage-leaves .leaf-tone-0 { fill: var(--color-moss); }
