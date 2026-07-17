@@ -29,4 +29,10 @@
 - Added Node-based unit coverage for timer restoration/background expiry, partial-time accounting, history migration, and delete undo behavior.
 - Reframed timer completion copy as a calm invitation to add another five minutes and replaced reassuring stop/break messages with neutral session-saved feedback, while retaining the confetti animation.
 - Removed the redundant Take a break completion action; Finish here already provides the same permission-to-stop outcome.
-- Shifted the interface away from productivity-dashboard styling toward a quiet windowsill-and-session-notes metaphor: ambient paper light replaces the graph grid, a CSS vignette grows with voluntary extensions, status copy is more conversational, and surfaces are less rigid. Session time and extension counts remain prominent.
+- Shifted the interface away from productivity-dashboard styling toward a quiet windowsill-and-session-notes metaphor: ambient paper light replaces the graph grid, the vignette provides gentle visual progress, status copy is more conversational, and surfaces are less rigid. Session time and extension counts remain prominent.
+- Expanded the windowsill vignette into a persistent local grove. Every completed five-minute contract adds one leaf, 50 leaves mature a tree, and mature trees accumulate without streaks, decay, currency, or reversal when history is deleted. Growth is credited idempotently per session and backfilled once from retained local records.
+
+## 2026-07-17
+
+- Increased grove growth to five leaves per completed five-minute contract—one leaf per completed minute, awarded together when the contract finishes. Existing credited contracts migrate to the new rate without double-counting.
+- Changed grove growth to happen live at one leaf per completed minute and raised tree maturity to 60 leaves so one focused hour grows a full tree. A full foreground tree now waits until the next new session before joining the background grove.

@@ -5,12 +5,14 @@
 	import EndOfTimerPrompt from './EndOfTimerPrompt.svelte';
 	import type { FocusPhase } from '$lib/features/focus-session/focusSession.types';
 	import TaskIntentionInput from '$lib/features/task-intention/components/TaskIntentionInput.svelte';
-	import CozyVignette from './CozyVignette.svelte';
+	import GroveVignette from './GroveVignette.svelte';
 
 	let {
 		remainingSeconds,
 		progress,
-		extensionCount,
+		groveTotalLeaves,
+		groveSettledMatureTreeCount,
+		groveGrowthToken,
 		phase,
 		intention,
 		intentionValue,
@@ -25,7 +27,9 @@
 	}: {
 		remainingSeconds: number;
 		progress: number;
-		extensionCount: number;
+		groveTotalLeaves: number;
+		groveSettledMatureTreeCount: number;
+		groveGrowthToken: number;
 		phase: FocusPhase;
 		intention: string;
 		intentionValue: string;
@@ -140,9 +144,15 @@
 				{/each}
 			</div>
 		{/if}
-		{#if phase !== 'contract-complete'}
-			<div class="relative z-10 mb-3"><CozyVignette {progress} {extensionCount} paused={phase === 'paused'} /></div>
-		{/if}
+		<div class="relative z-10 mb-3">
+			<GroveVignette
+				{progress}
+				totalLeaves={groveTotalLeaves}
+				settledMatureTreeCount={groveSettledMatureTreeCount}
+				growthToken={groveGrowthToken}
+				paused={phase === 'paused'}
+			/>
+		</div>
 		<div class="relative z-10 h-48">
 			{#if phase === 'contract-complete'}
 				<div aria-live="polite"><EndOfTimerPrompt /></div>
@@ -297,6 +307,7 @@
 
 	.confetti {
 		position: absolute;
+		z-index: 20;
 		inset: 0;
 		overflow: hidden;
 		pointer-events: none;

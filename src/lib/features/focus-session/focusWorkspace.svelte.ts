@@ -16,6 +16,14 @@ import {
 	restoreSessionRecord,
 	saveSessionHistory
 } from '$lib/features/session-history/sessionHistory.storage';
+import {
+	creditElapsedMinutes,
+	deriveGroveProgress,
+	emptyGroveState,
+	settleMatureTrees
+} from '$lib/features/grove/grove.state';
+import { loadOrInitializeGrove, saveGroveState } from '$lib/features/grove/grove.storage';
+import type { GroveState } from '$lib/features/grove/grove.types';
 
 const FOCUS_WORKSPACE_CONTEXT = Symbol('focus-workspace');
 
@@ -33,6 +41,8 @@ export class FocusWorkspace {
 	hydrated = $state(false);
 	toastMessage = $state('');
 	deletedRecord = $state<FocusSessionRecord | null>(null);
+	groveState = $state<GroveState>(emptyGroveState());
+	groveGrowthToken = $state(0);
 
 	private startOrExtendSound: HTMLAudioElement | null = null;
 	private timerFinishSound: HTMLAudioElement | null = null;
@@ -48,6 +58,14 @@ export class FocusWorkspace {
 	get segmentProgress() {
 		if (this.phase === 'contract-complete') return 100;
 		return ((FIVE_MINUTES_SECONDS - this.remainingSeconds) / FIVE_MINUTES_SECONDS) * 100;
+	}
+
+	get groveTotalLeaves() {
+		return this.groveState.totalLeaves;
+	}
+
+	get groveSettledMatureTreeCount() {
+		return this.groveState.settledMatureTreeCount;
 	}
 
 	get sessionTimeSeconds() {
@@ -110,6 +128,21 @@ export class FocusWorkspace {
 				});
 			}
 		}
+
+		const groveSeeds = this.history.map((record) => ({
+			id: record.id,
+			completedContracts: record.completedContracts,
+			totalSeconds: record.totalSeconds
+		}));
+		if (this.activeSessionId) {
+			groveSeeds.push({
+				id: this.activeSessionId,
+				completedContracts: this.completedContracts,
+				totalSeconds: this.sessionTimeSeconds
+			});
+		}
+		this.groveState = loadOrInitializeGrove(groveSeeds);
+		this.creditCurrentSessionMinutes();
 
 		this.hydrated = true;
 		this.timerInterval = window.setInterval(() => this.syncTimer(), 250);
@@ -177,6 +210,11 @@ export class FocusWorkspace {
 	startSession() {
 		if (this.preferences.notificationsEnabled) void prepareTimerNotifications();
 		this.playSound(this.startOrExtendSound);
+		const settledGrove = settleMatureTrees(this.groveState);
+		if (settledGrove !== this.groveState) {
+			this.groveState = settledGrove;
+			saveGroveState(this.groveState);
+		}
 
 		this.sessionStartedAt = new Date().toISOString();
 		this.activeSessionId = createSessionId();
@@ -313,7 +351,11 @@ export class FocusWorkspace {
 			0,
 			Math.ceil((this.segmentEndsAt - Date.now()) / 1000)
 		);
-		if (this.remainingSeconds === 0) this.completeCurrentContract();
+		if (this.remainingSeconds === 0) {
+			this.completeCurrentContract();
+		} else {
+			this.creditCurrentSessionMinutes();
+		}
 	};
 
 	private completeCurrentContract() {
@@ -325,6 +367,7 @@ export class FocusWorkspace {
 		this.completedContracts = nextCompletedContracts;
 		this.phase = 'contract-complete';
 		this.segmentEndsAt = null;
+		this.creditCurrentSessionMinutes();
 		this.playSound(this.timerFinishSound);
 		if (this.preferences.notificationsEnabled) {
 			notifyContractComplete({
@@ -350,6 +393,30 @@ export class FocusWorkspace {
 		this.activeSessionId = null;
 		this.segmentEndsAt = null;
 		if (clearIntention) this.intention = '';
+	}
+
+	private creditCurrentSessionMinutes() {
+		if (!this.activeSessionId) return;
+		const previousProgress = deriveGroveProgress(
+			this.groveState.totalLeaves,
+			this.groveState.settledMatureTreeCount
+		);
+		const result = creditElapsedMinutes(
+			this.groveState,
+			this.activeSessionId,
+			Math.floor(this.sessionTimeSeconds / 60)
+		);
+		if (result.addedLeaves === 0) return;
+
+		this.groveState = result.state;
+		const nextProgress = deriveGroveProgress(
+			this.groveState.totalLeaves,
+			this.groveState.settledMatureTreeCount
+		);
+		if (nextProgress.currentTreeLeaves !== previousProgress.currentTreeLeaves) {
+			this.groveGrowthToken += 1;
+		}
+		saveGroveState(this.groveState);
 	}
 
 	private playSound(sound: HTMLAudioElement | null) {

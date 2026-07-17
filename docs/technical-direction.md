@@ -87,6 +87,7 @@ When implementation begins, a pragmatic MVP would be:
   - Switch task
 - Current session summary with total elapsed time and extension count.
 - Local persistence for recent sessions, grouped by start date and resumable in place.
+- Versioned local persistence for cumulative grove growth, credited idempotently per elapsed session minute.
 - Absolute end timestamps for timer accuracy across throttled background tabs and refresh recovery.
 
 ## UX Constraints
@@ -103,6 +104,6 @@ When implementation begins, a pragmatic MVP would be:
 ## Future Technical Questions
 
 - Whether to use localStorage, IndexedDB, or a small local-first library.
-- Whether cozy/gamified visuals should be CSS/Svelte, canvas, or later Three.js.
+- Whether future grove interactions outgrow the current inline SVG and CSS approach.
 - Whether to support PWA installability.
 - Whether to add account sync later.

@@ -27,7 +27,9 @@
 		<FocusTimer
 			remainingSeconds={workspace.remainingSeconds}
 			progress={workspace.segmentProgress}
-			extensionCount={workspace.extensionCount}
+			groveTotalLeaves={workspace.groveTotalLeaves}
+			groveSettledMatureTreeCount={workspace.groveSettledMatureTreeCount}
+			groveGrowthToken={workspace.groveGrowthToken}
 			phase={workspace.phase}
 			intention={workspace.activeTitle}
 			intentionValue={workspace.intention}
