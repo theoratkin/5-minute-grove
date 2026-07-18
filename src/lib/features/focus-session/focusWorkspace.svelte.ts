@@ -205,6 +205,13 @@ export class FocusWorkspace {
 		) {
 			event.preventDefault();
 			this.fastForwardCurrentContract();
+		} else if (
+			import.meta.env.DEV &&
+			event.key.toLowerCase() === 'm' &&
+			(this.phase === 'running' || this.phase === 'paused')
+		) {
+			event.preventDefault();
+			this.skipOneMinute();
 		}
 	}
 
@@ -399,6 +406,22 @@ export class FocusWorkspace {
 		if (!import.meta.env.DEV || (this.phase !== 'running' && this.phase !== 'paused')) return;
 		if (this.phase === 'paused') this.phase = 'running';
 		this.completeCurrentContract();
+	}
+
+	private skipOneMinute() {
+		if (!import.meta.env.DEV || (this.phase !== 'running' && this.phase !== 'paused')) return;
+
+		if (this.remainingSeconds <= 60) {
+			if (this.phase === 'paused') this.phase = 'running';
+			this.completeCurrentContract();
+			return;
+		}
+
+		this.remainingSeconds -= 60;
+		if (this.phase === 'running') {
+			this.segmentEndsAt = Date.now() + this.remainingSeconds * 1000;
+		}
+		this.creditCurrentSessionMinutes();
 	}
 
 	private resetSession(clearIntention = false) {
