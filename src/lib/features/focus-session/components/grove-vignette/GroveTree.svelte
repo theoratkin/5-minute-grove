@@ -63,7 +63,9 @@
 		<path class="green-stem" d="M242.2 119 Q242.2 100 245 82 L247 119 Z"></path>
 		<g class="stage-leaves">
 			{#each sproutLeaves.slice(0, leafCount) as leaf, index}
-				<ellipse class:new-leaf={animateGrowth && index === leafCount - 1} class={`leaf-tone-${leaf.tone}`} cx={leaf.x} cy={leaf.y} rx={7.2 * leaf.scale} ry={4.2 * leaf.scale} transform={`rotate(${leaf.rotation} ${leaf.x} ${leaf.y})`}></ellipse>
+				<g class:new-leaf={animateGrowth && index === leafCount - 1} class="stage-leaf-growth" style={`transform-origin: ${leaf.x}px ${leaf.y}px`}>
+					<ellipse class={`leaf-tone-${leaf.tone}`} cx={leaf.x} cy={leaf.y} rx={7.2 * leaf.scale} ry={4.2 * leaf.scale} transform={`rotate(${leaf.rotation} ${leaf.x} ${leaf.y})`}></ellipse>
+				</g>
 			{/each}
 		</g>
 	{:else if leafCount <= 15}
@@ -73,7 +75,9 @@
 		{/each}
 		<g class="stage-leaves">
 			{#each saplingLeaves.slice(0, leafCount) as leaf, index}
-				<ellipse class:new-leaf={animateGrowth && index === leafCount - 1} class={`leaf-tone-${leaf.tone}`} cx={leaf.x} cy={leaf.y} rx={7.6 * leaf.scale} ry={4.5 * leaf.scale} transform={`rotate(${leaf.rotation} ${leaf.x} ${leaf.y})`}></ellipse>
+				<g class:new-leaf={animateGrowth && index === leafCount - 1} class="stage-leaf-growth" style={`transform-origin: ${leaf.x}px ${leaf.y}px`}>
+					<ellipse class={`leaf-tone-${leaf.tone}`} cx={leaf.x} cy={leaf.y} rx={7.6 * leaf.scale} ry={4.5 * leaf.scale} transform={`rotate(${leaf.rotation} ${leaf.x} ${leaf.y})`}></ellipse>
+				</g>
 			{/each}
 		</g>
 	{:else if leafCount <= 30}
@@ -84,7 +88,9 @@
 			{/each}
 			<g class="stage-leaves">
 				{#each youngTreeLeaves.slice(0, leafCount) as leaf, index}
-					<ellipse class:new-leaf={animateGrowth && index === leafCount - 1} class={`leaf-tone-${leaf.tone}`} cx={leaf.x} cy={leaf.y} rx={8 * leaf.scale} ry={4.8 * leaf.scale} transform={`rotate(${leaf.rotation} ${leaf.x} ${leaf.y})`}></ellipse>
+					<g class:new-leaf={animateGrowth && index === leafCount - 1} class="stage-leaf-growth" style={`transform-origin: ${leaf.x}px ${leaf.y}px`}>
+						<ellipse class={`leaf-tone-${leaf.tone}`} cx={leaf.x} cy={leaf.y} rx={8 * leaf.scale} ry={4.8 * leaf.scale} transform={`rotate(${leaf.rotation} ${leaf.x} ${leaf.y})`}></ellipse>
+					</g>
 				{/each}
 			</g>
 		</g>
@@ -135,7 +141,8 @@
 	.stage-leaves .leaf-tone-0 { fill: var(--color-moss); }
 	.stage-leaves .leaf-tone-1 { fill: var(--color-moss-dark); }
 	.stage-leaves .leaf-tone-2 { fill: var(--color-moss); opacity: 0.68; }
-	.stage-leaves .new-leaf { animation: leaf-bloom 900ms cubic-bezier(0.18, 0.9, 0.28, 1.25) both; transform-box: fill-box; transform-origin: center; }
+	.stage-leaf-growth { transform-box: view-box; }
+	.stage-leaves .new-leaf { animation: leaf-bloom 900ms cubic-bezier(0.18, 0.9, 0.28, 1.25) both; }
 	.blossoms circle { fill: color-mix(in srgb, var(--color-clay) 64%, var(--color-sun)); filter: drop-shadow(0 0 2px color-mix(in srgb, var(--color-sun) 65%, transparent)); }
 	.bird path { fill: var(--color-clay); }
 	.bird circle { fill: var(--color-ink); }
