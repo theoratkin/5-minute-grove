@@ -157,14 +157,14 @@
 			{#if phase === 'contract-complete'}
 				<div aria-live="polite"><EndOfTimerPrompt /></div>
 			{:else}
-				<div class:paused-readout={phase === 'paused'} class="grid h-full place-items-center font-display text-[clamp(4.5rem,18vw,8rem)] leading-none font-semibold tracking-[-0.065em] text-moss-dark">
+				<div class:paused-readout={phase === 'paused'} class="grid h-full place-items-center text-moss-dark">
 					{#if phase === 'paused'}
 						<div class="paused-badge font-sans text-xs font-bold">
 							<i class="ph-fill ph-pause text-sm" aria-hidden="true"></i>
 							Paused
 						</div>
 					{/if}
-					<span role="timer" aria-label={`${formatClock(remainingSeconds)} remaining`}>{formatClock(remainingSeconds)}</span>
+					<span class="timer-readout" role="timer" aria-label={`${formatClock(remainingSeconds)} remaining`}>{formatClock(remainingSeconds)}</span>
 				</div>
 			{/if}
 		</div>
@@ -225,6 +225,17 @@
 </section>
 
 <style>
+	.timer-readout {
+		font-family: var(--font-timer);
+		font-size: clamp(4.5rem, 18vw, 8rem);
+		font-weight: 700;
+		font-variant-numeric: tabular-nums lining-nums;
+		font-feature-settings: 'tnum' 1, 'lnum' 1;
+		letter-spacing: -0.035em;
+		line-height: 1;
+		white-space: nowrap;
+	}
+
 	.timer-progress-fill {
 		position: absolute;
 		z-index: 0;

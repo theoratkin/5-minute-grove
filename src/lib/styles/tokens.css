@@ -6,8 +6,9 @@
 @import './themes/quiet-night.css';
 
 @theme inline {
-	--font-sans: 'Avenir Next', Avenir, 'Segoe UI', sans-serif;
-	--font-display: Georgia, 'Times New Roman', serif;
+	--font-sans: 'Nunito Sans', 'Avenir Next', Avenir, 'Segoe UI', sans-serif;
+	--font-display: Lora, Georgia, 'Times New Roman', serif;
+	--font-timer: 'Nunito Sans', 'Avenir Next', Avenir, 'Segoe UI', sans-serif;
 	--color-ink: var(--theme-color-ink);
 	--color-ink-muted: var(--theme-color-ink-muted);
 	--color-paper: var(--theme-color-paper);
