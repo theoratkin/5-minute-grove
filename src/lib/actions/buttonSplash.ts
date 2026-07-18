@@ -8,7 +8,6 @@ type ButtonSplashOptions = {
 const DEFAULT_COLOR = 'rgb(49 94 76 / 72%)';
 const DEFAULT_FILL = 'rgb(49 94 76 / 12%)';
 const DEFAULT_GLOW = 'rgb(49 94 76 / 24%)';
-const DEFAULT_FADE = 'rgb(49 94 76 / 5%)';
 
 export const buttonSplash: Action<HTMLElement, ButtonSplashOptions | undefined> = (
 	node,
@@ -42,12 +41,11 @@ export const buttonSplash: Action<HTMLElement, ButtonSplashOptions | undefined> 
 		const color = config.color ?? (styles.getPropertyValue('--splash-color').trim() || DEFAULT_COLOR);
 		const fill = styles.getPropertyValue('--splash-fill').trim() || DEFAULT_FILL;
 		const glow = styles.getPropertyValue('--splash-glow').trim() || DEFAULT_GLOW;
-		const fade = styles.getPropertyValue('--splash-fade').trim() || DEFAULT_FADE;
 
 		for (let index = 0; index < config.ripples; index += 1) {
 			const ripple = document.createElement('span');
 			const delay = index * 85;
-			const duration = 2400 + index * 140;
+			const duration = 2200 + index * 140;
 			const width = finalSize * (0.96 + Math.random() * 0.16);
 			const height = finalSize * (0.82 + Math.random() * 0.2);
 			const rotation = -18 + Math.random() * 36;
@@ -64,14 +62,14 @@ export const buttonSplash: Action<HTMLElement, ButtonSplashOptions | undefined> 
 			ripple.style.top = `${originY}px`;
 			ripple.style.width = `${width}px`;
 			ripple.style.height = `${height}px`;
-			ripple.style.border = `1.5px solid ${color}`;
+			ripple.style.border = `10px solid ${color}`;
 			ripple.style.background = fill;
 			ripple.style.borderRadius = radius;
-			ripple.style.boxShadow = `0 0 34px ${glow}, inset 0 0 28px ${fill}`;
+			ripple.style.boxShadow = `0 0 28px ${glow}, inset 0 0 22px ${fill}`;
 			ripple.style.pointerEvents = 'none';
 			ripple.style.zIndex = '0';
 			ripple.style.transform = initialTransform;
-			ripple.style.willChange = 'transform, opacity, border-width, border-radius, background';
+			ripple.style.willChange = 'transform, opacity';
 
 			const background = document.getElementById('button-splash-background') ?? document.body;
 			background.appendChild(ripple);
@@ -79,25 +77,16 @@ export const buttonSplash: Action<HTMLElement, ButtonSplashOptions | undefined> 
 			const animation = ripple.animate(
 				[
 					{
-						opacity: 0.92,
-						background: fill,
-						borderRadius: radius,
-						borderWidth: '18px',
+						opacity: 0.86,
 						transform: initialTransform
 					},
 					{
-						opacity: 0.52,
-						background: fade,
-						borderRadius: createOrganicRadius(),
-						borderWidth: '7px',
+						opacity: 0.38,
 						offset: 0.52,
 						transform: middleTransform
 					},
 					{
 						opacity: 0,
-						background: 'transparent',
-						borderRadius: createOrganicRadius(),
-						borderWidth: '0px',
 						transform: finalTransform
 					}
 				],
@@ -145,7 +134,7 @@ function createRadiusStops() {
 
 function normalizeOptions(options: ButtonSplashOptions) {
 	return {
-		ripples: Math.max(1, options.ripples ?? 3),
+		ripples: Math.max(1, options.ripples ?? 2),
 		color: options.color
 	};
 }
