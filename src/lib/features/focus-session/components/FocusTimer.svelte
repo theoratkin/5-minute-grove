@@ -344,7 +344,7 @@
 
 	.confetti {
 		position: absolute;
-		z-index: 20;
+		z-index: 0;
 		inset: 0;
 		overflow: hidden;
 		pointer-events: none;
@@ -364,7 +364,8 @@
 
 	@keyframes confetti-fall {
 		0% {
-			transform: translate3d(0, -1rem, 0) rotate(0deg);
+			top: -1.5rem;
+			transform: translate3d(0, 0, 0) rotate(0deg);
 			opacity: 0;
 		}
 
@@ -373,7 +374,8 @@
 		}
 
 		100% {
-			transform: translate3d(var(--drift), 20rem, 0) rotate(calc(540deg + var(--rotation)));
+			top: calc(100% + 1.5rem);
+			transform: translate3d(var(--drift), 0, 0) rotate(calc(540deg + var(--rotation)));
 			opacity: 0.85;
 		}
 	}
