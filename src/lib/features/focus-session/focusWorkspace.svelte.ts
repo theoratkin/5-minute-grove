@@ -102,8 +102,8 @@ export class FocusWorkspace {
 
 	setup() {
 		this.history = loadSessionHistory();
-		this.startOrExtendSound = new Audio('/sounds/start-or-extend.mp3');
-		this.timerFinishSound = new Audio('/sounds/timer-finish.mp3');
+		this.startOrExtendSound = new Audio('/sounds/start-or-extend.wav');
+		this.timerFinishSound = new Audio('/sounds/timer-finish.wav');
 		this.startOrExtendSound.preload = 'auto';
 		this.timerFinishSound.preload = 'auto';
 
