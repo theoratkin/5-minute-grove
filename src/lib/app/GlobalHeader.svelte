@@ -74,7 +74,7 @@
 	}
 </script>
 
-<header class="relative z-20 mx-auto mt-4 w-[calc(100%-2rem)] max-w-6xl rounded-[1.1rem_1.7rem_1.25rem_1.5rem] border border-surface/90 bg-paper/85 shadow-[0_12px_36px_rgb(0_0_0/10%)] backdrop-blur sm:w-[calc(100%-3rem)] lg:w-[calc(100%-4rem)]">
+<header class="relative z-20 mx-auto mt-4 w-[calc(100%-2rem)] max-w-6xl rounded-[1.1rem_1.7rem_1.25rem_1.5rem] border border-surface/90 bg-paper/95 shadow-[0_12px_36px_rgb(0_0_0/10%)] sm:w-[calc(100%-3rem)] lg:w-[calc(100%-4rem)]">
 	<div class="flex min-h-16 w-full items-center justify-between gap-5 px-4 sm:px-6 lg:px-8">
 		<a class="font-display text-xl font-semibold tracking-[-0.025em] text-moss-dark transition hover:text-moss" href="/">
 			Five Minute Grove

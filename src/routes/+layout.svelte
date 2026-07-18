@@ -3,6 +3,7 @@
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 	import favicon from '$lib/assets/favicon.svg';
+	import AmbientCanopy from '$lib/app/AmbientCanopy.svelte';
 	import GlobalHeader from '$lib/app/GlobalHeader.svelte';
 	import { applyTheme, loadTheme, type ThemeId } from '$lib/app/theme';
 	import { AppPreferences, providePreferences } from '$lib/app/preferences.svelte';
@@ -50,6 +51,7 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
+<AmbientCanopy />
 <div id="button-splash-background" class="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden="true"></div>
 
 <GlobalHeader

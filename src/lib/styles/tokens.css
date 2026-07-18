@@ -33,12 +33,6 @@
 
 	body {
 		@apply min-w-80 bg-mist font-sans text-ink;
-		/* Soft, uneven light gives the workspace warmth without adding visual tasks. */
-		background-image:
-			radial-gradient(ellipse at 12% 8%, color-mix(in srgb, var(--color-sun) 19%, transparent), transparent 34rem),
-			radial-gradient(ellipse at 92% 36%, color-mix(in srgb, var(--color-sprout) 28%, transparent), transparent 32rem),
-			repeating-linear-gradient(100deg, transparent 0 7px, color-mix(in srgb, var(--color-ink) 1.5%, transparent) 8px 9px);
-		background-attachment: fixed;
 	}
 
 	button:not(:disabled) {
