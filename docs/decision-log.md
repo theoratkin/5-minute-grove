@@ -43,3 +43,7 @@
 - Opened the grove vignette into a fully outdoor, edge-to-edge landscape. The interior window frame, sill, and furniture were removed; the mug appears separately as a quiet ritual cue only when a five-minute contract is complete.
 - Reworked every post-sprout tree silhouette around natural binary forks instead of branches attached independently to one central stem: the sapling forks once, the young tree twice, and the later tree three times.
 - Made the forked silhouettes deliberately irregular: sibling limbs differ in angle and length, later forks occur at uneven heights, and some eligible limbs do not divide.
+
+## 2026-07-18
+
+- Added an optional, local-first sleep reminder that appears from midnight through 5:59 a.m. local time, at most once per local calendar day. It is intentionally gentle, dismissible, and enabled by default with an opt-out in preferences.

@@ -135,6 +135,17 @@
 
 					<div class="grid gap-2 border-t border-moss/10 pt-4">
 						<div class="px-1">
+							<p class="text-sm font-bold text-ink-muted">Wellbeing</p>
+							<p class="mt-1 text-xs leading-relaxed text-ink-muted">A gentle note after midnight, shown at most once a day.</p>
+						</div>
+						<label class="flex min-h-11 cursor-pointer items-center justify-between gap-4 rounded-xl px-3 py-2 text-sm font-bold text-ink transition hover:bg-mist">
+							<span class="flex items-center gap-2"><i class="ph-bold ph-moon-stars text-lg text-moss" aria-hidden="true"></i> Sleep reminder</span>
+							<input class="size-5 accent-moss" type="checkbox" checked={preferences.sleepReminderEnabled} onchange={(event) => preferences.setSleepReminder(event.currentTarget.checked)} />
+						</label>
+					</div>
+
+					<div class="grid gap-2 border-t border-moss/10 pt-4">
+						<div class="px-1">
 							<p class="text-sm font-bold text-ink-muted">Grove</p>
 							<p class="mt-1 text-xs leading-relaxed text-ink-muted">
 								Start the grove over without removing session history.

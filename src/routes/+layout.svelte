@@ -5,6 +5,7 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import AmbientCanopy from '$lib/app/AmbientCanopy.svelte';
 	import GlobalHeader from '$lib/app/GlobalHeader.svelte';
+	import SleepReminder from '$lib/app/SleepReminder.svelte';
 	import { applyTheme, loadTheme, type ThemeId } from '$lib/app/theme';
 	import { AppPreferences, providePreferences } from '$lib/app/preferences.svelte';
 	import {
@@ -60,6 +61,8 @@
 	onThemeChange={changeTheme}
 	onResetGrove={() => workspace.resetGrove()}
 />
+
+<SleepReminder {preferences} />
 
 <main class="relative z-10 mx-auto grid min-h-[calc(100vh-5rem)] w-full max-w-6xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start lg:px-8 lg:py-10">
 	{@render children()}
