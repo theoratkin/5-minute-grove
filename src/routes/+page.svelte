@@ -26,6 +26,7 @@
 	<div class="grid gap-7 px-6 py-7 sm:px-10 sm:py-9">
 		<FocusTimer
 			remainingSeconds={workspace.remainingSeconds}
+			canRemoveOneMinute={workspace.segmentDurationSeconds > 60}
 			progress={workspace.segmentProgress}
 			groveTotalLeaves={workspace.groveTotalLeaves}
 			groveSettledMatureTreeCount={workspace.groveSettledMatureTreeCount}
@@ -36,6 +37,8 @@
 			onIntentionChange={(nextValue) => (workspace.intention = nextValue)}
 			onStart={() => workspace.startSession()}
 			onAddFive={() => workspace.addFiveMinutes()}
+			onAddOne={() => workspace.addOneMinute()}
+			onRemoveOne={() => workspace.removeOneMinute()}
 			onPause={() => workspace.pauseSession()}
 			onResume={() => workspace.resumeSession()}
 			onStop={() => workspace.stopSessionEarly()}

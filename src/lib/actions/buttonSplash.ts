@@ -3,6 +3,8 @@ import type { Action } from 'svelte/action';
 type ButtonSplashOptions = {
 	ripples?: number;
 	color?: string;
+	durationMs?: number;
+	simple?: boolean;
 };
 
 const DEFAULT_COLOR = 'rgb(49 94 76 / 72%)';
@@ -45,15 +47,16 @@ export const buttonSplash: Action<HTMLElement, ButtonSplashOptions | undefined> 
 		for (let index = 0; index < config.ripples; index += 1) {
 			const ripple = document.createElement('span');
 			const delay = index * 85;
-			const duration = 2200 + index * 140;
+			const duration = config.durationMs + index * 140;
 			const width = finalSize * (0.96 + Math.random() * 0.16);
 			const height = finalSize * (0.82 + Math.random() * 0.2);
 			const rotation = -18 + Math.random() * 36;
 			const skewX = -5 + Math.random() * 10;
 			const skewY = -3 + Math.random() * 6;
-			const radius = createOrganicRadius();
+			const radius = config.simple ? '9999px' : createOrganicRadius();
 			const initialTransform = createTransform(0.02, rotation, skewX, skewY);
-			const middleTransform = createTransform(0.58, rotation + 7, skewX * 0.6, skewY * 0.6);
+			const middleTransform = createTransform(config.simple ? 0.26 : 0.58, rotation + 7, skewX * 0.6, skewY * 0.6);
+			const fadeTransform = createTransform(0.44, rotation + 10, skewX * 0.3, skewY * 0.3);
 			const finalTransform = createTransform(1, rotation + 13, 0, 0);
 
 			ripple.setAttribute('aria-hidden', 'true');
@@ -62,10 +65,10 @@ export const buttonSplash: Action<HTMLElement, ButtonSplashOptions | undefined> 
 			ripple.style.top = `${originY}px`;
 			ripple.style.width = `${width}px`;
 			ripple.style.height = `${height}px`;
-			ripple.style.border = `10px solid ${color}`;
-			ripple.style.background = fill;
+			ripple.style.border = `${config.simple ? 5 : 10}px solid ${color}`;
+			ripple.style.background = config.simple ? 'transparent' : fill;
 			ripple.style.borderRadius = radius;
-			ripple.style.boxShadow = `0 0 28px ${glow}, inset 0 0 22px ${fill}`;
+			ripple.style.boxShadow = config.simple ? 'none' : `0 0 28px ${glow}, inset 0 0 22px ${fill}`;
 			ripple.style.pointerEvents = 'none';
 			ripple.style.zIndex = '0';
 			ripple.style.transform = initialTransform;
@@ -74,8 +77,28 @@ export const buttonSplash: Action<HTMLElement, ButtonSplashOptions | undefined> 
 			const background = document.getElementById('button-splash-background') ?? document.body;
 			background.appendChild(ripple);
 
-			const animation = ripple.animate(
-				[
+			const keyframes = config.simple
+				? [
+						{
+							opacity: 0.72,
+							transform: initialTransform
+						},
+						{
+						opacity: 0.48,
+						offset: 0.38,
+							transform: middleTransform
+						},
+						{
+							opacity: 0,
+						offset: 0.7,
+							transform: fadeTransform
+						},
+						{
+							opacity: 0,
+							transform: finalTransform
+						}
+					]
+				: [
 					{
 						opacity: 0.86,
 						transform: initialTransform
@@ -89,11 +112,14 @@ export const buttonSplash: Action<HTMLElement, ButtonSplashOptions | undefined> 
 						opacity: 0,
 						transform: finalTransform
 					}
-				],
+				];
+
+			const animation = ripple.animate(
+				keyframes,
 				{
 					delay,
 					duration,
-					easing: 'cubic-bezier(0.11, 0.72, 0.24, 1)'
+					easing: config.simple ? 'linear' : 'cubic-bezier(0.11, 0.72, 0.24, 1)'
 				}
 			);
 
@@ -135,6 +161,8 @@ function createRadiusStops() {
 function normalizeOptions(options: ButtonSplashOptions) {
 	return {
 		ripples: Math.max(1, options.ripples ?? 2),
-		color: options.color
+		color: options.color,
+		durationMs: Math.max(100, options.durationMs ?? 2200),
+		simple: options.simple ?? false
 	};
 }

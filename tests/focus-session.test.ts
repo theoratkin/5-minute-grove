@@ -8,6 +8,7 @@ const baseSession: ActiveFocusSession = {
 	intention: 'Write the opening',
 	phase: 'running',
 	remainingSeconds: 300,
+	segmentDurationSeconds: 300,
 	completedContracts: 1,
 	extensionCount: 1,
 	elapsedSessionSeconds: 300,
@@ -47,4 +48,18 @@ test('counts partial work honestly without exceeding one contract', () => {
 	assert.equal(elapsedInCurrentContract(173), 127);
 	assert.equal(elapsedInCurrentContract(0), 300);
 	assert.equal(elapsedInCurrentContract(-10), 300);
+});
+
+test('counts partial work against an extended segment duration', () => {
+	assert.equal(elapsedInCurrentContract(360, 360), 0);
+	assert.equal(elapsedInCurrentContract(240, 360), 120);
+	assert.equal(elapsedInCurrentContract(0, 360), 360);
+});
+
+test('credits the full extended segment when it finishes while away', () => {
+	const restored = restoreFocusSession(
+		{ ...baseSession, remainingSeconds: 360, segmentDurationSeconds: 360 },
+		1_050_000
+	);
+	assert.equal(restored.elapsedSessionSeconds, 660);
 });

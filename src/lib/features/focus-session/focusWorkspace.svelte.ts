@@ -27,11 +27,14 @@ import { loadOrInitializeGrove, saveGroveState } from '$lib/features/grove/grove
 import type { GroveState } from '$lib/features/grove/grove.types';
 
 const FOCUS_WORKSPACE_CONTEXT = Symbol('focus-workspace');
+const C_MAJOR_OCTAVE_SEMITONES = [0, 2, 4, 5, 7, 9, 11, 12] as const;
+const LOWER_C_MAJOR_OCTAVE_SEMITONES = [-12, -10, -8, -7, -5, -3, -1, 0] as const;
 
 export class FocusWorkspace {
 	intention = $state('');
 	phase = $state<FocusPhase>('idle');
 	remainingSeconds = $state(FIVE_MINUTES_SECONDS);
+	segmentDurationSeconds = $state(FIVE_MINUTES_SECONDS);
 	completedContracts = $state(0);
 	extensionCount = $state(0);
 	elapsedSessionSeconds = $state(0);
@@ -46,6 +49,7 @@ export class FocusWorkspace {
 	groveGrowthToken = $state(0);
 
 	private startOrExtendSound: HTMLAudioElement | null = null;
+	private addOneMinuteSound: HTMLAudioElement | null = null;
 	private timerFinishSound: HTMLAudioElement | null = null;
 	private timerInterval: ReturnType<typeof setInterval> | undefined;
 	private deleteTimeout: ReturnType<typeof setTimeout> | undefined;
@@ -58,7 +62,9 @@ export class FocusWorkspace {
 
 	get segmentProgress() {
 		if (this.phase === 'contract-complete') return 100;
-		return ((FIVE_MINUTES_SECONDS - this.remainingSeconds) / FIVE_MINUTES_SECONDS) * 100;
+		return (
+			((this.segmentDurationSeconds - this.remainingSeconds) / this.segmentDurationSeconds) * 100
+		);
 	}
 
 	get groveTotalLeaves() {
@@ -75,7 +81,7 @@ export class FocusWorkspace {
 			: this.elapsedSessionSeconds +
 					(this.phase === 'contract-complete'
 						? 0
-						: elapsedInCurrentContract(this.remainingSeconds));
+						: elapsedInCurrentContract(this.remainingSeconds, this.segmentDurationSeconds));
 	}
 
 	get pageTitle() {
@@ -103,8 +109,10 @@ export class FocusWorkspace {
 	setup() {
 		this.history = loadSessionHistory();
 		this.startOrExtendSound = new Audio('/sounds/start-or-extend.wav');
+		this.addOneMinuteSound = new Audio('/sounds/add-1-minute.wav');
 		this.timerFinishSound = new Audio('/sounds/timer-finish.wav');
 		this.startOrExtendSound.preload = 'auto';
+		this.addOneMinuteSound.preload = 'auto';
 		this.timerFinishSound.preload = 'auto';
 
 		const savedSession = loadActiveSession();
@@ -113,6 +121,7 @@ export class FocusWorkspace {
 			this.intention = restored.intention;
 			this.phase = restored.phase;
 			this.remainingSeconds = restored.remainingSeconds;
+			this.segmentDurationSeconds = restored.segmentDurationSeconds;
 			this.completedContracts = restored.completedContracts;
 			this.extensionCount = restored.extensionCount;
 			this.elapsedSessionSeconds = restored.elapsedSessionSeconds;
@@ -168,6 +177,7 @@ export class FocusWorkspace {
 			intention: this.intention,
 			phase: this.phase,
 			remainingSeconds: this.remainingSeconds,
+			segmentDurationSeconds: this.segmentDurationSeconds,
 			completedContracts: this.completedContracts,
 			extensionCount: this.extensionCount,
 			elapsedSessionSeconds: this.elapsedSessionSeconds,
@@ -226,6 +236,7 @@ export class FocusWorkspace {
 		this.extensionCount = 0;
 		this.elapsedSessionSeconds = 0;
 		this.remainingSeconds = FIVE_MINUTES_SECONDS;
+		this.segmentDurationSeconds = FIVE_MINUTES_SECONDS;
 		this.segmentEndsAt = Date.now() + FIVE_MINUTES_SECONDS * 1000;
 		this.phase = 'running';
 	}
@@ -237,8 +248,54 @@ export class FocusWorkspace {
 
 		this.extensionCount += 1;
 		this.remainingSeconds = FIVE_MINUTES_SECONDS;
+		this.segmentDurationSeconds = FIVE_MINUTES_SECONDS;
 		this.segmentEndsAt = Date.now() + FIVE_MINUTES_SECONDS * 1000;
 		this.phase = 'running';
+	}
+
+	addOneMinute() {
+		if (this.phase !== 'running' || this.segmentEndsAt === null) return;
+		if (this.segmentEndsAt <= Date.now()) {
+			this.syncTimer();
+			return;
+		}
+
+		this.segmentDurationSeconds += 60;
+		this.segmentEndsAt += 60 * 1000;
+		this.remainingSeconds = Math.max(
+			1,
+			Math.ceil((this.segmentEndsAt - Date.now()) / 1000)
+		);
+		this.playRandomMajorNote(this.addOneMinuteSound, C_MAJOR_OCTAVE_SEMITONES);
+	}
+
+	removeOneMinute() {
+		if (
+			this.phase !== 'running' ||
+			this.segmentEndsAt === null ||
+			this.segmentDurationSeconds <= 60
+		) {
+			return;
+		}
+
+		const remainingSeconds = Math.max(
+			0,
+			Math.ceil((this.segmentEndsAt - Date.now()) / 1000)
+		);
+		if (remainingSeconds === 0) {
+			this.syncTimer();
+			return;
+		}
+
+		const secondsToRemove = Math.min(60, remainingSeconds);
+		this.segmentDurationSeconds -= secondsToRemove;
+		this.segmentEndsAt -= secondsToRemove * 1000;
+		this.remainingSeconds = Math.max(
+			0,
+			Math.ceil((this.segmentEndsAt - Date.now()) / 1000)
+		);
+		this.playRandomMajorNote(this.addOneMinuteSound, LOWER_C_MAJOR_OCTAVE_SEMITONES);
+		if (this.remainingSeconds === 0) this.completeCurrentContract(false);
 	}
 
 	pauseSession() {
@@ -305,6 +362,7 @@ export class FocusWorkspace {
 		this.extensionCount = record.extensionCount;
 		this.elapsedSessionSeconds = record.totalSeconds;
 		this.remainingSeconds = FIVE_MINUTES_SECONDS;
+		this.segmentDurationSeconds = FIVE_MINUTES_SECONDS;
 		this.segmentEndsAt = Date.now() + FIVE_MINUTES_SECONDS * 1000;
 		this.phase = 'running';
 		if (this.preferences.notificationsEnabled) void prepareTimerNotifications();
@@ -383,17 +441,17 @@ export class FocusWorkspace {
 		}
 	};
 
-	private completeCurrentContract() {
+	private completeCurrentContract(playFinishSound = true) {
 		if (this.phase !== 'running') return;
 
 		const nextCompletedContracts = this.completedContracts + 1;
-		this.elapsedSessionSeconds += FIVE_MINUTES_SECONDS;
+		this.elapsedSessionSeconds += this.segmentDurationSeconds;
 		this.remainingSeconds = 0;
 		this.completedContracts = nextCompletedContracts;
 		this.phase = 'contract-complete';
 		this.segmentEndsAt = null;
 		this.creditCurrentSessionMinutes();
-		this.playSound(this.timerFinishSound);
+		if (playFinishSound) this.playSound(this.timerFinishSound);
 		if (this.preferences.notificationsEnabled) {
 			notifyContractComplete({
 				intention: this.activeTitle,
@@ -427,6 +485,7 @@ export class FocusWorkspace {
 	private resetSession(clearIntention = false) {
 		this.phase = 'idle';
 		this.remainingSeconds = FIVE_MINUTES_SECONDS;
+		this.segmentDurationSeconds = FIVE_MINUTES_SECONDS;
 		this.completedContracts = 0;
 		this.extensionCount = 0;
 		this.elapsedSessionSeconds = 0;
@@ -474,6 +533,14 @@ export class FocusWorkspace {
 		void sound.play().catch(() => {
 			// Some browsers may block non-gesture audio if autoplay permission is unavailable.
 		});
+	}
+
+	private playRandomMajorNote(sound: HTMLAudioElement | null, semitoneChoices: readonly number[]) {
+		if (!sound || !this.preferences.soundEnabled) return;
+		const semitones = semitoneChoices[Math.floor(Math.random() * semitoneChoices.length)];
+		sound.preservesPitch = false;
+		sound.playbackRate = 2 ** (semitones / 12);
+		this.playSound(sound);
 	}
 }
 

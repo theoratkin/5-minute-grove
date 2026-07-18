@@ -21,12 +21,15 @@ export function restoreFocusSession(
 		phase: 'contract-complete',
 		remainingSeconds: 0,
 		completedContracts: session.completedContracts + 1,
-		elapsedSessionSeconds: session.elapsedSessionSeconds + FIVE_MINUTES_SECONDS,
+		elapsedSessionSeconds: session.elapsedSessionSeconds + session.segmentDurationSeconds,
 		segmentEndsAt: null,
 		completedWhileAway: true
 	};
 }
 
-export function elapsedInCurrentContract(remainingSeconds: number): number {
-	return Math.max(0, Math.min(FIVE_MINUTES_SECONDS, FIVE_MINUTES_SECONDS - remainingSeconds));
+export function elapsedInCurrentContract(
+	remainingSeconds: number,
+	segmentDurationSeconds = FIVE_MINUTES_SECONDS
+): number {
+	return Math.max(0, Math.min(segmentDurationSeconds, segmentDurationSeconds - remainingSeconds));
 }

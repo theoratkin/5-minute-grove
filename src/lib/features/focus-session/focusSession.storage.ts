@@ -23,6 +23,7 @@ export function loadActiveSession(): ActiveFocusSession | null {
 		intention: typeof value.intention === 'string' ? value.intention : '',
 		phase: value.phase as ActiveFocusSession['phase'],
 		remainingSeconds: finiteNonNegative(value.remainingSeconds, 300),
+		segmentDurationSeconds: Math.max(300, finiteNonNegative(value.segmentDurationSeconds, 300)),
 		completedContracts: finiteNonNegative(value.completedContracts, 0),
 		extensionCount: finiteNonNegative(value.extensionCount, 0),
 		elapsedSessionSeconds: finiteNonNegative(value.elapsedSessionSeconds, 0),

@@ -9,6 +9,7 @@
 
 	let {
 		remainingSeconds,
+		canRemoveOneMinute,
 		progress,
 		groveTotalLeaves,
 		groveSettledMatureTreeCount,
@@ -19,6 +20,8 @@
 		onIntentionChange,
 		onStart,
 		onAddFive,
+		onAddOne,
+		onRemoveOne,
 		onPause,
 		onResume,
 		onStop,
@@ -26,6 +29,7 @@
 		onSwitch
 	}: {
 		remainingSeconds: number;
+		canRemoveOneMinute: boolean;
 		progress: number;
 		groveTotalLeaves: number;
 		groveSettledMatureTreeCount: number;
@@ -36,6 +40,8 @@
 		onIntentionChange: (value: string) => void;
 		onStart: () => void;
 		onAddFive: () => void;
+		onAddOne: () => void;
+		onRemoveOne: () => void;
 		onPause: () => void;
 		onResume: () => void;
 		onStop: () => void;
@@ -164,7 +170,15 @@
 							Paused
 						</div>
 					{/if}
-					<span class="timer-readout" role="timer" aria-label={`${formatClock(remainingSeconds)} remaining`}>{formatClock(remainingSeconds)}</span>
+					{#if phase === 'running'}
+						<div class="timer-adjustment-layout">
+							<button class="minute-adjust minute-adjust-remove" type="button" use:buttonSplash={{ ripples: 1, durationMs: 2000, simple: true }} onclick={onRemoveOne} title="Remove one minute from this timer" aria-label="Remove one minute" disabled={!canRemoveOneMinute}>−1:00</button>
+							<span class="timer-readout timer-adjust-readout" role="timer" aria-label={`${formatClock(remainingSeconds)} remaining`}>{formatClock(remainingSeconds)}</span>
+							<button class="minute-adjust minute-adjust-add" type="button" use:buttonSplash={{ ripples: 1, durationMs: 2000, simple: true }} onclick={onAddOne} title="Add one minute to this timer" aria-label="Add one minute">+1:00</button>
+						</div>
+					{:else}
+						<span class="timer-readout" role="timer" aria-label={`${formatClock(remainingSeconds)} remaining`}>{formatClock(remainingSeconds)}</span>
+					{/if}
 				</div>
 			{/if}
 		</div>
@@ -234,6 +248,76 @@
 		letter-spacing: -0.035em;
 		line-height: 1;
 		white-space: nowrap;
+	}
+
+	.minute-adjust {
+		min-width: 3.25rem;
+		border: 1px solid color-mix(in srgb, var(--color-moss) 13%, transparent);
+		border-radius: 9999px;
+		padding: 0.35rem 0.4rem;
+		color: var(--color-ink-muted);
+		background: color-mix(in srgb, var(--color-surface) 55%, transparent);
+		font-family: var(--font-timer);
+		font-size: 0.6875rem;
+		font-weight: 700;
+		font-variant-numeric: tabular-nums;
+		line-height: 1;
+		transition: border-color 150ms, color 150ms, background 150ms;
+	}
+
+	.timer-adjustment-layout {
+		display: grid;
+		grid-template-areas:
+			'readout readout'
+			'remove add';
+		grid-template-columns: 1fr 1fr;
+		align-items: center;
+		justify-items: center;
+		column-gap: 0.5rem;
+		row-gap: 0.6rem;
+		width: 100%;
+	}
+
+	.timer-adjust-readout {
+		grid-area: readout;
+	}
+
+	.minute-adjust-remove {
+		grid-area: remove;
+		justify-self: end;
+	}
+
+	.minute-adjust-add {
+		grid-area: add;
+		justify-self: start;
+	}
+
+	.minute-adjust:hover {
+		border-color: color-mix(in srgb, var(--color-moss) 28%, transparent);
+		color: var(--color-moss);
+		background: color-mix(in srgb, var(--color-mist) 72%, transparent);
+	}
+
+	.minute-adjust:disabled {
+		cursor: default;
+		opacity: 0.35;
+	}
+
+	@media (min-width: 640px) {
+		.timer-adjustment-layout {
+			grid-template-areas: 'remove readout add';
+			grid-template-columns: 3.75rem 1fr 3.75rem;
+			column-gap: 0.5rem;
+			row-gap: 0;
+		}
+
+		.minute-adjust-remove {
+			justify-self: start;
+		}
+
+		.minute-adjust-add {
+			justify-self: end;
+		}
 	}
 
 	.timer-progress-fill {

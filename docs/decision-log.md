@@ -48,3 +48,4 @@
 ## 2026-07-18
 
 - Added an optional, local-first sleep reminder that appears from midnight through 5:59 a.m. local time, at most once per local calendar day. It is intentionally gentle, dismissible, and enabled by default with an opt-out in preferences.
+- Added subtle “−1:00” and “+1:00” controls around the running clock for small, voluntary timer adjustments, moving them beneath the countdown on mobile. They preserve elapsed-time accuracy and do not affect the session's extension count; both give one gentle ripple that fades before reaching the viewport edge, with remove pitching the optional C4 sound across C3–C4 in C major and add pitching it across C4–C5.

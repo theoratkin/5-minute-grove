@@ -15,6 +15,7 @@ export interface ActiveFocusSession {
 	intention: string;
 	phase: Exclude<FocusPhase, 'idle'>;
 	remainingSeconds: number;
+	segmentDurationSeconds: number;
 	completedContracts: number;
 	extensionCount: number;
 	elapsedSessionSeconds: number;
