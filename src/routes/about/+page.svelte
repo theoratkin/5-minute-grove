@@ -14,13 +14,22 @@
 
 	<div class="mt-8 grid gap-5 text-base leading-relaxed text-ink-muted sm:text-lg">
 		<p>
-			Five Minute Grove is a focus timer for the moment when starting feels harder than doing. You make one honest, five-minute commitment—small enough to believe.
+			The hardest part of working, for me, is starting.
 		</p>
 		<p>
-			When the timer ends, the app asks whether you want another five minutes. You can continue, finish, or switch tasks.
+			Traditional focus timers never worked very well. A Pomodoro required me to commit to 25 minutes before I had even begun. A stopwatch had no visible end, and choosing a countdown meant deciding how long I ought to work. Each option made starting feel bigger than it needed to be.
+		</p>
+		<p>
+			Five minutes felt different. It was small enough to be an honest commitment: I could focus for five minutes, and when they were over, I was allowed to stop.
+		</p>
+		<p>
+			Often, though, starting was all I needed. When the timer ended, I found myself choosing another five minutes—and then sometimes another. Each block became a gentle checkpoint: continue if I wanted to, or finish without having failed.
+		</p>
+		<p>
+			Five Minute Grove is my attempt to wrap that way of working in a simple, cozy package. Start with five minutes. When the timer ends, add five more, switch tasks, or finish there. As you work, each focused minute helps your grove grow.
 		</p>
 		<p class="rounded-2xl border border-moss/10 bg-mist/60 p-5 font-semibold text-ink">
-			The choice stays small: another five minutes, or move on.
+			It isn’t about squeezing as much work as possible out of every session. It’s about making the first step approachable and letting momentum grow voluntarily.
 		</p>
 	</div>
 
