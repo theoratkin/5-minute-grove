@@ -40,3 +40,5 @@
 - Renamed the product from "Just 5 More Minutes" to "Five Minute Grove" to reflect its calm, cumulative growth metaphor while preserving the five-minute contract. Existing local-storage keys remain stable so the rename does not reset local data.
 - Added a confirmed grove reset in settings. Resetting clears visible growth while preserving session history and its credit baseline, so old sessions do not regrow the grove after a reload.
 - Opened the grove vignette into a fully outdoor, edge-to-edge landscape. The interior window frame, sill, and furniture were removed; the mug appears separately as a quiet ritual cue only when a five-minute contract is complete.
+- Reworked every post-sprout tree silhouette around natural binary forks instead of branches attached independently to one central stem: the sapling forks once, the young tree twice, and the later tree three times.
+- Made the forked silhouettes deliberately irregular: sibling limbs differ in angle and length, later forks occur at uneven heights, and some eligible limbs do not divide.

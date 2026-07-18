@@ -1,11 +1,18 @@
 <script lang="ts">
 	import GroveLeaves from './GroveLeaves.svelte';
+	import {
+		branchDirection,
+		branchPath,
+		pointOnBranch,
+		SAPLING_BRANCHES,
+		YOUNG_TREE_BRANCHES,
+		FULL_TREE_BRANCHES,
+		type Branch
+	} from './treeGeometry';
 
 	let { leafCount, animateGrowth = false }: { leafCount: number; animateGrowth?: boolean } = $props();
 
-	type Point = { x: number; y: number };
-	type Leaf = Point & { rotation: number; scale: number; tone: number };
-	type GrowthLine = { start: Point; end: Point; leaves: number };
+	type Leaf = { x: number; y: number; rotation: number; scale: number; tone: number };
 
 	const sproutLeaves: Leaf[] = [
 		{ x: 238, y: 105, rotation: 18, scale: 0.72, tone: 0 },
@@ -15,37 +22,30 @@
 		{ x: 244, y: 85, rotation: -82, scale: 0.72, tone: 1 }
 	];
 
-	function leavesAlong(lines: GrowthLine[]): Leaf[] {
-		return lines.flatMap((line, lineIndex) => {
-			const dx = line.end.x - line.start.x;
-			const dy = line.end.y - line.start.y;
-			const length = Math.hypot(dx, dy);
-			return Array.from({ length: line.leaves }, (_, index) => {
-				const t = 0.18 + (index / Math.max(1, line.leaves - 1)) * 0.78;
-				const side = (index + lineIndex) % 2 === 0 ? 1 : -1;
-				const normal = { x: (-dy / length) * side, y: (dx / length) * side };
-				return {
-					x: line.start.x + dx * t + normal.x * 5,
-					y: line.start.y + dy * t + normal.y * 5,
-					rotation: (Math.atan2(normal.y, normal.x) * 180) / Math.PI,
-					scale: 0.72 + ((index + lineIndex) % 3) * 0.055,
-					tone: (index + lineIndex * 2) % 3
-				};
-			});
+	function leavesAcross(branches: readonly Branch[], count: number): Leaf[] {
+		return Array.from({ length: count }, (_, index) => {
+			const branchIndex = index % branches.length;
+			const ring = Math.floor(index / branches.length);
+			const branch = branches[branchIndex];
+			const rings = Math.ceil(count / branches.length);
+			const t = 0.28 + (ring / Math.max(1, rings - 1)) * 0.64;
+			const anchor = pointOnBranch(branch, t);
+			const direction = branchDirection(branch, t);
+			const length = Math.hypot(direction.x, direction.y);
+			const side = (ring + branchIndex) % 2 === 0 ? 1 : -1;
+			const normal = { x: (-direction.y / length) * side, y: (direction.x / length) * side };
+			return {
+				x: anchor.x + normal.x * 5,
+				y: anchor.y + normal.y * 5,
+				rotation: (Math.atan2(normal.y, normal.x) * 180) / Math.PI,
+				scale: 0.72 + ((ring + branchIndex) % 3) * 0.055,
+				tone: (ring + branchIndex * 2) % 3
+			};
 		});
 	}
 
-	const saplingLeaves = leavesAlong([
-		{ start: { x: 244, y: 111 }, end: { x: 244, y: 66 }, leaves: 9 },
-		{ start: { x: 244, y: 91 }, end: { x: 267, y: 75 }, leaves: 6 }
-	]);
-
-	const youngTreeLeaves = leavesAlong([
-		{ start: { x: 244, y: 108 }, end: { x: 244, y: 38 }, leaves: 10 },
-		{ start: { x: 243, y: 88 }, end: { x: 213, y: 69 }, leaves: 7 },
-		{ start: { x: 245, y: 70 }, end: { x: 274, y: 50 }, leaves: 7 },
-		{ start: { x: 243, y: 56 }, end: { x: 221, y: 39 }, leaves: 6 }
-	]);
+	const saplingLeaves = leavesAcross(SAPLING_BRANCHES, 15);
+	const youngTreeLeaves = leavesAcross(YOUNG_TREE_BRANCHES, 30);
 
 	function fullTreeScale(count: number): number {
 		if (count <= 37) return 0.78;
@@ -67,8 +67,10 @@
 			{/each}
 		</g>
 	{:else if leafCount <= 15}
-		<path class="stage-trunk" d="M240.5 119 Q241 91 244 63 Q247 91 248.5 119 Z"></path>
-		<path class="stage-branch" d="M244 91 Q254 84 267 75"></path>
+		<path class="stage-trunk" d="M241 119 Q241.5 101 242.5 89 L245.5 89 Q247 101 248 119 Z"></path>
+		{#each SAPLING_BRANCHES as branch}
+			<path class="stage-branch" d={branchPath(branch)}></path>
+		{/each}
 		<g class="stage-leaves">
 			{#each saplingLeaves.slice(0, leafCount) as leaf, index}
 				<ellipse class:new-leaf={animateGrowth && index === leafCount - 1} class={`leaf-tone-${leaf.tone}`} cx={leaf.x} cy={leaf.y} rx={7.6 * leaf.scale} ry={4.5 * leaf.scale} transform={`rotate(${leaf.rotation} ${leaf.x} ${leaf.y})`}></ellipse>
@@ -76,8 +78,10 @@
 		</g>
 	{:else if leafCount <= 30}
 		<g class="young-tree">
-			<path class="stage-trunk" d="M239 119 Q240 75 244 35 Q248 76 250 119 Z"></path>
-			<path class="stage-branch" d="M243 88 Q228 80 213 69 M245 70 Q259 61 274 50 M243 56 Q232 48 221 39"></path>
+			<path class="stage-trunk" d="M240 119 Q240.5 95 242.5 83 L245.5 83 Q248 95 249 119 Z"></path>
+			{#each YOUNG_TREE_BRANCHES as branch, index}
+				<path class:secondary-branch={index >= 2} class="stage-branch" d={branchPath(branch)}></path>
+			{/each}
 			<g class="stage-leaves">
 				{#each youngTreeLeaves.slice(0, leafCount) as leaf, index}
 					<ellipse class:new-leaf={animateGrowth && index === leafCount - 1} class={`leaf-tone-${leaf.tone}`} cx={leaf.x} cy={leaf.y} rx={8 * leaf.scale} ry={4.8 * leaf.scale} transform={`rotate(${leaf.rotation} ${leaf.x} ${leaf.y})`}></ellipse>
@@ -86,19 +90,21 @@
 		</g>
 	{:else}
 		<g class="tree-growth" style={`--tree-scale: ${growthScale}`}>
-			<path class="trunk" d="M236 119 C235 99 239 84 240 66 C241 43 240 31 244 20 C247 34 246 47 248 69 C250 89 251 102 253 119 Z"></path>
-			<path class="branch" d="M243 69 C229 61 216 52 205 41 M247 58 C258 49 269 43 278 36 M241 84 C228 78 215 72 203 63 M250 82 C262 75 273 67 282 58 M243 49 C234 42 226 35 219 27"></path>
+			<path class="trunk" d="M239 119 C239.5 103 241 89 242 82 L246 82 C248 90 249.5 103 250 119 Z"></path>
+			{#each FULL_TREE_BRANCHES as branch, index}
+				<path class="branch" class:branch-level-2={index >= 2 && index < 6} class:branch-level-3={index >= 6} d={branchPath(branch)}></path>
+			{/each}
 
 			<GroveLeaves count={leafCount} {animateGrowth} />
 
 			<g class="blossoms">
-				<circle cx="218" cy="50" r="2.4"></circle>
-				<circle cx="264" cy="47" r="2.1"></circle>
-				<circle cx="235" cy="31" r="2.3"></circle>
+				<circle cx="208" cy="45" r="2.4"></circle>
+				<circle cx="268" cy="51" r="2.1"></circle>
+				<circle cx="226" cy="33" r="2.3"></circle>
 			</g>
 
 			{#if leafCount >= 40}
-				<g class="bird" transform="translate(275 65)">
+				<g class="bird" transform="translate(278 32)">
 					<path d="M0 1 Q7 -5 13 1 Q8 0 6 6 Q4 2 0 1 Z"></path>
 					<circle cx="9" cy="0" r="0.8"></circle>
 				</g>
@@ -124,6 +130,8 @@
 	.stage-branch, .branch { fill: none; stroke: color-mix(in srgb, var(--color-clay) 62%, var(--color-moss-dark)); stroke-linecap: butt; }
 	.stage-branch { stroke-width: 2.8; }
 	.branch { stroke-width: 3.2; }
+	.secondary-branch, .branch-level-2 { stroke-width: 2.4; }
+	.branch-level-3 { stroke-width: 1.7; }
 	.stage-leaves .leaf-tone-0 { fill: var(--color-moss); }
 	.stage-leaves .leaf-tone-1 { fill: var(--color-moss-dark); }
 	.stage-leaves .leaf-tone-2 { fill: var(--color-moss); opacity: 0.68; }
