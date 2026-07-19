@@ -2,6 +2,7 @@
 	import { onDestroy, tick } from 'svelte';
 	import { formatClock } from '$lib/app/time';
 	import { buttonSplash } from '$lib/actions/buttonSplash';
+	import { confettiBurst } from '$lib/actions/confettiBurst';
 	import EndOfTimerPrompt from './EndOfTimerPrompt.svelte';
 	import type { FocusPhase } from '$lib/features/focus-session/focusSession.types';
 	import type { FocusTask } from '$lib/features/focus-list/focusTask.types';
@@ -227,7 +228,7 @@
 					</div>
 					<div class={`grid gap-2 ${canCompleteTask ? 'grid-cols-2' : 'grid-cols-1'}`}>
 						<button class="flex min-h-12 items-center justify-center gap-1 rounded-xl border border-moss/15 bg-surface px-2 text-sm font-extrabold text-moss transition hover:bg-mist" type="button" onclick={onDone} title="Save this focus without completing the task"><i class="ph-bold ph-stop" aria-hidden="true"></i><span>Stop for now</span></button>
-						{#if canCompleteTask}<button class="flex min-h-12 items-center justify-center gap-1 rounded-xl border border-moss/20 bg-sprout/25 px-2 text-sm font-extrabold text-moss transition hover:bg-sprout/45" type="button" onclick={onCompleteTask} title="Save this focus and mark the task done"><i class="ph-bold ph-check" aria-hidden="true"></i><span>Mark done</span></button>{/if}
+						{#if canCompleteTask}<button class="flex min-h-12 items-center justify-center gap-1 rounded-xl border border-moss/20 bg-sprout/25 px-2 text-sm font-extrabold text-moss transition hover:bg-sprout/45" type="button" use:confettiBurst onclick={onCompleteTask} title="Save this focus and mark the task done"><i class="ph-bold ph-check" aria-hidden="true"></i><span>Mark done</span></button>{/if}
 					</div>
 				</div>
 			{:else if phase === 'paused'}
