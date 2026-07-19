@@ -48,7 +48,7 @@
 		/>
 
 		<p class="hidden text-center text-xs text-ink-muted sm:block" aria-label="Keyboard shortcuts">
-			{#if workspace.phase === 'idle'}Set a time, then press <kbd>Enter</kbd> to start{:else if workspace.phase === 'contract-complete'}Press <kbd>+</kbd> to add five minutes{:else}Press <kbd>Space</kbd> to {workspace.phase === 'paused' ? 'resume' : 'pause'}{#if import.meta.env.DEV} · <kbd>M</kbd> to skip 1 minute · <kbd>F</kbd> to fast-forward{/if}{/if}
+			{#if workspace.phase === 'idle'}Set a time, then press <kbd>Enter</kbd> to start{:else if workspace.phase === 'contract-complete'}Press <kbd>+</kbd> to add five minutes{:else}Press <kbd>Space</kbd> to {workspace.phase === 'paused' ? 'resume' : 'pause'}{#if import.meta.env.DEV} · <kbd>M</kbd> to skip 1 minute · <kbd>F</kbd> to fast-forward{/if}{/if}{#if import.meta.env.DEV} · <kbd>Shift</kbd> + <kbd>I</kbd> for intro{/if}
 		</p>
 
 		<div class="grid grid-cols-2 gap-3" aria-label="Current session progress">

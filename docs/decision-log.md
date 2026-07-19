@@ -48,5 +48,6 @@
 ## 2026-07-18
 
 - Added an optional, local-first sleep reminder that appears from midnight through 5:59 a.m. local time, at most once per local calendar day. It is intentionally gentle, dismissible, and enabled by default with an opt-out in preferences.
+- Added a first-visit introduction that briefly distinguishes the app's tiny, honest work contract and voluntary +5 loop from a conventional timer. Dismissal is stored locally, and a development-only `Shift+I` shortcut reopens it from any route for testing.
 - Added subtle “−1:00” and “+1:00” controls around the running clock for small, voluntary timer adjustments, moving them beneath the countdown on mobile. They preserve elapsed-time accuracy and do not affect the session's extension count; both give one gentle ripple that fades before reaching the viewport edge, with remove pitching the optional C4 sound across C3–C4 in C major and add pitching it across C4–C5.
 - Replaced the forced five-minute starting duration with a segmented minutes-and-seconds field that remembers the user's last choice. Five minutes remains the deliberate post-timer extension, preserving the product's consent-based momentum loop without making every new session reset prescriptive.

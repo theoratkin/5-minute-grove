@@ -5,7 +5,9 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import AmbientCanopy from '$lib/app/AmbientCanopy.svelte';
 	import GlobalHeader from '$lib/app/GlobalHeader.svelte';
+	import IntroductionModal from '$lib/app/IntroductionModal.svelte';
 	import SleepReminder from '$lib/app/SleepReminder.svelte';
+	import { hasSeenIntroduction, markIntroductionSeen } from '$lib/app/introduction';
 	import { applyTheme, loadTheme, type ThemeId } from '$lib/app/theme';
 	import { AppPreferences, providePreferences } from '$lib/app/preferences.svelte';
 	import {
@@ -20,6 +22,7 @@
 
 	let { children } = $props();
 	let theme = $state<ThemeId>('soft-daylight');
+	let introductionOpen = $state(false);
 	const preferences = new AppPreferences();
 	providePreferences(preferences);
 	const workspace = new FocusWorkspace(preferences);
@@ -30,8 +33,25 @@
 		applyTheme(theme);
 		preferences.load();
 		workspace.setup();
+		introductionOpen = !hasSeenIntroduction();
 
-		return () => workspace.dispose();
+		function showIntroductionForDevelopment(event: KeyboardEvent) {
+			if (!import.meta.env.DEV || event.key.toLowerCase() !== 'i' || !event.shiftKey) return;
+			if (event.ctrlKey || event.metaKey || event.altKey) return;
+
+			const target = event.target as HTMLElement | null;
+			if (target?.matches('input, textarea, select, [contenteditable="true"]')) return;
+
+			event.preventDefault();
+			introductionOpen = true;
+		}
+
+		window.addEventListener('keydown', showIntroductionForDevelopment);
+
+		return () => {
+			window.removeEventListener('keydown', showIntroductionForDevelopment);
+			workspace.dispose();
+		};
 	});
 
 	$effect(() => workspace.persistActiveSession());
@@ -45,6 +65,11 @@
 		if (workspace.resumeSavedSession(record) && page.url.pathname !== '/') {
 			void goto('/');
 		}
+	}
+
+	function dismissIntroduction() {
+		markIntroductionSeen();
+		introductionOpen = false;
 	}
 </script>
 
@@ -63,6 +88,8 @@
 />
 
 <SleepReminder {preferences} />
+
+<IntroductionModal open={introductionOpen} ondismiss={dismissIntroduction} />
 
 <main class="relative z-10 mx-auto grid min-h-[calc(100vh-5rem)] w-full max-w-6xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start lg:px-8 lg:py-10">
 	{@render children()}

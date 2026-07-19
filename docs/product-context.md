@@ -14,6 +14,8 @@ Choose an honest starting contract -> complete it -> allow stopping -> invite +5
 
 The app should treat a finished five-minute block as a neutral decision point and gently invite another five minutes. Stopping is a normal option and does not need praise, reassurance, or justification.
 
+Users may choose a shorter or longer opening contract when that makes starting more honest or lets the app serve as a conventional timer. The voluntary five-minute continuation remains the central invitation when that chosen time ends.
+
 ## Differentiation
 
 Adjacent products exist:
@@ -30,7 +32,8 @@ The more nuanced opportunity is making the repeated, consent-based "+5 minutes" 
 The first usable version should likely include:
 
 - An optional session title, defaulting simply to "Session".
-- A default 5-minute timer.
+- A default 5-minute timer with a custom opening duration.
+- A brief first-visit introduction to the tiny-contract and voluntary-continuation idea.
 - A clear end-of-contract state.
 - A prominent "Add 5 minutes" action.
 - Equally valid options to finish or switch tasks.
