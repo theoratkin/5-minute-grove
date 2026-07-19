@@ -43,7 +43,7 @@
 		</button>
 
 		<div class="pr-10">
-			<p class="mb-2 text-sm font-bold text-moss">Welcome to Five Minute Grove</p>
+			<p class="mb-2 text-sm font-bold text-moss">Welcome to 5 Minute Grove</p>
 			<h2 id="introduction-title" class="font-display text-3xl leading-tight font-semibold tracking-[-0.035em] text-moss-dark sm:text-4xl">
 				Make the first commitment small.
 			</h2>

@@ -1,6 +1,6 @@
 import { browser } from '$app/environment';
 
-const STORAGE_PREFIX = 'five-minute-grove';
+const STORAGE_PREFIX = '5-minute-grove';
 
 type StoredValueName =
 	| 'active-session'

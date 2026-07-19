@@ -58,6 +58,7 @@
 
 ## 2026-07-19
 
+- Restyled the product name from "Five Minute Grove" to "5 Minute Grove" for a more appealing, compact brand, including the internal package, storage, and notification namespaces. Used a temporary one-way migration from `five-minute-grove:*` browser storage to `5-minute-grove:*`, then removed it after the active development environment migrated.
 - Added local task renaming, deliberate one-step reordering, and confirmed deletion. These secondary actions stay behind a per-task menu, with inline editing and confirmation, so the focus list remains calm and Start/complete remain the primary card actions.
 - Widened the desktop focus-list column from 20rem to 24rem and the overall workspace from 72rem to 80rem; mobile keeps the existing full-width stacked layout.
 - Made task titles directly editable, naturally wrapping text that saves on blur or Enter. Reordering uses `svelte-dnd-action` with a dedicated grip in the card's outer gutter, preserving ordinary text selection and the full title width while supporting pointer, touch, and keyboard input; Move up/down remains available as an explicit fallback.

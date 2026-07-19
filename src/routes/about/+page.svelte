@@ -1,8 +1,8 @@
 <svelte:head>
-	<title>About - Five Minute Grove</title>
+	<title>About - 5 Minute Grove</title>
 	<meta
 		name="description"
-		content="Why Five Minute Grove makes starting small and choosing another five minutes the whole point."
+		content="Why 5 Minute Grove makes starting small and choosing another five minutes the whole point."
 	/>
 </svelte:head>
 
@@ -26,7 +26,7 @@
 			Often, though, starting was all I needed. When the timer ended, I found myself choosing another five minutes—and then sometimes another. Each block became a gentle checkpoint: continue if I wanted to, or finish without having failed.
 		</p>
 		<p>
-			Five Minute Grove is my attempt to wrap that way of working in a simple, cozy package. Start with five minutes. When the timer ends, add five more, switch tasks, or finish there. As you work, each focused minute helps your grove grow.
+			5 Minute Grove is my attempt to wrap that way of working in a simple, cozy package. Start with five minutes. When the timer ends, add five more, switch tasks, or finish there. As you work, each focused minute helps your grove grow.
 		</p>
 		<p class="rounded-2xl border border-moss/10 bg-mist/60 p-5 font-semibold text-ink">
 			It isn’t about squeezing as much work as possible out of every focus. It’s about making the first step approachable and letting momentum grow voluntarily.

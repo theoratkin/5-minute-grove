@@ -1,4 +1,4 @@
-# Five Minute Grove
+# 5 Minute Grove
 
 A SvelteKit web app centered on a tiny five-minute work contract and voluntary continuation.
 
