@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tick } from 'svelte';
 	import { flip } from 'svelte/animate';
 	import {
 		dragHandle,
@@ -10,6 +11,7 @@
 	import { buttonSplash } from '$lib/actions/buttonSplash';
 	import { confettiBurst } from '$lib/actions/confettiBurst';
 	import { formatMinutes } from '$lib/app/time';
+	import { parseTaskTitle } from '../focusTask.hashtags';
 	import { UNTITLED_TASK_ID } from '../focusTask.state';
 	import type { FocusTask } from '../focusTask.types';
 	import * as m from '$lib/paraglide/messages.js';
@@ -40,6 +42,8 @@
 
 	let draft = $state('');
 	let openMenuTaskId = $state<string | null>(null);
+	let editingTitles = $state<Record<string, string>>({});
+	let titleRenderRevision = $state(0);
 	let draggedTaskId = $state<string | null>(null);
 	let consideredOpenTasks = $state<FocusTask[] | null>(null);
 	let openTasks = $derived(consideredOpenTasks ?? tasks.filter((task) => !task.completedAt));
@@ -62,26 +66,69 @@
 		return task.id === UNTITLED_TASK_ID ? m.focus_list_untitled() : task.title;
 	}
 
-	function constrainTitle(event: Event) {
-		const element = event.currentTarget as HTMLElement;
-		const current = element.textContent ?? '';
-		const constrained = current.replace(/[\r\n]+/g, ' ').slice(0, 80);
-		if (constrained === current) return;
-		element.textContent = constrained;
-		const selection = window.getSelection();
-		selection?.selectAllChildren(element);
-		selection?.collapseToEnd();
+	function editableTitle(task: FocusTask) {
+		return editingTitles[task.id] ?? task.title;
 	}
 
-	function commitTitle(event: FocusEvent, task: FocusTask) {
-		const element = event.currentTarget as HTMLElement;
-		const title = (element.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 80);
-		if (!title) {
-			element.textContent = task.title;
-			return;
+	function caretOffset(element: HTMLElement) {
+		const selection = window.getSelection();
+		if (!selection?.rangeCount) return (element.textContent ?? '').length;
+		const range = selection.getRangeAt(0);
+		if (!element.contains(range.endContainer)) return (element.textContent ?? '').length;
+		const beforeCaret = range.cloneRange();
+		beforeCaret.selectNodeContents(element);
+		beforeCaret.setEnd(range.endContainer, range.endOffset);
+		return beforeCaret.toString().length;
+	}
+
+	function restoreCaret(element: HTMLElement, offset: number) {
+		const selection = window.getSelection();
+		if (!selection) return;
+		const range = document.createRange();
+		const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+		let remaining = offset;
+		let node = walker.nextNode();
+
+		while (node) {
+			const length = node.textContent?.length ?? 0;
+			if (remaining <= length) {
+				range.setStart(node, remaining);
+				range.collapse(true);
+				selection.removeAllRanges();
+				selection.addRange(range);
+				return;
+			}
+			remaining -= length;
+			node = walker.nextNode();
 		}
-		element.textContent = title;
-		if (title !== task.title) onrename(task.id, title);
+
+		range.selectNodeContents(element);
+		range.collapse(false);
+		selection.removeAllRanges();
+		selection.addRange(range);
+	}
+
+	async function updateEditableTitle(element: HTMLElement, task: FocusTask) {
+		const offset = caretOffset(element);
+		const title = (element.textContent ?? '').replace(/[\r\n]+/g, ' ').slice(0, 80);
+		editingTitles[task.id] = title;
+		titleRenderRevision += 1;
+		await tick();
+		restoreCaret(element, Math.min(offset, title.length));
+	}
+
+	function handleTitleInput(event: Event, task: FocusTask) {
+		if (!(event as InputEvent).isComposing) {
+			void updateEditableTitle(event.currentTarget as HTMLElement, task);
+		}
+	}
+
+	async function commitTitle(task: FocusTask) {
+		const title = (editingTitles[task.id] ?? task.title).replace(/\s+/g, ' ').trim().slice(0, 80);
+		if (title && title !== task.title) onrename(task.id, title);
+		editingTitles[task.id] = title || task.title;
+		await tick();
+		delete editingTitles[task.id];
 	}
 
 	function handleTitleKeydown(event: KeyboardEvent, task: FocusTask) {
@@ -90,9 +137,8 @@
 			(event.currentTarget as HTMLElement).blur();
 		} else if (event.key === 'Escape') {
 			event.preventDefault();
-			const element = event.currentTarget as HTMLElement;
-			element.textContent = task.title;
-			element.blur();
+			editingTitles[task.id] = task.title;
+			(event.currentTarget as HTMLElement).blur();
 		}
 	}
 
@@ -122,6 +168,14 @@
 		if (!(event.target as Element | null)?.closest('.task-menu-control')) closeTransientControls();
 	}
 </script>
+
+{#snippet highlightedTaskTitle(title: string)}
+	{#each parseTaskTitle(title) as part}
+		{#if part.type === 'hashtag'}
+			<span class="task-hashtag">{part.value}</span>
+		{:else}{part.value}{/if}
+	{/each}
+{/snippet}
 
 <svelte:window onclick={handleWindowClick} onkeydown={(event) => event.key === 'Escape' && closeTransientControls()} />
 
@@ -175,7 +229,7 @@
 						{#if task.id === UNTITLED_TASK_ID}
 							<strong class="task-title block text-sm text-ink">{m.focus_list_untitled()}</strong>
 						{:else}
-							<div class="editable-title task-title rounded-md text-sm font-bold text-ink" contenteditable="plaintext-only" role="textbox" tabindex="0" aria-label={m.focus_list_edit_title({ title: task.title })} spellcheck="true" oninput={constrainTitle} onblur={(event) => commitTitle(event, task)} onkeydown={(event) => handleTitleKeydown(event, task)}>{task.title}</div>
+							<div class="editable-title task-title rounded-md text-sm font-bold text-ink" contenteditable="plaintext-only" role="textbox" tabindex="0" aria-label={m.focus_list_edit_title({ title: task.title })} spellcheck="true" onfocus={() => editingTitles[task.id] = task.title} oninput={(event) => handleTitleInput(event, task)} oncompositionend={(event) => void updateEditableTitle(event.currentTarget as HTMLElement, task)} onblur={() => void commitTitle(task)} onkeydown={(event) => handleTitleKeydown(event, task)}>{#key `${editableTitle(task)}:${titleRenderRevision}`}{@render highlightedTaskTitle(editableTitle(task))}{/key}</div>
 						{/if}
 						<span class="mt-0.5 block text-xs font-semibold text-ink-muted">{m.focus_list_minutes_focused({ minutes: formatMinutes(taskSeconds(task)) })}{task.id === activeTaskId && currentSession ? m.focus_list_now() : ''}</span>
 					</div>
@@ -216,7 +270,7 @@
 					<li class="relative grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 rounded-xl bg-mist/45 p-2">
 						<button class="grid size-10 shrink-0 place-items-center rounded-xl text-moss hover:bg-sprout/40" type="button" onclick={() => ontoggle(task.id)} aria-label={m.focus_list_reopen({ title: task.title })} title={m.focus_list_reopen_title()}><i class="ph-fill ph-check-square text-lg" aria-hidden="true"></i></button>
 						<div class="min-w-0">
-							<div class="editable-title task-title rounded-md text-sm font-bold text-ink-muted line-through" contenteditable="plaintext-only" role="textbox" tabindex="0" aria-label={m.focus_list_edit_completed({ title: task.title })} spellcheck="true" oninput={constrainTitle} onblur={(event) => commitTitle(event, task)} onkeydown={(event) => handleTitleKeydown(event, task)}>{task.title}</div>
+							<div class="editable-title task-title rounded-md text-sm font-bold text-ink-muted line-through" contenteditable="plaintext-only" role="textbox" tabindex="0" aria-label={m.focus_list_edit_completed({ title: task.title })} spellcheck="true" onfocus={() => editingTitles[task.id] = task.title} oninput={(event) => handleTitleInput(event, task)} oncompositionend={(event) => void updateEditableTitle(event.currentTarget as HTMLElement, task)} onblur={() => void commitTitle(task)} onkeydown={(event) => handleTitleKeydown(event, task)}>{#key `${editableTitle(task)}:${titleRenderRevision}`}{@render highlightedTaskTitle(editableTitle(task))}{/key}</div>
 							<span class="text-xs text-ink-muted">{m.focus_list_minutes_focused({ minutes: formatMinutes(task.accumulatedSeconds) })}</span>
 						</div>
 						<div class="task-menu-control relative">
@@ -239,6 +293,7 @@
 	.task-row { border-radius: 0.85rem 1.35rem 1rem 0.75rem; }
 	.active-task { border-color: color-mix(in srgb, var(--color-moss) 30%, transparent); background: color-mix(in srgb, var(--color-sprout) 24%, var(--color-surface)); }
 	.task-title { overflow-wrap: anywhere; white-space: normal; line-height: 1.3; }
+	.task-hashtag { border-radius: 0.35rem; background: color-mix(in srgb, var(--color-sprout) 34%, transparent); color: var(--color-moss); padding: 0 0.16rem; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
 	.editable-title { cursor: text; padding: 0.15rem 0.2rem; margin: -0.15rem -0.2rem; }
 	.editable-title:hover { background: color-mix(in srgb, var(--color-mist) 60%, transparent); }
 	.editable-title:focus { background: var(--color-paper); box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-moss) 34%, transparent); outline: none; }

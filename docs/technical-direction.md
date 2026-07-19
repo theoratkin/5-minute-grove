@@ -90,6 +90,7 @@ When implementation begins, a pragmatic MVP would be:
 
 - Single main route.
 - Task/intention input and a lightweight local Focus list.
+- Derive normalized hashtags from task titles through one shared parser. Keep the title as the durable source of truth so highlighting and future filtering do not require a parallel tag-editing workflow.
 - Direct minutes-and-seconds countdown input that remembers the last chosen starting duration.
 - End-of-timer decision screen with:
   - Add 5 minutes

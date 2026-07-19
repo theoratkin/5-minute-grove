@@ -38,6 +38,7 @@ The first usable version should likely include:
 - A prominent "Add 5 minutes" action.
 - Equally valid options to finish or switch tasks.
 - A lightweight local Focus list where tasks can be started, resumed, completed, and reopened.
+- Inline hashtags can organize task titles without turning task planning into a separate setup step.
 - Separate session records that accumulate focused time on a task without implying that the task is complete.
 - Direct timer starts without a title use one shared Untitled task rather than creating anonymous duplicates.
 - An in-progress focus attempt can be reassigned in full to another open task.

@@ -9,6 +9,29 @@ import {
 	reorderOpenFocusTasks,
 	sortFocusTasks
 } from '../src/lib/features/focus-list/focusTask.state.ts';
+import {
+	extractTaskHashtags,
+	parseTaskTitle
+} from '../src/lib/features/focus-list/focusTask.hashtags.ts';
+
+test('parses hashtags without changing the task title text', () => {
+	const title = 'Draft proposal #Foxtery and #deep_work.';
+	assert.deepEqual(parseTaskTitle(title), [
+		{ type: 'text', value: 'Draft proposal ' },
+		{ type: 'hashtag', value: '#Foxtery' },
+		{ type: 'text', value: ' and ' },
+		{ type: 'hashtag', value: '#deep_work' },
+		{ type: 'text', value: '.' }
+	]);
+});
+
+test('extracts unique normalized hashtags for future filtering', () => {
+	assert.deepEqual(extractTaskHashtags('#Work notes #work #café'), ['work', 'café']);
+});
+
+test('only treats a hash at a word boundary as a hashtag', () => {
+	assert.deepEqual(extractTaskHashtags('Review issue #123, color#fff and #.'), ['123']);
+});
 
 test('normalizes durable task fields and rejects empty titles', () => {
 	const tasks = normalizeFocusTasks([
