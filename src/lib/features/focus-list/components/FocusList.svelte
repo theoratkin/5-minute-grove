@@ -7,6 +7,7 @@
 		TRIGGERS,
 		type DndEvent
 	} from 'svelte-dnd-action';
+	import { buttonSplash } from '$lib/actions/buttonSplash';
 	import { formatMinutes } from '$lib/app/time';
 	import { UNTITLED_TASK_ID } from '../focusTask.state';
 	import type { FocusTask } from '../focusTask.types';
@@ -179,7 +180,7 @@
 						{/if}
 						<span class="mt-0.5 block text-xs font-semibold text-ink-muted">{formatMinutes(taskSeconds(task))} focused{task.id === activeTaskId && currentSession ? ' · now' : ''}</span>
 					</div>
-					<button class="grid size-10 place-items-center rounded-xl border border-moss/15 bg-paper/60 text-moss transition hover:bg-sprout/35" type="button" onclick={() => onstart(task)} aria-label={`Start ${task.title}`} title="Start task">
+					<button class="grid size-10 place-items-center rounded-xl border border-moss/15 bg-paper/60 text-moss transition hover:bg-sprout/35" type="button" use:buttonSplash onclick={() => onstart(task)} aria-label={`Start ${task.title}`} title="Start task">
 						<i class="ph-fill ph-play" aria-hidden="true"></i>
 					</button>
 					<div class="task-menu-control relative">
