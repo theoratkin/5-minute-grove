@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
 	UNTITLED_TASK_ID,
+	assignUntitledTask,
 	moveOpenFocusTask,
 	normalizeFocusTasks,
 	removeEmptyUntitledTask,
@@ -87,4 +88,30 @@ test('removes an empty untitled inbox but preserves one with saved focus', () =>
 		{ id: UNTITLED_TASK_ID, title: 'Untitled', createdAt: '2026-07-18T10:00:00.000Z', accumulatedSeconds: 60, sessionCount: 1 }
 	]);
 	assert.equal(removeEmptyUntitledTask(focused).length, 1);
+});
+
+test('assigns saved untitled focus to a named task and removes the untitled inbox', () => {
+	const tasks = normalizeFocusTasks([
+		{
+			id: UNTITLED_TASK_ID,
+			title: 'Untitled',
+			createdAt: '2026-07-18T10:00:00.000Z',
+			updatedAt: '2026-07-18T12:00:00.000Z',
+			accumulatedSeconds: 90,
+			sessionCount: 1
+		},
+		{
+			id: 'named',
+			title: 'Named task',
+			createdAt: '2026-07-18T11:00:00.000Z',
+			accumulatedSeconds: 120,
+			sessionCount: 2
+		}
+	]);
+
+	const assigned = assignUntitledTask(tasks, 'named');
+	assert.deepEqual(assigned.map((task) => task.id), ['named']);
+	assert.equal(assigned[0].accumulatedSeconds, 210);
+	assert.equal(assigned[0].sessionCount, 3);
+	assert.equal(assigned[0].updatedAt, '2026-07-18T12:00:00.000Z');
 });

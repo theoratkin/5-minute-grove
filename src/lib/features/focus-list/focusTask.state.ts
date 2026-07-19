@@ -74,6 +74,26 @@ export function removeEmptyUntitledTask(tasks: FocusTask[]): FocusTask[] {
 	);
 }
 
+export function assignUntitledTask(tasks: FocusTask[], targetId: string): FocusTask[] {
+	const untitled = tasks.find((task) => task.id === UNTITLED_TASK_ID);
+	if (!untitled || targetId === UNTITLED_TASK_ID || !tasks.some((task) => task.id === targetId)) {
+		return tasks;
+	}
+
+	return tasks
+		.filter((task) => task.id !== UNTITLED_TASK_ID)
+		.map((task) =>
+			task.id === targetId
+				? {
+						...task,
+						updatedAt: untitled.updatedAt > task.updatedAt ? untitled.updatedAt : task.updatedAt,
+						accumulatedSeconds: task.accumulatedSeconds + untitled.accumulatedSeconds,
+						sessionCount: task.sessionCount + untitled.sessionCount
+					}
+				: task
+		);
+}
+
 export function sortFocusTasks(tasks: FocusTask[]): FocusTask[] {
 	const openTasks = tasks.filter((task) => !task.completedAt);
 	const completedTasks = tasks

@@ -54,7 +54,7 @@
 - Replaced the forced five-minute starting duration with a segmented minutes-and-seconds field that remembers the user's last choice. Five minutes remains the deliberate post-timer extension, preserving the product's consent-based momentum loop without making every new session reset prescriptive.
 - Replaced the session journal as the primary sidebar with a lightweight local Focus list. Tasks can be planned, focused, completed, and reopened, while sessions remain separate effort records that accumulate time without implying completion. Existing history stays available in a collapsible archive, and “Finish session” remains distinct from “Mark done.”
 - Made tasks the sole user-facing work model. Direct unnamed starts now accumulate under one system-managed Untitled task, an active focus attempt can be reassigned in full to any open task, and internal session records are no longer exposed as an archive. “Stop for now” remains distinct from completing a named task.
-- Made the shared Untitled inbox ephemeral while empty: assigning its first active focus to a named task removes the empty row, while an Untitled task with previously saved focus remains visible.
+- Made the shared Untitled inbox ephemeral on assignment: assigning its active focus to a named task removes the Untitled row, folding any focus already saved there into the chosen task so credited time is not lost.
 
 ## 2026-07-19
 

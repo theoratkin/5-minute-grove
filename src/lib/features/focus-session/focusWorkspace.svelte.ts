@@ -32,10 +32,10 @@ import { loadOrInitializeGrove, saveGroveState } from '$lib/features/grove/grove
 import type { GroveState } from '$lib/features/grove/grove.types';
 import { loadFocusTasks, saveFocusTasks } from '$lib/features/focus-list/focusTask.storage';
 import {
+	assignUntitledTask,
 	createUntitledTask,
 	moveOpenFocusTask,
 	reorderOpenFocusTasks,
-	removeEmptyUntitledTask,
 	sortFocusTasks,
 	UNTITLED_TASK_ID,
 	UNTITLED_TASK_TITLE
@@ -415,17 +415,15 @@ export class FocusWorkspace {
 		let switchedTasks = false;
 		if (this.phase !== 'idle') {
 			if (task.id === this.activeTaskId) return true;
+			if (this.activeTaskId === UNTITLED_TASK_ID) {
+				this.assignActiveTask(task.id);
+				return true;
+			}
 
 			switchedTasks = true;
 			this.syncTimer();
-			const previousTaskId = this.activeTaskId;
 			if (this.sessionTimeSeconds > 0) this.finishSession();
 			else this.resetSession();
-
-			if (previousTaskId === UNTITLED_TASK_ID) {
-				this.tasks = removeEmptyUntitledTask(this.tasks);
-				saveFocusTasks(this.tasks);
-			}
 		}
 		this.activeTaskId = task.id;
 		this.intention = task.title;
@@ -443,7 +441,7 @@ export class FocusWorkspace {
 		this.activeTaskId = task.id;
 		this.intention = task.title;
 		if (previousTaskId === UNTITLED_TASK_ID) {
-			this.tasks = removeEmptyUntitledTask(this.tasks);
+			this.tasks = assignUntitledTask(this.tasks, task.id);
 			saveFocusTasks(this.tasks);
 		}
 		this.toastMessage = `This focus is now assigned to “${task.title}”.`;
