@@ -55,3 +55,10 @@
 - Replaced the session journal as the primary sidebar with a lightweight local Focus list. Tasks can be planned, focused, completed, and reopened, while sessions remain separate effort records that accumulate time without implying completion. Existing history stays available in a collapsible archive, and “Finish session” remains distinct from “Mark done.”
 - Made tasks the sole user-facing work model. Direct unnamed starts now accumulate under one system-managed Untitled task, an active focus attempt can be reassigned in full to any open task, and internal session records are no longer exposed as an archive. “Stop for now” remains distinct from completing a named task.
 - Made the shared Untitled inbox ephemeral while empty: assigning its first active focus to a named task removes the empty row, while an Untitled task with previously saved focus remains visible.
+
+## 2026-07-19
+
+- Added local task renaming, deliberate one-step reordering, and confirmed deletion. These secondary actions stay behind a per-task menu, with inline editing and confirmation, so the focus list remains calm and Start/complete remain the primary card actions.
+- Widened the desktop focus-list column from 20rem to 24rem and the overall workspace from 72rem to 80rem; mobile keeps the existing full-width stacked layout.
+- Made task titles directly editable, naturally wrapping text that saves on blur or Enter. Reordering uses `svelte-dnd-action` with a dedicated grip in the card's outer gutter, preserving ordinary text selection and the full title width while supporting pointer, touch, and keyboard input; Move up/down remains available as an explicit fallback.
+- Kept the outer drag gutter visually quiet on precise pointers by revealing only the hovered or keyboard-focused task's grip. The grip stays visible on touch devices, with Move up/down still available from the task menu.

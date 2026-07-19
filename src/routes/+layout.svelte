@@ -89,7 +89,7 @@
 
 <IntroductionModal open={introductionOpen} ondismiss={dismissIntroduction} />
 
-<main class="relative z-10 mx-auto grid min-h-[calc(100vh-5rem)] w-full max-w-6xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start lg:px-8 lg:py-10">
+<main class="relative z-10 mx-auto grid min-h-[calc(100vh-5rem)] w-full max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-start lg:px-8 lg:py-10">
 	{@render children()}
 
 	<aside class="rounded-[1.35rem_2rem_1.65rem_1.2rem] border border-surface/90 bg-paper/80 p-5 shadow-[0_18px_50px_rgb(0_0_0/8%)] backdrop-blur lg:sticky lg:top-8">
@@ -100,6 +100,10 @@
 			onadd={(title) => workspace.addTask(title)}
 			onstart={startTask}
 			ontoggle={(id) => workspace.toggleTaskDone(id)}
+			onrename={(id, title) => workspace.updateTaskTitle(id, title)}
+			onmove={(id, direction) => workspace.moveTask(id, direction)}
+			onreorder={(orderedIds) => workspace.reorderTasks(orderedIds)}
+			ondelete={(id) => workspace.deleteTask(id)}
 		/>
 	</aside>
 </main>
@@ -111,7 +115,7 @@
 	</div>
 {/if}
 
-<footer class="relative z-10 mx-auto w-full max-w-6xl px-4 pb-6 text-center text-xs sm:px-6 lg:px-8">
+<footer class="relative z-10 mx-auto w-full max-w-7xl px-4 pb-6 text-center text-xs sm:px-6 lg:px-8">
 	<p class="inline-block rounded-full border border-surface/90 bg-paper/95 px-4 py-2 text-ink-muted shadow-sm backdrop-blur">
 		by Theo Ratkin (<a
 			class="font-semibold text-ink transition hover:text-moss focus-visible:text-moss"

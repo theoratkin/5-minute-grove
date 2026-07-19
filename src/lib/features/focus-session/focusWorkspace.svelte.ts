@@ -33,6 +33,8 @@ import type { GroveState } from '$lib/features/grove/grove.types';
 import { loadFocusTasks, saveFocusTasks } from '$lib/features/focus-list/focusTask.storage';
 import {
 	createUntitledTask,
+	moveOpenFocusTask,
+	reorderOpenFocusTasks,
 	removeEmptyUntitledTask,
 	sortFocusTasks,
 	UNTITLED_TASK_ID,
@@ -487,6 +489,40 @@ export class FocusWorkspace {
 		);
 		if (id === this.activeTaskId) this.intention = cleanTitle;
 		saveFocusTasks(this.tasks);
+	}
+
+	moveTask(id: string, direction: -1 | 1) {
+		const reordered = moveOpenFocusTask(this.tasks, id, direction);
+		if (reordered === this.tasks) return;
+		this.tasks = reordered;
+		saveFocusTasks(this.tasks);
+	}
+
+	reorderTasks(orderedIds: string[]) {
+		const reordered = reorderOpenFocusTasks(this.tasks, orderedIds);
+		if (reordered === this.tasks) return;
+		this.tasks = reordered;
+		saveFocusTasks(this.tasks);
+	}
+
+	deleteTask(id: string) {
+		const task = this.tasks.find((item) => item.id === id);
+		if (!task || id === UNTITLED_TASK_ID) return;
+
+		if (id === this.activeTaskId) {
+			if (this.phase === 'idle') {
+				this.activeTaskId = null;
+				this.intention = '';
+			} else {
+				const untitled = this.getOrCreateUntitledTask();
+				this.activeTaskId = untitled.id;
+				this.intention = untitled.title;
+			}
+		}
+
+		this.tasks = this.tasks.filter((item) => item.id !== id);
+		saveFocusTasks(this.tasks);
+		this.toastMessage = 'Task deleted.';
 	}
 
 	updateIntention(title: string) {

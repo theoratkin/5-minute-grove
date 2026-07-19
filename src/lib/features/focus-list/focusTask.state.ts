@@ -28,8 +28,7 @@ export function normalizeFocusTasks(value: unknown): FocusTask[] {
 		}));
 
 	const untitledTasks = normalized.filter((task) => task.id === UNTITLED_TASK_ID);
-	const namedTasks = normalized.filter((task) => task.id !== UNTITLED_TASK_ID);
-	if (untitledTasks.length === 0) return namedTasks.slice(0, TASK_LIMIT);
+	if (untitledTasks.length === 0) return normalized.slice(0, TASK_LIMIT);
 
 	const untitled = untitledTasks.reduce((merged, task) => ({
 		...merged,
@@ -45,7 +44,15 @@ export function normalizeFocusTasks(value: unknown): FocusTask[] {
 		sessionCount: merged.sessionCount + task.sessionCount
 	}));
 
-	return [untitled, ...namedTasks].slice(0, TASK_LIMIT);
+	let insertedUntitled = false;
+	return normalized
+		.flatMap((task) => {
+			if (task.id !== UNTITLED_TASK_ID) return [task];
+			if (insertedUntitled) return [];
+			insertedUntitled = true;
+			return [untitled];
+		})
+		.slice(0, TASK_LIMIT);
 }
 
 export function createUntitledTask(now = new Date().toISOString()): FocusTask {
@@ -68,10 +75,43 @@ export function removeEmptyUntitledTask(tasks: FocusTask[]): FocusTask[] {
 }
 
 export function sortFocusTasks(tasks: FocusTask[]): FocusTask[] {
-	return [...tasks].sort((a, b) => {
-		if (Boolean(a.completedAt) !== Boolean(b.completedAt)) return a.completedAt ? 1 : -1;
-		return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-	});
+	const openTasks = tasks.filter((task) => !task.completedAt);
+	const completedTasks = tasks
+		.filter((task) => task.completedAt)
+		.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+	return [...openTasks, ...completedTasks];
+}
+
+export function moveOpenFocusTask(
+	tasks: FocusTask[],
+	id: string,
+	direction: -1 | 1
+): FocusTask[] {
+	const openTasks = tasks.filter((task) => !task.completedAt);
+	const completedTasks = tasks.filter((task) => task.completedAt);
+	const currentIndex = openTasks.findIndex((task) => task.id === id);
+	const nextIndex = currentIndex + direction;
+	if (currentIndex < 0 || nextIndex < 0 || nextIndex >= openTasks.length) return tasks;
+
+	const reordered = [...openTasks];
+	[reordered[currentIndex], reordered[nextIndex]] = [
+		reordered[nextIndex],
+		reordered[currentIndex]
+	];
+	return [...reordered, ...completedTasks];
+}
+
+export function reorderOpenFocusTasks(tasks: FocusTask[], orderedIds: string[]): FocusTask[] {
+	const openTasks = tasks.filter((task) => !task.completedAt);
+	const completedTasks = tasks.filter((task) => task.completedAt);
+	if (orderedIds.length !== openTasks.length) return tasks;
+	const tasksById = new Map(openTasks.map((task) => [task.id, task]));
+	if (new Set(orderedIds).size !== openTasks.length || orderedIds.some((id) => !tasksById.has(id))) {
+		return tasks;
+	}
+	const reordered = orderedIds.map((id) => tasksById.get(id)!);
+	if (reordered.every((task, index) => task.id === openTasks[index].id)) return tasks;
+	return [...reordered, ...completedTasks];
 }
 
 function finiteNonNegative(value: unknown): number {
