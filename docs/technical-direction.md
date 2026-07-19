@@ -11,6 +11,7 @@ Suggested initial shape:
 - Minimal dependencies until concrete needs appear.
 - Responsive web UI for desktop and mobile.
 - Paraglide JS for compiler-generated, type-safe localization with request-scoped SSR locale handling.
+- Resolve locale from the URL first, then a saved cookie, then the browser's preferred language, with English as the base fallback.
 
 ## Code Architecture
 
