@@ -9,6 +9,7 @@
 	import TaskIntentionInput from '$lib/features/task-intention/components/TaskIntentionInput.svelte';
 	import GroveVignette from './GroveVignette.svelte';
 	import DurationField from './DurationField.svelte';
+	import * as m from '$lib/paraglide/messages.js';
 
 	let {
 		remainingSeconds,
@@ -67,17 +68,17 @@
 	let primaryCompletionAction = $state<HTMLButtonElement | undefined>();
 
 	let statusText = $derived.by(() => {
-		if (phase === 'running') return 'Quiet focus time';
-		if (phase === 'paused') return 'Taking a breath';
-		if (phase === 'contract-complete') return 'Your time is complete';
-		return 'Ready when you are';
+		if (phase === 'running') return m.timer_status_running();
+		if (phase === 'paused') return m.timer_status_paused();
+		if (phase === 'contract-complete') return m.timer_status_complete();
+		return m.timer_status_idle();
 	});
 
 	let companionText = $derived.by(() => {
-		if (phase === 'contract-complete') return 'The choice is yours';
-		if (phase === 'paused') return 'Here when you’re ready';
-		if (phase === 'running') return 'Settling in';
-		return 'A small beginning';
+		if (phase === 'contract-complete') return m.timer_companion_complete();
+		if (phase === 'paused') return m.timer_companion_paused();
+		if (phase === 'running') return m.timer_companion_running();
+		return m.timer_companion_idle();
 	});
 
 	const confetti = [
@@ -134,7 +135,7 @@
 	});
 </script>
 
-<section class="grid gap-5" aria-label="Focus timer">
+<section class="grid gap-5" aria-label={m.timer_label()}>
 	<div class="flex items-center justify-between gap-4 text-sm font-semibold text-ink-muted">
 		<span aria-live="polite">{statusText}</span>
 		<span class="flex items-center gap-1.5 text-xs"><i class="ph-fill ph-leaf text-moss" aria-hidden="true"></i> {companionText}</span>
@@ -178,14 +179,14 @@
 					{#if phase === 'paused'}
 						<div class="paused-badge font-sans text-xs font-bold">
 							<i class="ph-fill ph-pause text-sm" aria-hidden="true"></i>
-							Paused
+							{m.timer_paused()}
 						</div>
 					{/if}
 					{#if phase === 'running'}
 						<div class="timer-adjustment-layout">
-							<button class="minute-adjust minute-adjust-remove" type="button" use:buttonSplash={{ ripples: 1, durationMs: 2000, simple: true }} onclick={onRemoveOne} title="Remove one minute from this timer" aria-label="Remove one minute" disabled={!canRemoveOneMinute}>−1:00</button>
+							<button class="minute-adjust minute-adjust-remove" type="button" use:buttonSplash={{ ripples: 1, durationMs: 2000, simple: true }} onclick={onRemoveOne} title={m.timer_remove_minute_title()} aria-label={m.timer_remove_minute()} disabled={!canRemoveOneMinute}>−1:00</button>
 							<div class="timer-adjust-readout"><DurationField seconds={remainingSeconds} editable={false} /></div>
-							<button class="minute-adjust minute-adjust-add" type="button" use:buttonSplash={{ ripples: 1, durationMs: 2000, simple: true }} onclick={onAddOne} title="Add one minute to this timer" aria-label="Add one minute">+1:00</button>
+							<button class="minute-adjust minute-adjust-add" type="button" use:buttonSplash={{ ripples: 1, durationMs: 2000, simple: true }} onclick={onAddOne} title={m.timer_add_minute_title()} aria-label={m.timer_add_minute()}>+1:00</button>
 						</div>
 					{:else if phase === 'idle'}
 						<DurationField seconds={remainingSeconds} onchange={onDurationChange} onsubmit={startWithCommitment} />
@@ -200,7 +201,7 @@
 			<TaskIntentionInput value={intentionValue} clearable={phase === 'idle'} onchange={onIntentionChange} />
 			{#if phase !== 'idle' && activeTaskId}
 				<label class="mx-auto mt-2 flex w-fit items-center gap-2 text-xs font-semibold text-ink-muted">
-					<span>Assign this focus to</span>
+					<span>{m.timer_assign_focus()}</span>
 					<select class="min-h-9 max-w-52 rounded-lg border border-moss/15 bg-paper px-2 font-bold text-moss outline-none focus:border-moss/40" value={activeTaskId} onchange={(event) => onAssignTask(event.currentTarget.value)}>
 						{#each tasks.filter((task) => !task.completedAt) as task (task.id)}
 							<option value={task.id}>{task.title}</option>
@@ -215,44 +216,44 @@
 				<div class="raised-button raised-button-start">
 					<button class:starting={isStarting} class="start-button relative z-10 flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-moss px-5 py-4 text-base font-extrabold text-on-accent transition hover:bg-moss-dark active:translate-y-1" type="button" use:buttonSplash onclick={startWithCommitment} disabled={isStarting}>
 						<i class:starting={isStarting} class="start-icon ph-fill ph-play text-lg" aria-hidden="true"></i>
-						<span>{isStarting ? 'Here we go' : `Start ${formatClock(remainingSeconds)}`}</span>
+						<span>{isStarting ? m.timer_here_we_go() : m.timer_start({ time: formatClock(remainingSeconds) })}</span>
 					</button>
 				</div>
 			{:else if phase === 'contract-complete'}
-				<div class="grid gap-3" aria-label="Completed timer controls">
+				<div class="grid gap-3" aria-label={m.timer_completed_controls()}>
 					<div class="raised-button raised-button-extend">
 						<button bind:this={primaryCompletionAction} class:starting={isExtending} class="extend-button relative z-10 flex min-h-14 w-full min-w-0 items-center justify-center gap-2 rounded-2xl bg-moss px-4 font-extrabold text-on-accent transition hover:bg-moss-dark active:translate-y-1" type="button" use:buttonSplash onclick={extendWithCommitment} disabled={isExtending}>
 							<i class:starting={isExtending} class="extend-icon ph-bold ph-plus text-lg" aria-hidden="true"></i>
-							<span>{isExtending ? 'Another 5 minutes' : 'Add 5 minutes'}</span>
+							<span>{isExtending ? m.timer_another_five() : m.timer_add_five()}</span>
 						</button>
 					</div>
 					<div class={`grid gap-2 ${canCompleteTask ? 'grid-cols-2' : 'grid-cols-1'}`}>
-						<button class="flex min-h-12 items-center justify-center gap-1 rounded-xl border border-moss/15 bg-surface px-2 text-sm font-extrabold text-moss transition hover:bg-mist" type="button" onclick={onDone} title="Save this focus without completing the task"><i class="ph-bold ph-stop" aria-hidden="true"></i><span>Stop for now</span></button>
-						{#if canCompleteTask}<button class="flex min-h-12 items-center justify-center gap-1 rounded-xl border border-moss/20 bg-sprout/25 px-2 text-sm font-extrabold text-moss transition hover:bg-sprout/45" type="button" use:confettiBurst onclick={onCompleteTask} title="Save this focus and mark the task done"><i class="ph-bold ph-check" aria-hidden="true"></i><span>Mark done</span></button>{/if}
+						<button class="flex min-h-12 items-center justify-center gap-1 rounded-xl border border-moss/15 bg-surface px-2 text-sm font-extrabold text-moss transition hover:bg-mist" type="button" onclick={onDone} title={m.timer_save_without_completing()}><i class="ph-bold ph-stop" aria-hidden="true"></i><span>{m.timer_stop_for_now()}</span></button>
+						{#if canCompleteTask}<button class="flex min-h-12 items-center justify-center gap-1 rounded-xl border border-moss/20 bg-sprout/25 px-2 text-sm font-extrabold text-moss transition hover:bg-sprout/45" type="button" use:confettiBurst onclick={onCompleteTask} title={m.timer_save_and_complete()}><i class="ph-bold ph-check" aria-hidden="true"></i><span>{m.timer_mark_done()}</span></button>{/if}
 					</div>
 				</div>
 			{:else if phase === 'paused'}
-				<div class="grid min-h-14 grid-cols-2 gap-3" aria-label="Paused timer controls">
+				<div class="grid min-h-14 grid-cols-2 gap-3" aria-label={m.timer_paused_controls()}>
 					<div class="raised-button raised-button-resume">
 						<button class="relative z-10 flex h-full w-full items-center justify-center gap-2 rounded-2xl bg-moss px-4 font-extrabold text-on-accent transition hover:bg-moss-dark active:translate-y-1" type="button" onclick={onResume}>
 							<i class="ph-fill ph-play text-[1.0625rem]" aria-hidden="true"></i>
-							<span>Resume timer</span>
+							<span>{m.timer_resume()}</span>
 						</button>
 					</div>
 					<button class="flex items-center justify-center gap-2 rounded-2xl border border-clay/30 bg-surface px-4 font-bold text-clay transition hover:bg-clay/10" type="button" onclick={onStop}>
 						<i class="ph-fill ph-stop-circle text-[1.0625rem]" aria-hidden="true"></i>
-						<span>Stop for now</span>
+						<span>{m.timer_stop_for_now()}</span>
 					</button>
 				</div>
 			{:else}
-				<div class="grid min-h-14 grid-cols-2 gap-3" aria-label="Running timer controls">
+				<div class="grid min-h-14 grid-cols-2 gap-3" aria-label={m.timer_running_controls()}>
 					<button class="flex items-center justify-center gap-2 rounded-2xl border border-moss/15 bg-mist px-4 font-extrabold text-moss transition hover:-translate-y-0.5 hover:bg-sprout/50" type="button" onclick={onPause}>
 						<i class="ph-fill ph-pause text-[1.0625rem]" aria-hidden="true"></i>
-						<span>Pause</span>
+						<span>{m.timer_pause()}</span>
 					</button>
 					<button class="flex items-center justify-center gap-2 rounded-2xl border border-clay/30 bg-surface px-4 font-bold text-clay transition hover:bg-clay/10" type="button" onclick={onStop}>
 						<i class="ph-fill ph-stop-circle text-[1.0625rem]" aria-hidden="true"></i>
-						<span>Stop for now</span>
+						<span>{m.timer_stop_for_now()}</span>
 					</button>
 				</div>
 			{/if}

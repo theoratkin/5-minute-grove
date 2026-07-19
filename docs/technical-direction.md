@@ -10,6 +10,7 @@ Suggested initial shape:
 - Local-first state using browser storage for history, preferences, and active-session recovery.
 - Minimal dependencies until concrete needs appear.
 - Responsive web UI for desktop and mobile.
+- Paraglide JS for compiler-generated, type-safe localization with request-scoped SSR locale handling.
 
 ## Code Architecture
 
@@ -76,6 +77,7 @@ Guidelines:
 - Put product behavior and product-specific components in `lib/features/`.
 - Put only generic reusable primitives in `lib/ui/`.
 - Put cross-feature infrastructure in `lib/app/`.
+- Keep user-facing copy in `messages/{locale}.json` and consume generated functions from `$lib/paraglide/messages.js`; generated Paraglide output is not hand-edited.
 - Keep product-meaningful components near their feature. For example, `AddFiveButton` and `EndOfTimerPrompt` belong in `focus-session`, not shared UI.
 - Add abstractions only when they clarify real behavior or remove meaningful duplication.
 

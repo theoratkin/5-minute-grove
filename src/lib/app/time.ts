@@ -9,7 +9,7 @@ export function formatClock(totalSeconds: number): string {
 }
 
 export function formatTime(value: string): string {
-	return new Intl.DateTimeFormat(undefined, {
+	return new Intl.DateTimeFormat(getLocale(), {
 		hour: 'numeric',
 		minute: '2-digit'
 	}).format(new Date(value));
@@ -17,5 +17,7 @@ export function formatTime(value: string): string {
 
 export function formatMinutes(totalSeconds: number): string {
 	const minutes = Math.round(totalSeconds / 60);
-	return `${minutes} min`;
+	return m.minutes_short({ minutes });
 }
+import * as m from '$lib/paraglide/messages.js';
+import { getLocale } from '$lib/paraglide/runtime.js';

@@ -3,6 +3,8 @@
 	import { buttonSplash } from '$lib/actions/buttonSplash';
 	import { formatMinutes, formatTime } from '$lib/app/time';
 	import type { FocusSessionRecord } from '$lib/features/focus-session/focusSession.types';
+	import * as m from '$lib/paraglide/messages.js';
+	import { getLocale } from '$lib/paraglide/runtime.js';
 
 	let {
 		records,
@@ -47,7 +49,7 @@
 	function saveTitle(record: FocusSessionRecord) {
 		if (editingId !== record.id) return;
 
-		const title = titleDraft.trim() || 'Session';
+		const title = titleDraft.trim() || m.default_session_title();
 		if (title !== record.title) updateSessionTitle(record.id, title);
 		editingId = null;
 	}
@@ -70,7 +72,9 @@
 	});
 
 	function extensionLabel(count: number): string {
-		return `${count} ${count === 1 ? 'extension' : 'extensions'}`;
+		return count === 1
+			? m.journal_extension_one({ count })
+			: m.journal_extension_other({ count });
 	}
 
 	function dayLabel(value: string): string {
@@ -79,9 +83,9 @@
 		const yesterday = new Date();
 		yesterday.setDate(today.getDate() - 1);
 
-		if (date.toDateString() === today.toDateString()) return 'Today';
-		if (date.toDateString() === yesterday.toDateString()) return 'Yesterday';
-		return new Intl.DateTimeFormat(undefined, { month: 'long', day: 'numeric', year: 'numeric' }).format(date);
+		if (date.toDateString() === today.toDateString()) return m.journal_today();
+		if (date.toDateString() === yesterday.toDateString()) return m.journal_yesterday();
+		return new Intl.DateTimeFormat(getLocale(), { month: 'long', day: 'numeric', year: 'numeric' }).format(date);
 	}
 
 	let availableRecords = $derived(records.filter((record) => record.id !== currentSession?.id));
@@ -100,26 +104,26 @@
 	let sessionCount = $derived(records.filter((record) => record.id !== currentSession?.id).length + Number(currentSession !== null));
 </script>
 
-<section class="journal grid gap-4" aria-label="Recent sessions">
+<section class="journal grid gap-4" aria-label={m.journal_label()}>
 	<div class="flex items-center justify-between gap-4">
-		<h2 class="font-display text-2xl font-semibold tracking-[-0.03em] text-moss-dark">Session journal</h2>
+		<h2 class="font-display text-2xl font-semibold tracking-[-0.03em] text-moss-dark">{m.journal_heading()}</h2>
 		<span class="min-w-8 rounded-full bg-sprout/65 px-2 py-0.5 text-center text-sm font-bold text-moss">{sessionCount}</span>
 	</div>
 
 	{#if currentSession === null && records.length === 0}
-			<p class="rounded-[1.25rem_1.7rem_1.2rem_1.5rem] border border-dashed border-moss/20 bg-mist/50 p-4 text-sm leading-relaxed text-ink-muted">No notes yet. Time you choose to save will appear here.</p>
+			<p class="rounded-[1.25rem_1.7rem_1.2rem_1.5rem] border border-dashed border-moss/20 bg-mist/50 p-4 text-sm leading-relaxed text-ink-muted">{m.journal_empty()}</p>
 	{:else}
 		<div class="grid gap-5">
 			{#if currentSession}
-				<section class="grid gap-2.5" aria-label="Current session">
-					<h3 class="date-heading text-sm font-bold text-moss">In progress</h3>
+				<section class="grid gap-2.5" aria-label={m.journal_current_section()}>
+					<h3 class="date-heading text-sm font-bold text-moss">{m.journal_in_progress()}</h3>
 					<div class="journal-entry current-entry grid gap-3 border border-moss/20 bg-sprout/20 p-3">
 						<div class="flex items-start justify-between gap-3">
 							<div class="min-w-0">
 								{#if editingId === currentSession.id}
 									<input
 										class="session-title-input max-w-48"
-										aria-label="Session name"
+										aria-label={m.journal_session_name()}
 										bind:this={titleInput}
 										bind:value={titleDraft}
 										onblur={() => saveTitle(currentSession)}
@@ -129,7 +133,7 @@
 										}}
 									/>
 								{:else}
-									<button class="session-title max-w-48" type="button" aria-label={`Edit name: ${currentSession.title}`} title="Edit session name" onclick={() => startEditing(currentSession)}>{currentSession.title}</button>
+									<button class="session-title max-w-48" type="button" aria-label={m.journal_edit_name({ title: currentSession.title })} title={m.journal_edit_name_title()} onclick={() => startEditing(currentSession)}>{currentSession.title}</button>
 								{/if}
 							</div>
 							<div class="grid flex-none justify-items-end">
@@ -137,7 +141,7 @@
 								<span class="mt-1 text-xs font-bold text-ink-muted">{extensionLabel(currentSession.extensionCount)}</span>
 							</div>
 						</div>
-						<span class="text-xs font-bold text-moss">Current session</span>
+						<span class="text-xs font-bold text-moss">{m.journal_current()}</span>
 					</div>
 				</section>
 			{/if}
@@ -155,7 +159,7 @@
 										{#if editingId === record.id}
 											<input
 												class="session-title-input max-w-48"
-												aria-label="Session name"
+												aria-label={m.journal_session_name()}
 												bind:this={titleInput}
 												bind:value={titleDraft}
 												onblur={() => saveTitle(record)}
@@ -165,7 +169,7 @@
 												}}
 											/>
 										{:else}
-											<button class="session-title max-w-48" type="button" aria-label={`Edit name: ${record.title}`} title="Edit session name" onclick={() => startEditing(record)}>{record.title}</button>
+											<button class="session-title max-w-48" type="button" aria-label={m.journal_edit_name({ title: record.title })} title={m.journal_edit_name_title()} onclick={() => startEditing(record)}>{record.title}</button>
 										{/if}
 										<span class="text-xs font-bold text-ink-muted">{formatTime(record.startedAt)}</span>
 									</div>
@@ -175,10 +179,10 @@
 									</div>
 								</div>
 								<div class="entry-actions relative z-10 flex justify-end gap-2">
-									<button class:resuming={resumingId === record.id} class="resume-button grid size-11 place-items-center rounded-xl border border-moss/20 bg-paper/60 text-moss transition hover:border-moss/35 hover:bg-sprout/35" type="button" aria-label={resumingId === record.id ? `Continuing ${record.title}` : `Continue ${record.title} with your saved timer`} title="Continue with your saved timer" use:buttonSplash onclick={() => resumeWithCommitment(record)} disabled={resumingId !== null}>
+									<button class:resuming={resumingId === record.id} class="resume-button grid size-11 place-items-center rounded-xl border border-moss/20 bg-paper/60 text-moss transition hover:border-moss/35 hover:bg-sprout/35" type="button" aria-label={resumingId === record.id ? m.journal_continue_active({ title: record.title }) : m.journal_continue({ title: record.title })} title={m.journal_continue_title()} use:buttonSplash onclick={() => resumeWithCommitment(record)} disabled={resumingId !== null}>
 										<i class:resuming={resumingId === record.id} class="resume-icon ph-fill ph-play text-base" aria-hidden="true"></i>
 									</button>
-									<button class="grid size-11 place-items-center rounded-xl border border-clay/25 text-clay transition hover:bg-clay/10" type="button" aria-label={`Remove ${record.title}; this can be undone`} title="Remove session" onclick={() => deleteSession(record.id)}>
+									<button class="grid size-11 place-items-center rounded-xl border border-clay/25 text-clay transition hover:bg-clay/10" type="button" aria-label={m.journal_remove({ title: record.title })} title={m.journal_remove_title()} onclick={() => deleteSession(record.id)}>
 										<i class="ph-fill ph-trash text-base" aria-hidden="true"></i>
 									</button>
 								</div>
@@ -189,7 +193,7 @@
 			{/each}
 			{#if compactHistory && availableRecords.length > 4}
 				<button class="min-h-11 w-full rounded-xl text-sm font-extrabold text-moss transition hover:bg-mist" type="button" onclick={() => (historyExpanded = !historyExpanded)}>
-					{historyExpanded ? 'Show fewer sessions' : `Show ${availableRecords.length - 4} older sessions`}
+					{historyExpanded ? m.journal_show_fewer() : m.journal_show_older({ count: availableRecords.length - 4 })}
 				</button>
 			{/if}
 		</div>

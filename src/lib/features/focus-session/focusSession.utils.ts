@@ -10,7 +10,7 @@ export function createSessionId(): string {
 	return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-export function getSessionTitle(intention: string): string {
+export function getSessionTitle(intention: string, fallback = 'Session'): string {
 	const trimmed = intention.trim();
-	return trimmed.length > 0 ? trimmed : 'Session';
+	return trimmed.length > 0 ? trimmed : fallback;
 }

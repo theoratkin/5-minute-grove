@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { normalizeStartDuration } from '../focusSession.utils';
+	import * as m from '$lib/paraglide/messages.js';
 
 	let {
 		seconds,
@@ -97,12 +98,12 @@
 	class="duration-field"
 	class:duration-field-editable={editable}
 	role={editable ? 'group' : 'timer'}
-	aria-label={editable ? 'Timer duration in minutes and seconds' : `${minutesText}:${secondsText} remaining`}
+	aria-label={editable ? m.duration_editable_label() : m.duration_remaining({ time: `${minutesText}:${secondsText}` })}
 	onfocusin={() => editable && (editing = true)}
 	onfocusout={finishEditing}
 >
 	{#if editable}
-		<label class="sr-only" for="timer-minutes">Minutes</label>
+		<label class="sr-only" for="timer-minutes">{m.duration_minutes()}</label>
 		<input
 			bind:this={minutesInput}
 			id="timer-minutes"
@@ -126,7 +127,7 @@
 	{/if}
 	<span class="duration-separator" aria-hidden="true">:</span>
 	{#if editable}
-		<label class="sr-only" for="timer-seconds">Seconds</label>
+		<label class="sr-only" for="timer-seconds">{m.duration_seconds()}</label>
 		<input
 			bind:this={secondsInput}
 			id="timer-seconds"

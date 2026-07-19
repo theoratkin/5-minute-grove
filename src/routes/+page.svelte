@@ -3,6 +3,7 @@
 	import { formatClock } from '$lib/app/time';
 	import FocusTimer from '$lib/features/focus-session/components/FocusTimer.svelte';
 	import { useFocusWorkspace } from '$lib/features/focus-session/focusWorkspace.svelte';
+	import * as m from '$lib/paraglide/messages.js';
 
 	const workspace = useFocusWorkspace();
 
@@ -17,12 +18,12 @@
 	<title>{workspace.pageTitle}</title>
 	<meta
 		name="description"
-		content="A gentle focus timer with a duration you choose and voluntary five-minute extensions."
+		content={m.home_meta_description()}
 	/>
 </svelte:head>
 
-<h1 class="sr-only">5 Minute Grove focus timer</h1>
-<section class="workspace-card overflow-hidden border border-surface/80 bg-paper/90 shadow-[0_24px_70px_rgb(0_0_0/12%)] backdrop-blur" aria-label="5 Minute Grove workspace">
+<h1 class="sr-only">{m.home_heading()}</h1>
+<section class="workspace-card overflow-hidden border border-surface/80 bg-paper/90 shadow-[0_24px_70px_rgb(0_0_0/12%)] backdrop-blur" aria-label={m.home_workspace_label()}>
 	<div class="grid gap-7 px-6 py-7 sm:px-10 sm:py-9">
 		<FocusTimer
 			remainingSeconds={workspace.remainingSeconds}
@@ -50,18 +51,18 @@
 			onCompleteTask={() => workspace.completeActiveTask()}
 		/>
 
-		<p class="hidden text-center text-xs text-ink-muted sm:block" aria-label="Keyboard shortcuts">
-			{#if workspace.phase === 'idle'}Set a time, then press <kbd>Enter</kbd> to start{:else if workspace.phase === 'contract-complete'}Press <kbd>+</kbd> to add five minutes{:else}Press <kbd>Space</kbd> to {workspace.phase === 'paused' ? 'resume' : 'pause'}{#if import.meta.env.DEV} · <kbd>M</kbd> to skip 1 minute · <kbd>F</kbd> to fast-forward{/if}{/if}{#if import.meta.env.DEV} · <kbd>Shift</kbd> + <kbd>I</kbd> for intro{/if}
+		<p class="hidden text-center text-xs text-ink-muted sm:block" aria-label={m.keyboard_shortcuts_label()}>
+			{#if workspace.phase === 'idle'}{m.keyboard_set_time()} <kbd>Enter</kbd> {m.keyboard_to_start()}{:else if workspace.phase === 'contract-complete'}{m.keyboard_press()} <kbd>+</kbd> {m.keyboard_to_add_five()}{:else}{m.keyboard_press()} <kbd>Space</kbd> {workspace.phase === 'paused' ? m.keyboard_to_resume() : m.keyboard_to_pause()}{#if import.meta.env.DEV} · <kbd>M</kbd> {m.keyboard_skip_minute()} · <kbd>F</kbd> {m.keyboard_fast_forward()}{/if}{/if}{#if import.meta.env.DEV} · <kbd>Shift</kbd> + <kbd>I</kbd> {m.keyboard_for_intro()}{/if}
 		</p>
 
-		<div class="grid grid-cols-2 gap-3" aria-label="Current focus progress">
+		<div class="grid grid-cols-2 gap-3" aria-label={m.current_focus_progress_label()}>
 			<div class="metric-card metric-card-time border border-moss/10 bg-mist/60 p-4">
 				<strong class="block text-2xl leading-none font-extrabold text-moss-dark">{formatClock(workspace.sessionTimeSeconds)}</strong>
-				<span class="mt-1 block text-xs font-bold text-ink-muted">Focused now</span>
+				<span class="mt-1 block text-xs font-bold text-ink-muted">{m.focused_now()}</span>
 			</div>
 			<div class="metric-card metric-card-extensions border border-moss/10 bg-mist/60 p-4">
 				<strong class="block text-2xl leading-none font-extrabold text-moss-dark">{workspace.extensionCount}</strong>
-				<span class="mt-1 block text-xs font-bold text-ink-muted">Extensions</span>
+				<span class="mt-1 block text-xs font-bold text-ink-muted">{m.extensions()}</span>
 			</div>
 		</div>
 	</div>

@@ -1,4 +1,6 @@
 <script lang="ts">
+	import * as m from '$lib/paraglide/messages.js';
+
 	let {
 		open,
 		ondismiss
@@ -36,25 +38,25 @@
 		<button
 			class="absolute top-4 right-4 grid size-11 place-items-center rounded-xl text-ink-muted transition hover:bg-mist hover:text-moss"
 			type="button"
-			aria-label="Close introduction"
+			aria-label={m.intro_close()}
 			onclick={ondismiss}
 		>
 			<i class="ph-bold ph-x text-lg" aria-hidden="true"></i>
 		</button>
 
 		<div class="pr-10">
-			<p class="mb-2 text-sm font-bold text-moss">Welcome to 5 Minute Grove</p>
+			<p class="mb-2 text-sm font-bold text-moss">{m.intro_welcome()}</p>
 			<h2 id="introduction-title" class="font-display text-3xl leading-tight font-semibold tracking-[-0.035em] text-moss-dark sm:text-4xl">
-				Make the first commitment small.
+				{m.intro_heading()}
 			</h2>
 		</div>
 
 		<div class="grid gap-4 text-sm leading-relaxed text-ink-muted sm:text-base">
 			<p>
-				Use it like any timer, or use its real trick: choose a time you can honestly agree to—even less than five minutes.
+				{m.intro_paragraph_1()}
 			</p>
 			<p>
-				When time is up, you’re free to stop. If momentum has arrived, add five minutes and keep your grove growing. Each extension is a choice, never an obligation.
+				{m.intro_paragraph_2()}
 			</p>
 		</div>
 
@@ -63,7 +65,7 @@
 			type="button"
 			onclick={ondismiss}
 		>
-			Choose my time
+			{m.intro_choose_time()}
 		</button>
 	</div>
 </dialog>

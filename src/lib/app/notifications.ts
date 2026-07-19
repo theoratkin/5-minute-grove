@@ -1,4 +1,5 @@
 import { browser } from '$app/environment';
+import * as m from '$lib/paraglide/messages.js';
 
 type ContractCompleteNotification = {
 	intention: string;
@@ -27,9 +28,14 @@ export function notifyContractComplete({
 }: ContractCompleteNotification) {
 	if (!canUseNotifications() || Notification.permission !== 'granted') return;
 
-	const blockLabel = completedContracts === 1 ? 'one focus block' : `${completedContracts} focus blocks`;
-	const notification = new Notification('Another five minutes?', {
-		body: `${intention || 'This focus'} has reached ${blockLabel}. Add five minutes to continue.`,
+	const blockLabel = completedContracts === 1
+		? m.notification_block_one()
+		: m.notification_block_other({ count: completedContracts });
+	const notification = new Notification(m.notification_title(), {
+		body: m.notification_body({
+			intention: intention || m.notification_focus_fallback(),
+			blockLabel
+		}),
 		tag: '5-minute-grove:contract-complete'
 	});
 

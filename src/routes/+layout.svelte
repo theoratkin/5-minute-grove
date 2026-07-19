@@ -19,6 +19,8 @@
 	import '$lib/styles/tokens.css';
 	import '@phosphor-icons/web/bold';
 	import '@phosphor-icons/web/fill';
+	import * as m from '$lib/paraglide/messages.js';
+	import { localizeHref } from '$lib/paraglide/runtime.js';
 
 	let { children } = $props();
 	let theme = $state<ThemeId>('soft-daylight');
@@ -68,7 +70,7 @@
 	}
 
 	function startTask(task: FocusTask) {
-		if (workspace.startTask(task) && page.url.pathname !== '/') void goto('/');
+		if (workspace.startTask(task) && page.url.pathname !== '/') void goto(localizeHref('/'));
 	}
 
 	function dismissIntroduction() {
@@ -118,15 +120,15 @@
 	<div class="fixed right-4 bottom-4 z-50 flex min-h-12 w-max max-w-[calc(100vw-2rem)] items-center justify-between gap-4 rounded-2xl border border-moss/15 bg-paper px-4 py-3 text-sm font-semibold text-ink shadow-[0_16px_45px_rgb(0_0_0/18%)]" role="status">
 		<span>{workspace.toastMessage}</span>
 		{#if workspace.canUndoTaskDeletion}
-			<button class="min-h-11 rounded-xl px-3 font-bold text-moss transition hover:bg-mist" type="button" onclick={() => workspace.undoTaskDeletion()}>Undo</button>
+			<button class="min-h-11 rounded-xl px-3 font-bold text-moss transition hover:bg-mist" type="button" onclick={() => workspace.undoTaskDeletion()}>{m.undo()}</button>
 		{/if}
-		<button class="grid size-11 shrink-0 place-items-center rounded-xl text-ink-muted transition hover:bg-mist" type="button" aria-label="Dismiss message" onclick={() => workspace.dismissToast()}><i class="ph-bold ph-x" aria-hidden="true"></i></button>
+		<button class="grid size-11 shrink-0 place-items-center rounded-xl text-ink-muted transition hover:bg-mist" type="button" aria-label={m.dismiss_message()} onclick={() => workspace.dismissToast()}><i class="ph-bold ph-x" aria-hidden="true"></i></button>
 	</div>
 {/if}
 
 <footer class="relative z-10 mx-auto w-full max-w-7xl px-4 pb-6 text-center text-xs sm:px-6 lg:px-8">
 	<p class="inline-block rounded-full border border-surface/90 bg-paper/95 px-4 py-2 text-ink-muted shadow-sm backdrop-blur">
-		by Theo Ratkin (<a
+		{m.footer_by()} (<a
 			class="font-semibold text-ink transition hover:text-moss focus-visible:text-moss"
 			href="https://theoratkin.com"
 		>theoratkin.com</a>)

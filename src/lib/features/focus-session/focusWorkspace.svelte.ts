@@ -41,6 +41,7 @@ import {
 	UNTITLED_TASK_TITLE
 } from '$lib/features/focus-list/focusTask.state';
 import type { FocusTask } from '$lib/features/focus-list/focusTask.types';
+import * as m from '$lib/paraglide/messages.js';
 
 const FOCUS_WORKSPACE_CONTEXT = Symbol('focus-workspace');
 const C_MAJOR_OCTAVE_SEMITONES = [0, 2, 4, 5, 7, 9, 11, 12] as const;
@@ -87,12 +88,13 @@ export class FocusWorkspace {
 
 	get activeTitle() {
 		const activeTask = this.tasks.find((task) => task.id === this.activeTaskId);
+		if (activeTask?.id === UNTITLED_TASK_ID) return m.focus_list_untitled();
 		if (activeTask) return activeTask.title;
-		return getSessionTitle(this.intention);
+		return getSessionTitle(this.intention, m.default_session_title());
 	}
 
 	get canUndoTaskDeletion() {
-		return this.deletedTaskUndo !== null && this.toastMessage === 'Task deleted.';
+		return this.deletedTaskUndo !== null && this.toastMessage === m.toast_task_deleted();
 	}
 
 	get canCompleteActiveTask() {
@@ -129,10 +131,10 @@ export class FocusWorkspace {
 
 	get pageTitle() {
 		if (this.phase === 'running') {
-			return `${formatClock(this.remainingSeconds)} - 5 Minute Grove`;
+			return m.page_title_running({ time: formatClock(this.remainingSeconds) });
 		}
-		if (this.phase === 'paused') return 'Paused - 5 Minute Grove';
-		return '5 Minute Grove';
+		if (this.phase === 'paused') return m.page_title_paused();
+		return m.app_name();
 	}
 
 	get currentSession(): FocusSessionRecord | null {
@@ -181,8 +183,8 @@ export class FocusWorkspace {
 			this.recoverActiveTask();
 			this.segmentEndsAt = restored.segmentEndsAt;
 			this.toastMessage = restored.completedWhileAway
-				? 'Your five-minute contract finished while you were away.'
-				: 'Your focus was restored.';
+				? m.toast_contract_finished_away()
+				: m.toast_focus_restored();
 			if (restored.completedWhileAway && this.preferences.notificationsEnabled) {
 				notifyContractComplete({
 					intention: this.activeTitle,
@@ -379,7 +381,7 @@ export class FocusWorkspace {
 		this.phase = 'running';
 	}
 
-	finishSession(message = 'Focus saved.', clearIntention = false) {
+	finishSession(message = m.toast_focus_saved(), clearIntention = false) {
 		if (!this.sessionStartedAt || !this.activeSessionId || this.sessionTimeSeconds <= 0) return;
 
 		const record: FocusSessionRecord = {
@@ -447,7 +449,7 @@ export class FocusWorkspace {
 		this.activeTaskId = task.id;
 		this.intention = task.title;
 		this.startSession();
-		if (switchedTasks) this.toastMessage = `Now focusing on “${task.title}”.`;
+		if (switchedTasks) this.toastMessage = m.toast_now_focusing({ title: task.title });
 		return true;
 	}
 
@@ -463,7 +465,7 @@ export class FocusWorkspace {
 			this.tasks = assignUntitledTask(this.tasks, task.id);
 			saveFocusTasks(this.tasks);
 		}
-		this.toastMessage = `This focus is now assigned to “${task.title}”.`;
+		this.toastMessage = m.toast_focus_assigned({ title: task.title });
 	}
 
 	toggleTaskDone(id: string) {
@@ -471,7 +473,7 @@ export class FocusWorkspace {
 		if (!task || id === UNTITLED_TASK_ID) return;
 
 		if (id === this.activeTaskId && this.phase !== 'idle') {
-			if (this.sessionTimeSeconds > 0) this.finishSession('Task marked done.');
+			if (this.sessionTimeSeconds > 0) this.finishSession(m.toast_task_done());
 			else this.resetSession(true);
 		}
 		const now = new Date().toISOString();
@@ -482,7 +484,7 @@ export class FocusWorkspace {
 			)
 		);
 		saveFocusTasks(this.tasks);
-		this.toastMessage = completedAt ? 'Task marked done.' : 'Task moved back to your list.';
+		this.toastMessage = completedAt ? m.toast_task_done() : m.toast_task_reopened();
 		if (completedAt) this.playSound(this.taskDoneSound);
 		if (completedAt && id === this.activeTaskId) {
 			this.activeTaskId = null;
@@ -558,7 +560,7 @@ export class FocusWorkspace {
 			createdReplacementUntitled:
 				!hadUntitledTask && this.activeTaskId === UNTITLED_TASK_ID
 		};
-		this.toastMessage = 'Task deleted.';
+		this.toastMessage = m.toast_task_deleted();
 	}
 
 	undoTaskDeletion() {
@@ -588,7 +590,7 @@ export class FocusWorkspace {
 
 		saveFocusTasks(this.tasks);
 		this.deletedTaskUndo = null;
-		this.toastMessage = 'Task restored.';
+		this.toastMessage = m.toast_task_restored();
 	}
 
 	updateIntention(title: string) {
@@ -631,7 +633,7 @@ export class FocusWorkspace {
 		this.groveState = resetGroveState(groveSeeds);
 		this.groveGrowthToken += 1;
 		saveGroveState(this.groveState);
-		this.toastMessage = 'Your grove has been reset.';
+		this.toastMessage = m.toast_grove_reset();
 	}
 
 	private syncTimer = () => {

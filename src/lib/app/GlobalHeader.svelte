@@ -3,6 +3,8 @@
 	import { themes, type ThemeId } from '$lib/app/theme';
 	import type { AppPreferences } from '$lib/app/preferences.svelte';
 	import { prepareTimerNotifications } from '$lib/app/notifications';
+	import * as m from '$lib/paraglide/messages.js';
+	import { localizeHref } from '$lib/paraglide/runtime.js';
 
 	let {
 		theme,
@@ -57,15 +59,15 @@
 		const available = permission === 'granted';
 		preferences.setNotifications(available);
 		notificationNote = available
-			? 'Timer-finish alerts are on.'
+			? m.notifications_enabled()
 			: permission === 'unsupported'
-				? 'Notifications are not available in this browser.'
-				: 'Notifications remain off because permission was not granted.';
+				? m.notifications_unsupported()
+				: m.notifications_denied();
 	}
 
 	function confirmGroveReset() {
 		const confirmed = window.confirm(
-			'Reset your grove? This removes all trees and leaves. Your focused time will stay, and this cannot be undone.'
+			m.reset_grove_confirmation()
 		);
 		if (!confirmed) return;
 
@@ -76,23 +78,23 @@
 
 <header class="relative z-20 mx-auto mt-4 w-[calc(100%-2rem)] max-w-[76rem] rounded-[1.1rem_1.7rem_1.25rem_1.5rem] border border-surface/90 bg-paper/95 shadow-[0_12px_36px_rgb(0_0_0/10%)] sm:w-[calc(100%-3rem)] lg:w-[calc(100%-4rem)]">
 	<div class="flex min-h-16 w-full items-center justify-between gap-5 px-4 sm:px-6 lg:px-8">
-		<a class="font-display text-xl font-semibold tracking-[-0.025em] text-moss-dark transition hover:text-moss" href="/">
-			5 Minute Grove
+		<a class="font-display text-xl font-semibold tracking-[-0.025em] text-moss-dark transition hover:text-moss" href={localizeHref('/')}>
+			{m.app_name()}
 		</a>
 
-		<nav class="flex items-center gap-1 sm:gap-2" aria-label="Primary navigation">
-			<a class="rounded-xl px-3 py-2 text-sm font-bold text-ink-muted transition hover:bg-mist hover:text-moss" href="/about">About</a>
+		<nav class="flex items-center gap-1 sm:gap-2" aria-label={m.primary_navigation()}>
+			<a class="rounded-xl px-3 py-2 text-sm font-bold text-ink-muted transition hover:bg-mist hover:text-moss" href={localizeHref('/about')}>{m.about_link()}</a>
 			<details bind:this={themeMenu} class="group relative">
 				<summary
 					class="grid size-10 cursor-pointer list-none place-items-center rounded-xl text-ink-muted transition marker:hidden hover:bg-mist hover:text-moss group-open:bg-mist group-open:text-moss"
-					aria-label="Open preferences"
+					aria-label={m.open_preferences()}
 				>
 					<i class="ph-bold ph-sliders-horizontal text-xl" aria-hidden="true"></i>
 				</summary>
 
 				<div class="absolute top-[calc(100%+0.5rem)] right-0 z-30 grid w-[min(20rem,calc(100vw-2rem))] gap-4 rounded-2xl border border-surface/90 bg-paper p-4 shadow-[0_16px_45px_rgb(0_0_0/18%)]">
 					<div>
-						<p class="mb-2 px-1 text-sm font-bold text-ink-muted">Theme</p>
+						<p class="mb-2 px-1 text-sm font-bold text-ink-muted">{m.theme()}</p>
 						<div class="grid gap-1">
 					{#each themes as option (option.id)}
 						<button
@@ -110,7 +112,7 @@
 										></span>
 									{/each}
 								</span>
-								<span>{option.label}</span>
+								<span>{option.label()}</span>
 							</span>
 							{#if theme === option.id}
 								<i class="ph-bold ph-check text-base" aria-hidden="true"></i>
@@ -121,13 +123,13 @@
 					</div>
 
 					<div class="grid gap-2 border-t border-moss/10 pt-4">
-						<p class="px-1 text-sm font-bold text-ink-muted">Timer feedback</p>
+						<p class="px-1 text-sm font-bold text-ink-muted">{m.timer_feedback()}</p>
 						<label class="flex min-h-11 cursor-pointer items-center justify-between gap-4 rounded-xl px-3 py-2 text-sm font-bold text-ink transition hover:bg-mist">
-							<span class="flex items-center gap-2"><i class="ph-bold ph-speaker-high text-lg text-moss" aria-hidden="true"></i> Sounds</span>
+							<span class="flex items-center gap-2"><i class="ph-bold ph-speaker-high text-lg text-moss" aria-hidden="true"></i> {m.sounds()}</span>
 							<input class="size-5 accent-moss" type="checkbox" checked={preferences.soundEnabled} onchange={(event) => preferences.setSound(event.currentTarget.checked)} />
 						</label>
 						<label class="flex min-h-11 cursor-pointer items-center justify-between gap-4 rounded-xl px-3 py-2 text-sm font-bold text-ink transition hover:bg-mist">
-							<span class="flex items-center gap-2"><i class="ph-bold ph-bell text-lg text-moss" aria-hidden="true"></i> Notifications</span>
+							<span class="flex items-center gap-2"><i class="ph-bold ph-bell text-lg text-moss" aria-hidden="true"></i> {m.notifications()}</span>
 							<input class="size-5 accent-moss" type="checkbox" checked={preferences.notificationsEnabled} onchange={(event) => void toggleNotifications(event.currentTarget.checked)} />
 						</label>
 						{#if notificationNote}<p class="px-3 text-xs leading-relaxed text-ink-muted" aria-live="polite">{notificationNote}</p>{/if}
@@ -135,20 +137,20 @@
 
 					<div class="grid gap-2 border-t border-moss/10 pt-4">
 						<div class="px-1">
-							<p class="text-sm font-bold text-ink-muted">Wellbeing</p>
-							<p class="mt-1 text-xs leading-relaxed text-ink-muted">A gentle note after midnight, shown at most once a day.</p>
+							<p class="text-sm font-bold text-ink-muted">{m.wellbeing()}</p>
+							<p class="mt-1 text-xs leading-relaxed text-ink-muted">{m.wellbeing_description()}</p>
 						</div>
 						<label class="flex min-h-11 cursor-pointer items-center justify-between gap-4 rounded-xl px-3 py-2 text-sm font-bold text-ink transition hover:bg-mist">
-							<span class="flex items-center gap-2"><i class="ph-bold ph-moon-stars text-lg text-moss" aria-hidden="true"></i> Sleep reminder</span>
+							<span class="flex items-center gap-2"><i class="ph-bold ph-moon-stars text-lg text-moss" aria-hidden="true"></i> {m.sleep_reminder_setting()}</span>
 							<input class="size-5 accent-moss" type="checkbox" checked={preferences.sleepReminderEnabled} onchange={(event) => preferences.setSleepReminder(event.currentTarget.checked)} />
 						</label>
 					</div>
 
 					<div class="grid gap-2 border-t border-moss/10 pt-4">
 						<div class="px-1">
-							<p class="text-sm font-bold text-ink-muted">Grove</p>
+							<p class="text-sm font-bold text-ink-muted">{m.grove()}</p>
 							<p class="mt-1 text-xs leading-relaxed text-ink-muted">
-								Start the grove over without removing your focused time.
+								{m.grove_reset_description()}
 							</p>
 						</div>
 						<button
@@ -160,7 +162,7 @@
 								><i
 									class="ph-bold ph-arrow-counter-clockwise text-lg"
 									aria-hidden="true"
-								></i> Reset grove</span
+								></i> {m.reset_grove()}</span
 							>
 						</button>
 					</div>

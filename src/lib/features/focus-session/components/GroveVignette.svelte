@@ -5,6 +5,7 @@
 		LEAVES_PER_TREE
 	} from '$lib/features/grove/grove.state';
 	import GroveLandscape from './grove-vignette/GroveLandscape.svelte';
+	import * as m from '$lib/paraglide/messages.js';
 
 	let {
 		progress,
@@ -47,7 +48,9 @@
 	let displayTreeNumber = $derived(groveProgress.currentTreeNumber);
 	let displayLeaves = $derived(groveProgress.currentTreeLeaves);
 	let treeSummary = $derived(
-		`${displayMatureTrees} mature ${displayMatureTrees === 1 ? 'tree' : 'trees'}. Tree ${displayTreeNumber} has ${displayLeaves} of ${LEAVES_PER_TREE} leaves.`
+		displayMatureTrees === 1
+			? m.grove_tree_summary_one({ matureTrees: displayMatureTrees, treeNumber: displayTreeNumber, leaves: displayLeaves, leafLimit: LEAVES_PER_TREE })
+			: m.grove_tree_summary_other({ matureTrees: displayMatureTrees, treeNumber: displayTreeNumber, leaves: displayLeaves, leafLimit: LEAVES_PER_TREE })
 	);
 </script>
 
