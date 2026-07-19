@@ -79,6 +79,7 @@ export class FocusWorkspace {
 	private startOrExtendSound: HTMLAudioElement | null = null;
 	private addOneMinuteSound: HTMLAudioElement | null = null;
 	private timerFinishSound: HTMLAudioElement | null = null;
+	private taskDoneSound: HTMLAudioElement | null = null;
 	private timerInterval: ReturnType<typeof setInterval> | undefined;
 	private deletedTaskUndo = $state<DeletedTaskUndo | null>(null);
 
@@ -158,9 +159,11 @@ export class FocusWorkspace {
 		this.startOrExtendSound = new Audio('/sounds/start-or-extend.wav');
 		this.addOneMinuteSound = new Audio('/sounds/add-1-minute.wav');
 		this.timerFinishSound = new Audio('/sounds/timer-finish.wav');
+		this.taskDoneSound = new Audio('/sounds/task-done.wav');
 		this.startOrExtendSound.preload = 'auto';
 		this.addOneMinuteSound.preload = 'auto';
 		this.timerFinishSound.preload = 'auto';
+		this.taskDoneSound.preload = 'auto';
 
 		const savedSession = loadActiveSession();
 		if (savedSession) {
@@ -480,6 +483,7 @@ export class FocusWorkspace {
 		);
 		saveFocusTasks(this.tasks);
 		this.toastMessage = completedAt ? 'Task marked done.' : 'Task moved back to your list.';
+		if (completedAt) this.playSound(this.taskDoneSound);
 		if (completedAt && id === this.activeTaskId) {
 			this.activeTaskId = null;
 			this.intention = '';
