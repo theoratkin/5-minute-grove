@@ -5,11 +5,18 @@ import { formatClock } from '$lib/app/time';
 import {
 	clearActiveSession,
 	loadActiveSession,
+	loadStartDuration,
+	saveStartDuration,
 	saveActiveSession
 } from './focusSession.storage';
 import { elapsedInCurrentContract, restoreFocusSession } from './focusSession.state';
 import type { FocusPhase, FocusSessionRecord } from './focusSession.types';
-import { FIVE_MINUTES_SECONDS, createSessionId, getSessionTitle } from './focusSession.utils';
+import {
+	FIVE_MINUTES_SECONDS,
+	createSessionId,
+	getSessionTitle,
+	normalizeStartDuration
+} from './focusSession.utils';
 import {
 	loadSessionHistory,
 	removeSessionById,
@@ -107,6 +114,9 @@ export class FocusWorkspace {
 	}
 
 	setup() {
+		const startDuration = loadStartDuration();
+		this.remainingSeconds = startDuration;
+		this.segmentDurationSeconds = startDuration;
 		this.history = loadSessionHistory();
 		this.startOrExtendSound = new Audio('/sounds/start-or-extend.wav');
 		this.addOneMinuteSound = new Audio('/sounds/add-1-minute.wav');
@@ -235,10 +245,20 @@ export class FocusWorkspace {
 		this.completedContracts = 0;
 		this.extensionCount = 0;
 		this.elapsedSessionSeconds = 0;
-		this.remainingSeconds = FIVE_MINUTES_SECONDS;
-		this.segmentDurationSeconds = FIVE_MINUTES_SECONDS;
-		this.segmentEndsAt = Date.now() + FIVE_MINUTES_SECONDS * 1000;
+		const startDuration = normalizeStartDuration(this.remainingSeconds);
+		this.remainingSeconds = startDuration;
+		this.segmentDurationSeconds = startDuration;
+		this.segmentEndsAt = Date.now() + startDuration * 1000;
+		saveStartDuration(startDuration);
 		this.phase = 'running';
+	}
+
+	setStartDuration(seconds: number) {
+		if (this.phase !== 'idle') return;
+		const duration = normalizeStartDuration(seconds);
+		this.remainingSeconds = duration;
+		this.segmentDurationSeconds = duration;
+		saveStartDuration(duration);
 	}
 
 	addFiveMinutes() {
@@ -361,9 +381,10 @@ export class FocusWorkspace {
 			record.completedContracts || Math.round(record.totalSeconds / FIVE_MINUTES_SECONDS);
 		this.extensionCount = record.extensionCount;
 		this.elapsedSessionSeconds = record.totalSeconds;
-		this.remainingSeconds = FIVE_MINUTES_SECONDS;
-		this.segmentDurationSeconds = FIVE_MINUTES_SECONDS;
-		this.segmentEndsAt = Date.now() + FIVE_MINUTES_SECONDS * 1000;
+		const startDuration = loadStartDuration();
+		this.remainingSeconds = startDuration;
+		this.segmentDurationSeconds = startDuration;
+		this.segmentEndsAt = Date.now() + startDuration * 1000;
 		this.phase = 'running';
 		if (this.preferences.notificationsEnabled) void prepareTimerNotifications();
 		this.playSound(this.startOrExtendSound);
@@ -484,8 +505,9 @@ export class FocusWorkspace {
 
 	private resetSession(clearIntention = false) {
 		this.phase = 'idle';
-		this.remainingSeconds = FIVE_MINUTES_SECONDS;
-		this.segmentDurationSeconds = FIVE_MINUTES_SECONDS;
+		const startDuration = loadStartDuration();
+		this.remainingSeconds = startDuration;
+		this.segmentDurationSeconds = startDuration;
 		this.completedContracts = 0;
 		this.extensionCount = 0;
 		this.elapsedSessionSeconds = 0;

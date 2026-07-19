@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { elapsedInCurrentContract, restoreFocusSession } from '../src/lib/features/focus-session/focusSession.state.ts';
 import type { ActiveFocusSession } from '../src/lib/features/focus-session/focusSession.types.ts';
+import { normalizeStartDuration } from '../src/lib/features/focus-session/focusSession.utils.ts';
 
 const baseSession: ActiveFocusSession = {
 	version: 1,
@@ -62,4 +63,11 @@ test('credits the full extended segment when it finishes while away', () => {
 		1_050_000
 	);
 	assert.equal(restored.elapsedSessionSeconds, 660);
+});
+
+test('normalizes a custom starting duration without forcing five minutes', () => {
+	assert.equal(normalizeStartDuration(30), 30);
+	assert.equal(normalizeStartDuration(0), 1);
+	assert.equal(normalizeStartDuration(Number.NaN), 300);
+	assert.equal(normalizeStartDuration(1000 * 60), 999 * 60 + 59);
 });

@@ -10,7 +10,7 @@ The user found that ordinary Pomodoro, stopwatch, and timer workflows do not wor
 
 The product is not primarily a timer. It is a momentum loop:
 
-Start tiny -> complete contract -> allow stopping -> invite +5 -> repeat.
+Choose an honest starting contract -> complete it -> allow stopping -> invite +5 -> repeat.
 
 The app should treat a finished five-minute block as a neutral decision point and gently invite another five minutes. Stopping is a normal option and does not need praise, reassurance, or justification.
 

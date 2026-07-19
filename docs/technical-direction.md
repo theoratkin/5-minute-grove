@@ -80,7 +80,7 @@ When implementation begins, a pragmatic MVP would be:
 
 - Single main route.
 - Task/intention input.
-- 5-minute countdown timer.
+- Direct minutes-and-seconds countdown input that remembers the last chosen starting duration.
 - End-of-timer decision screen with:
   - Add 5 minutes
   - Done
@@ -94,6 +94,7 @@ When implementation begins, a pragmatic MVP would be:
 
 - Starting should take as few interactions as possible.
 - The "+5 minutes" action should be easy to choose, but stopping should remain legitimate.
+- Keep five minutes as the continuation invitation rather than forcing it as every session's starting duration.
 - Avoid visual or copy patterns that imply failure when the user stops.
 - Keep stop feedback neutral and concise; let the completed-timer copy gently invite continuation without over-explaining either choice.
 - Keep controls stable in size so timer transitions do not shift the layout.

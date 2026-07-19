@@ -17,7 +17,7 @@
 	<title>{workspace.pageTitle}</title>
 	<meta
 		name="description"
-		content="A tiny focus timer centered on five-minute starts and voluntary continuation."
+		content="A gentle focus timer with a duration you choose and voluntary five-minute extensions."
 	/>
 </svelte:head>
 
@@ -32,6 +32,7 @@
 			groveSettledMatureTreeCount={workspace.groveSettledMatureTreeCount}
 			groveGrowthToken={workspace.groveGrowthToken}
 			phase={workspace.phase}
+			onDurationChange={(seconds) => workspace.setStartDuration(seconds)}
 			intention={workspace.activeTitle}
 			intentionValue={workspace.intention}
 			onIntentionChange={(nextValue) => (workspace.intention = nextValue)}
@@ -47,7 +48,7 @@
 		/>
 
 		<p class="hidden text-center text-xs text-ink-muted sm:block" aria-label="Keyboard shortcuts">
-			{#if workspace.phase === 'idle'}Press <kbd>Enter</kbd> to start{:else if workspace.phase === 'contract-complete'}Press <kbd>+</kbd> to add five minutes{:else}Press <kbd>Space</kbd> to {workspace.phase === 'paused' ? 'resume' : 'pause'}{#if import.meta.env.DEV} · <kbd>M</kbd> to skip 1 minute · <kbd>F</kbd> to fast-forward{/if}{/if}
+			{#if workspace.phase === 'idle'}Set a time, then press <kbd>Enter</kbd> to start{:else if workspace.phase === 'contract-complete'}Press <kbd>+</kbd> to add five minutes{:else}Press <kbd>Space</kbd> to {workspace.phase === 'paused' ? 'resume' : 'pause'}{#if import.meta.env.DEV} · <kbd>M</kbd> to skip 1 minute · <kbd>F</kbd> to fast-forward{/if}{/if}
 		</p>
 
 		<div class="grid grid-cols-2 gap-3" aria-label="Current session progress">

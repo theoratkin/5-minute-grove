@@ -175,7 +175,7 @@
 									</div>
 								</div>
 								<div class="entry-actions relative z-10 flex justify-end gap-2">
-									<button class:resuming={resumingId === record.id} class="resume-button grid size-11 place-items-center rounded-xl border border-moss/20 bg-paper/60 text-moss transition hover:border-moss/35 hover:bg-sprout/35" type="button" aria-label={resumingId === record.id ? `Continuing ${record.title}` : `Continue ${record.title} with a new five-minute contract`} title="Continue with a new five-minute contract" use:buttonSplash onclick={() => resumeWithCommitment(record)} disabled={resumingId !== null}>
+									<button class:resuming={resumingId === record.id} class="resume-button grid size-11 place-items-center rounded-xl border border-moss/20 bg-paper/60 text-moss transition hover:border-moss/35 hover:bg-sprout/35" type="button" aria-label={resumingId === record.id ? `Continuing ${record.title}` : `Continue ${record.title} with your saved timer`} title="Continue with your saved timer" use:buttonSplash onclick={() => resumeWithCommitment(record)} disabled={resumingId !== null}>
 										<i class:resuming={resumingId === record.id} class="resume-icon ph-fill ph-play text-base" aria-hidden="true"></i>
 									</button>
 									<button class="grid size-11 place-items-center rounded-xl border border-clay/25 text-clay transition hover:bg-clay/10" type="button" aria-label={`Remove ${record.title}; this can be undone`} title="Remove session" onclick={() => deleteSession(record.id)}>

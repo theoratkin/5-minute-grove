@@ -6,6 +6,7 @@
 	import type { FocusPhase } from '$lib/features/focus-session/focusSession.types';
 	import TaskIntentionInput from '$lib/features/task-intention/components/TaskIntentionInput.svelte';
 	import GroveVignette from './GroveVignette.svelte';
+	import DurationField from './DurationField.svelte';
 
 	let {
 		remainingSeconds,
@@ -18,6 +19,7 @@
 		intention,
 		intentionValue,
 		onIntentionChange,
+		onDurationChange,
 		onStart,
 		onAddFive,
 		onAddOne,
@@ -38,6 +40,7 @@
 		intention: string;
 		intentionValue: string;
 		onIntentionChange: (value: string) => void;
+		onDurationChange: (seconds: number) => void;
 		onStart: () => void;
 		onAddFive: () => void;
 		onAddOne: () => void;
@@ -56,9 +59,9 @@
 	let primaryCompletionAction = $state<HTMLButtonElement | undefined>();
 
 	let statusText = $derived.by(() => {
-		if (phase === 'running') return 'Five quiet minutes';
+		if (phase === 'running') return 'Quiet focus time';
 		if (phase === 'paused') return 'Taking a breath';
-		if (phase === 'contract-complete') return 'That’s five minutes';
+		if (phase === 'contract-complete') return 'Your time is complete';
 		return 'Ready when you are';
 	});
 
@@ -176,6 +179,8 @@
 							<span class="timer-readout timer-adjust-readout" role="timer" aria-label={`${formatClock(remainingSeconds)} remaining`}>{formatClock(remainingSeconds)}</span>
 							<button class="minute-adjust minute-adjust-add" type="button" use:buttonSplash={{ ripples: 1, durationMs: 2000, simple: true }} onclick={onAddOne} title="Add one minute to this timer" aria-label="Add one minute">+1:00</button>
 						</div>
+					{:else if phase === 'idle'}
+						<DurationField seconds={remainingSeconds} onchange={onDurationChange} onsubmit={startWithCommitment} />
 					{:else}
 						<span class="timer-readout" role="timer" aria-label={`${formatClock(remainingSeconds)} remaining`}>{formatClock(remainingSeconds)}</span>
 					{/if}
@@ -192,7 +197,7 @@
 				<div class="raised-button raised-button-start">
 					<button class:starting={isStarting} class="start-button relative z-10 flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-moss px-5 py-4 text-base font-extrabold text-on-accent transition hover:bg-moss-dark active:translate-y-1" type="button" use:buttonSplash onclick={startWithCommitment} disabled={isStarting}>
 						<i class:starting={isStarting} class="start-icon ph-fill ph-play text-lg" aria-hidden="true"></i>
-						<span>{isStarting ? 'Here we go' : 'Start 5 minutes'}</span>
+						<span>{isStarting ? 'Here we go' : `Start ${formatClock(remainingSeconds)}`}</span>
 					</button>
 				</div>
 			{:else if phase === 'contract-complete'}

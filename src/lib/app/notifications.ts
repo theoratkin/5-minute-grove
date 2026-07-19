@@ -27,7 +27,7 @@ export function notifyContractComplete({
 }: ContractCompleteNotification) {
 	if (!canUseNotifications() || Notification.permission !== 'granted') return;
 
-	const blockLabel = completedContracts === 1 ? 'one five-minute block' : `${completedContracts} five-minute blocks`;
+	const blockLabel = completedContracts === 1 ? 'one focus block' : `${completedContracts} focus blocks`;
 	const notification = new Notification('Another five minutes?', {
 		body: `${intention || 'This session'} has reached ${blockLabel}. Add five minutes to continue.`,
 		tag: 'just-5-more-minutes:contract-complete'

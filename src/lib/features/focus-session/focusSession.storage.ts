@@ -1,8 +1,10 @@
 import { browser } from '$app/environment';
 import { readJson, writeJson } from '$lib/app/storage';
 import type { ActiveFocusSession, FocusPhase } from './focusSession.types';
+import { FIVE_MINUTES_SECONDS, normalizeStartDuration } from './focusSession.utils';
 
 const ACTIVE_SESSION_KEY = 'just-5-more-minutes:active-session';
+const START_DURATION_KEY = 'just-5-more-minutes:start-duration';
 const activePhases: FocusPhase[] = ['running', 'paused', 'contract-complete'];
 
 export function loadActiveSession(): ActiveFocusSession | null {
@@ -23,7 +25,7 @@ export function loadActiveSession(): ActiveFocusSession | null {
 		intention: typeof value.intention === 'string' ? value.intention : '',
 		phase: value.phase as ActiveFocusSession['phase'],
 		remainingSeconds: finiteNonNegative(value.remainingSeconds, 300),
-		segmentDurationSeconds: Math.max(300, finiteNonNegative(value.segmentDurationSeconds, 300)),
+		segmentDurationSeconds: Math.max(1, finiteNonNegative(value.segmentDurationSeconds, 300)),
 		completedContracts: finiteNonNegative(value.completedContracts, 0),
 		extensionCount: finiteNonNegative(value.extensionCount, 0),
 		elapsedSessionSeconds: finiteNonNegative(value.elapsedSessionSeconds, 0),
@@ -39,6 +41,14 @@ export function saveActiveSession(session: ActiveFocusSession): void {
 
 export function clearActiveSession(): void {
 	if (browser) localStorage.removeItem(ACTIVE_SESSION_KEY);
+}
+
+export function loadStartDuration(): number {
+	return normalizeStartDuration(readJson(START_DURATION_KEY, FIVE_MINUTES_SECONDS));
+}
+
+export function saveStartDuration(seconds: number): void {
+	writeJson(START_DURATION_KEY, normalizeStartDuration(seconds));
 }
 
 function finiteNonNegative(value: unknown, fallback: number): number {
