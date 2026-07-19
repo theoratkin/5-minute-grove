@@ -3,6 +3,7 @@
 	import { themes, type ThemeId } from '$lib/app/theme';
 	import type { AppPreferences } from '$lib/app/preferences.svelte';
 	import { prepareTimerNotifications } from '$lib/app/notifications';
+	import GroveLogo from '$lib/app/GroveLogo.svelte';
 	import * as m from '$lib/paraglide/messages.js';
 	import { localizeHref } from '$lib/paraglide/runtime.js';
 
@@ -78,8 +79,9 @@
 
 <header class="relative z-20 mx-auto mt-4 w-[calc(100%-2rem)] max-w-[76rem] rounded-[1.1rem_1.7rem_1.25rem_1.5rem] border border-surface/90 bg-paper/95 shadow-[0_12px_36px_rgb(0_0_0/10%)] sm:w-[calc(100%-3rem)] lg:w-[calc(100%-4rem)]">
 	<div class="flex min-h-16 w-full items-center justify-between gap-5 px-4 sm:px-6 lg:px-8">
-		<a class="font-display text-xl font-semibold tracking-[-0.025em] text-moss-dark transition hover:text-moss" href={localizeHref('/')}>
-			{m.app_name()}
+		<a class="flex items-center gap-2.5 font-display text-xl font-semibold tracking-[-0.025em] text-moss-dark transition hover:text-moss" href={localizeHref('/')}>
+			<span class="h-10 w-8 shrink-0" aria-hidden="true"><GroveLogo /></span>
+			<span>{m.app_name()}</span>
 		</a>
 
 		<nav class="flex items-center gap-1 sm:gap-2" aria-label={m.primary_navigation()}>

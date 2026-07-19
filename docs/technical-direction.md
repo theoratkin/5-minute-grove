@@ -114,6 +114,14 @@ When implementation begins, a pragmatic MVP would be:
 - Do not put the changing once-per-second timer value in a live region; announce meaningful phase changes instead.
 - Respect reduced-motion preferences for decorative and interaction animation.
 
+## Logo Asset Workflow
+
+- Keep the editable Inkscape source at `media/logo.inkscape.svg`.
+- Keep the exported illustration in an Inkscape layer labeled `v2`.
+- Label one representative shape for each palette color `dirt`, `trunk`, and `leaf`. Other shapes that use the same source fill are mapped with it.
+- Run `npm run generate:logo` after editing the source. This regenerates `src/lib/app/GroveLogo.svelte`, removes hidden/reference content, and maps the three fills to theme tokens.
+- Treat `GroveLogo.svelte` as generated code; make drawing changes in Inkscape rather than editing the component directly.
+
 ## Future Technical Questions
 
 - Whether to use localStorage, IndexedDB, or a small local-first library.
