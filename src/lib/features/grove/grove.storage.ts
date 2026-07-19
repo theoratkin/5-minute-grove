@@ -1,9 +1,9 @@
 import { browser } from '$app/environment';
-import { readJson, writeJson } from '$lib/app/storage';
+import { readJson, storageKey, writeJson } from '$lib/app/storage';
 import { normalizeGroveState, reconcileGroveState, seedGroveState } from './grove.state';
 import type { GroveSeedRecord, GroveState } from './grove.types';
 
-const GROVE_KEY = 'just-5-more-minutes:grove';
+const GROVE_KEY = storageKey('grove');
 
 export function loadOrInitializeGrove(records: GroveSeedRecord[]): GroveState {
 	if (!browser || localStorage.getItem(GROVE_KEY) === null) {

@@ -1,7 +1,8 @@
 import { browser } from '$app/environment';
 import { getContext, setContext } from 'svelte';
+import { storageKey } from './storage';
 
-const PREFERENCES_KEY = 'just-5-more-minutes:preferences';
+const PREFERENCES_KEY = storageKey('preferences');
 const PREFERENCES_CONTEXT = Symbol('app-preferences');
 
 type StoredPreferences = {

@@ -1,10 +1,10 @@
 import { browser } from '$app/environment';
-import { readJson, writeJson } from '$lib/app/storage';
+import { readJson, storageKey, writeJson } from '$lib/app/storage';
 import type { ActiveFocusSession, FocusPhase } from './focusSession.types';
 import { FIVE_MINUTES_SECONDS, normalizeStartDuration } from './focusSession.utils';
 
-const ACTIVE_SESSION_KEY = 'just-5-more-minutes:active-session';
-const START_DURATION_KEY = 'just-5-more-minutes:start-duration';
+const ACTIVE_SESSION_KEY = storageKey('active-session');
+const START_DURATION_KEY = storageKey('start-duration');
 const activePhases: FocusPhase[] = ['running', 'paused', 'contract-complete'];
 
 export function loadActiveSession(): ActiveFocusSession | null {

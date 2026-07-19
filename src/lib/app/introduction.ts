@@ -1,6 +1,7 @@
 import { browser } from '$app/environment';
+import { storageKey } from './storage';
 
-const INTRODUCTION_SEEN_KEY = 'just-5-more-minutes:introduction-seen-v1';
+const INTRODUCTION_SEEN_KEY = storageKey('introduction-seen-v1');
 
 export function hasSeenIntroduction(): boolean {
 	return browser && localStorage.getItem(INTRODUCTION_SEEN_KEY) === 'true';

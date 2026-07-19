@@ -1,4 +1,5 @@
 import { browser } from '$app/environment';
+import { storageKey } from './storage';
 
 export const themes = [
 	{ id: 'soft-daylight', label: 'Soft daylight', swatches: ['#fbfaf5', '#315e4c', '#f4c96b'] },
@@ -10,7 +11,7 @@ export const themes = [
 
 export type ThemeId = (typeof themes)[number]['id'];
 
-const storageKey = 'just-5-more-minutes:theme';
+const THEME_KEY = storageKey('theme');
 const defaultTheme: ThemeId = 'soft-daylight';
 
 function isThemeId(value: string | null): value is ThemeId {
@@ -20,7 +21,7 @@ function isThemeId(value: string | null): value is ThemeId {
 export function loadTheme(): ThemeId {
 	if (!browser) return defaultTheme;
 
-	const savedTheme = localStorage.getItem(storageKey);
+	const savedTheme = localStorage.getItem(THEME_KEY);
 	return isThemeId(savedTheme) ? savedTheme : defaultTheme;
 }
 
@@ -28,5 +29,5 @@ export function applyTheme(theme: ThemeId): void {
 	if (!browser) return;
 
 	document.documentElement.dataset.theme = theme;
-	localStorage.setItem(storageKey, theme);
+	localStorage.setItem(THEME_KEY, theme);
 }

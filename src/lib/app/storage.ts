@@ -1,5 +1,20 @@
 import { browser } from '$app/environment';
 
+const STORAGE_PREFIX = 'five-minute-grove';
+
+type StoredValueName =
+	| 'active-session'
+	| 'grove'
+	| 'introduction-seen-v1'
+	| 'preferences'
+	| 'session-history'
+	| 'start-duration'
+	| 'theme';
+
+export function storageKey(name: StoredValueName): string {
+	return `${STORAGE_PREFIX}:${name}`;
+}
+
 export function readJson<T>(key: string, fallback: T): T {
 	if (!browser) return fallback;
 

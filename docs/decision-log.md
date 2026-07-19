@@ -39,7 +39,7 @@
 - Changed grove growth to happen live at one leaf per completed minute and raised tree maturity to 60 leaves so one focused hour grows a full tree. A full foreground tree remains visible for the end-of-timer choice, then joins the background grove when the user chooses Add 5 minutes or starts a new session.
 - Adopted Google Fonts' Nunito Sans for the interface and timer, with Lora for display copy. The timer uses tabular lining numerals and restrained tracking so its digits remain stable and legible throughout the countdown.
 - Replaced the full-size barren foreground tree with one plant that grows through distinct silhouettes: a pointed green stem at zero leaves, a branchless green sprout at 1–5, a brown one-branch sapling at 6–15, a compact three-branch young tree at 16–30, a scaled full-tree silhouette at 31–45, and a full-size tree from 46 leaves. Removed the unrelated side sprout so every visible plant represents grove progress.
-- Renamed the product from "Just 5 More Minutes" to "Five Minute Grove" to reflect its calm, cumulative growth metaphor while preserving the five-minute contract. Existing local-storage keys remain stable so the rename does not reset local data.
+- Renamed the product from "Just 5 More Minutes" to "Five Minute Grove" to reflect its calm, cumulative growth metaphor while preserving the five-minute contract.
 - Added a confirmed grove reset in settings. Resetting clears visible growth while preserving session history and its credit baseline, so old sessions do not regrow the grove after a reload.
 - Opened the grove vignette into a fully outdoor, edge-to-edge landscape. The interior window frame, sill, and furniture were removed; the mug appears separately as a quiet ritual cue only when a five-minute contract is complete.
 - Reworked every post-sprout tree silhouette around natural binary forks instead of branches attached independently to one central stem: the sapling forks once, the young tree twice, and the later tree three times.
@@ -47,6 +47,7 @@
 
 ## 2026-07-18
 
+- Renamed the local-storage and notification namespaces to `five-minute-grove`; no backward-compatibility path is retained because the app has not been deployed.
 - Added an optional, local-first sleep reminder that appears from midnight through 5:59 a.m. local time, at most once per local calendar day. It is intentionally gentle, dismissible, and enabled by default with an opt-out in preferences.
 - Added a first-visit introduction that briefly distinguishes the app's tiny, honest work contract and voluntary +5 loop from a conventional timer. Dismissal is stored locally, and a development-only `Shift+I` shortcut reopens it from any route for testing.
 - Added subtle “−1:00” and “+1:00” controls around the running clock for small, voluntary timer adjustments, moving them beneath the countdown on mobile. They preserve elapsed-time accuracy and do not affect the session's extension count; both give one gentle ripple that fades before reaching the viewport edge, with remove pitching the optional C4 sound across C3–C4 in C major and add pitching it across C4–C5.
