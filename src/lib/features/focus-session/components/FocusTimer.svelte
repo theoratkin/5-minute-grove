@@ -196,7 +196,7 @@
 		</div>
 
 		<div class="relative z-10 -mt-1">
-			<TaskIntentionInput value={intentionValue} onchange={onIntentionChange} />
+			<TaskIntentionInput value={intentionValue} clearable={phase === 'idle'} onchange={onIntentionChange} />
 			{#if phase !== 'idle' && activeTaskId}
 				<label class="mx-auto mt-2 flex w-fit items-center gap-2 text-xs font-semibold text-ink-muted">
 					<span>Assign this focus to</span>
