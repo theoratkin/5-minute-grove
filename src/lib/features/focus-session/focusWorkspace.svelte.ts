@@ -46,6 +46,17 @@ const FOCUS_WORKSPACE_CONTEXT = Symbol('focus-workspace');
 const C_MAJOR_OCTAVE_SEMITONES = [0, 2, 4, 5, 7, 9, 11, 12] as const;
 const LOWER_C_MAJOR_OCTAVE_SEMITONES = [-12, -10, -8, -7, -5, -3, -1, 0] as const;
 
+type DeletedTaskUndo = {
+	task: FocusTask;
+	index: number;
+	previousActiveTaskId: string | null;
+	previousIntention: string;
+	activeSessionId: string | null;
+	replacementActiveTaskId: string | null;
+	replacementIntention: string;
+	createdReplacementUntitled: boolean;
+};
+
 export class FocusWorkspace {
 	intention = $state('');
 	phase = $state<FocusPhase>('idle');
@@ -69,6 +80,7 @@ export class FocusWorkspace {
 	private addOneMinuteSound: HTMLAudioElement | null = null;
 	private timerFinishSound: HTMLAudioElement | null = null;
 	private timerInterval: ReturnType<typeof setInterval> | undefined;
+	private deletedTaskUndo = $state<DeletedTaskUndo | null>(null);
 
 	constructor(private preferences: AppPreferences) {}
 
@@ -76,6 +88,10 @@ export class FocusWorkspace {
 		const activeTask = this.tasks.find((task) => task.id === this.activeTaskId);
 		if (activeTask) return activeTask.title;
 		return getSessionTitle(this.intention);
+	}
+
+	get canUndoTaskDeletion() {
+		return this.deletedTaskUndo !== null && this.toastMessage === 'Task deleted.';
 	}
 
 	get canCompleteActiveTask() {
@@ -506,8 +522,13 @@ export class FocusWorkspace {
 	}
 
 	deleteTask(id: string) {
-		const task = this.tasks.find((item) => item.id === id);
+		const index = this.tasks.findIndex((item) => item.id === id);
+		const task = this.tasks[index];
 		if (!task || id === UNTITLED_TASK_ID) return;
+		const previousActiveTaskId = this.activeTaskId;
+		const previousIntention = this.intention;
+		const activeSessionId = this.activeSessionId;
+		const hadUntitledTask = this.tasks.some((item) => item.id === UNTITLED_TASK_ID);
 
 		if (id === this.activeTaskId) {
 			if (this.phase === 'idle') {
@@ -522,7 +543,48 @@ export class FocusWorkspace {
 
 		this.tasks = this.tasks.filter((item) => item.id !== id);
 		saveFocusTasks(this.tasks);
+		this.deletedTaskUndo = {
+			task,
+			index,
+			previousActiveTaskId,
+			previousIntention,
+			activeSessionId,
+			replacementActiveTaskId: this.activeTaskId,
+			replacementIntention: this.intention,
+			createdReplacementUntitled:
+				!hadUntitledTask && this.activeTaskId === UNTITLED_TASK_ID
+		};
 		this.toastMessage = 'Task deleted.';
+	}
+
+	undoTaskDeletion() {
+		const undo = this.deletedTaskUndo;
+		if (!undo) return;
+
+		const restoredTasks = [...this.tasks];
+		restoredTasks.splice(Math.min(undo.index, restoredTasks.length), 0, undo.task);
+		this.tasks = restoredTasks;
+
+		if (
+			this.activeSessionId === undo.activeSessionId &&
+			this.activeTaskId === undo.replacementActiveTaskId &&
+			this.intention === undo.replacementIntention
+		) {
+			this.activeTaskId = undo.previousActiveTaskId;
+			this.intention = undo.previousIntention;
+			if (undo.createdReplacementUntitled) {
+				this.tasks = this.tasks.filter(
+					(task) =>
+						task.id !== UNTITLED_TASK_ID ||
+						task.accumulatedSeconds > 0 ||
+						task.sessionCount > 0
+				);
+			}
+		}
+
+		saveFocusTasks(this.tasks);
+		this.deletedTaskUndo = null;
+		this.toastMessage = 'Task restored.';
 	}
 
 	updateIntention(title: string) {
@@ -545,6 +607,7 @@ export class FocusWorkspace {
 
 	dismissToast() {
 		this.toastMessage = '';
+		this.deletedTaskUndo = null;
 	}
 
 	resetGrove() {

@@ -38,7 +38,6 @@
 
 	let draft = $state('');
 	let openMenuTaskId = $state<string | null>(null);
-	let deletingTaskId = $state<string | null>(null);
 	let draggedTaskId = $state<string | null>(null);
 	let consideredOpenTasks = $state<FocusTask[] | null>(null);
 	let openTasks = $derived(consideredOpenTasks ?? tasks.filter((task) => !task.completedAt));
@@ -107,12 +106,6 @@
 		) {
 			draggedTaskId = null;
 		}
-	}
-
-	function confirmDelete(id: string) {
-		ondelete(id);
-		deletingTaskId = null;
-		openMenuTaskId = null;
 	}
 
 	function closeTransientControls() {
@@ -196,17 +189,11 @@
 									<button class="menu-action" type="button" onclick={() => { onmove(task.id, -1); openMenuTaskId = null; }} disabled={index === 0} role="menuitem"><i class="ph-bold ph-arrow-up" aria-hidden="true"></i>Move up</button>
 									<button class="menu-action" type="button" onclick={() => { onmove(task.id, 1); openMenuTaskId = null; }} disabled={index === openTasks.length - 1} role="menuitem"><i class="ph-bold ph-arrow-down" aria-hidden="true"></i>Move down</button>
 									{#if task.id !== UNTITLED_TASK_ID}
-										<button class="menu-action menu-action-delete" type="button" onclick={() => { deletingTaskId = task.id; openMenuTaskId = null; }} role="menuitem"><i class="ph-bold ph-trash" aria-hidden="true"></i>Delete</button>
+										<button class="menu-action menu-action-delete" type="button" onclick={() => { ondelete(task.id); openMenuTaskId = null; }} role="menuitem"><i class="ph-bold ph-trash" aria-hidden="true"></i>Delete</button>
 									{/if}
 								</div>
 							{/if}
 					</div>
-					{#if deletingTaskId === task.id}
-						<div class="col-span-4 flex flex-wrap items-center justify-between gap-2 border-t border-moss/10 pt-2 text-xs font-semibold text-ink-muted">
-							<span>Delete “{task.title}” and its focused time?</span>
-							<span class="flex gap-1"><button class="min-h-9 rounded-lg px-3 hover:bg-mist" type="button" onclick={() => deletingTaskId = null}>Cancel</button><button class="min-h-9 rounded-lg bg-clay px-3 font-bold text-on-accent" type="button" onclick={() => confirmDelete(task.id)}>Delete</button></span>
-						</div>
-					{/if}
 				</li>
 			{/each}
 		</ul>
@@ -230,16 +217,10 @@
 								<button class="grid size-10 place-items-center rounded-xl text-ink-muted hover:bg-paper" type="button" onclick={() => openMenuTaskId = openMenuTaskId === task.id ? null : task.id} aria-label={`More actions for ${task.title}`} aria-expanded={openMenuTaskId === task.id}><i class="ph-bold ph-dots-three-vertical text-lg" aria-hidden="true"></i></button>
 								{#if openMenuTaskId === task.id}
 									<div class="task-menu absolute top-[calc(100%+0.35rem)] right-0 z-30 grid w-44 gap-1 rounded-xl border border-moss/15 bg-paper p-1.5 shadow-[0_12px_32px_rgb(0_0_0/18%)]" role="menu">
-										<button class="menu-action menu-action-delete" type="button" onclick={() => { deletingTaskId = task.id; openMenuTaskId = null; }} role="menuitem"><i class="ph-bold ph-trash" aria-hidden="true"></i>Delete</button>
-									</div>
-								{/if}
+									<button class="menu-action menu-action-delete" type="button" onclick={() => { ondelete(task.id); openMenuTaskId = null; }} role="menuitem"><i class="ph-bold ph-trash" aria-hidden="true"></i>Delete</button>
+								</div>
+							{/if}
 						</div>
-						{#if deletingTaskId === task.id}
-							<div class="col-span-3 flex flex-wrap items-center justify-between gap-2 border-t border-moss/10 pt-2 text-xs font-semibold text-ink-muted">
-								<span>Delete “{task.title}” and its focused time?</span>
-								<span class="flex gap-1"><button class="min-h-9 rounded-lg px-3 hover:bg-paper" type="button" onclick={() => deletingTaskId = null}>Cancel</button><button class="min-h-9 rounded-lg bg-clay px-3 font-bold text-on-accent" type="button" onclick={() => confirmDelete(task.id)}>Delete</button></span>
-							</div>
-						{/if}
 					</li>
 				{/each}
 			</ul>

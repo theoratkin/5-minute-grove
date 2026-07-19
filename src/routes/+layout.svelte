@@ -117,6 +117,9 @@
 {#if workspace.toastMessage}
 	<div class="fixed right-4 bottom-4 z-50 flex min-h-12 w-max max-w-[calc(100vw-2rem)] items-center justify-between gap-4 rounded-2xl border border-moss/15 bg-paper px-4 py-3 text-sm font-semibold text-ink shadow-[0_16px_45px_rgb(0_0_0/18%)]" role="status">
 		<span>{workspace.toastMessage}</span>
+		{#if workspace.canUndoTaskDeletion}
+			<button class="min-h-11 rounded-xl px-3 font-bold text-moss transition hover:bg-mist" type="button" onclick={() => workspace.undoTaskDeletion()}>Undo</button>
+		{/if}
 		<button class="grid size-11 shrink-0 place-items-center rounded-xl text-ink-muted transition hover:bg-mist" type="button" aria-label="Dismiss message" onclick={() => workspace.dismissToast()}><i class="ph-bold ph-x" aria-hidden="true"></i></button>
 	</div>
 {/if}
