@@ -176,13 +176,13 @@
 					{#if phase === 'running'}
 						<div class="timer-adjustment-layout">
 							<button class="minute-adjust minute-adjust-remove" type="button" use:buttonSplash={{ ripples: 1, durationMs: 2000, simple: true }} onclick={onRemoveOne} title="Remove one minute from this timer" aria-label="Remove one minute" disabled={!canRemoveOneMinute}>−1:00</button>
-							<span class="timer-readout timer-adjust-readout" role="timer" aria-label={`${formatClock(remainingSeconds)} remaining`}>{formatClock(remainingSeconds)}</span>
+							<div class="timer-adjust-readout"><DurationField seconds={remainingSeconds} editable={false} /></div>
 							<button class="minute-adjust minute-adjust-add" type="button" use:buttonSplash={{ ripples: 1, durationMs: 2000, simple: true }} onclick={onAddOne} title="Add one minute to this timer" aria-label="Add one minute">+1:00</button>
 						</div>
 					{:else if phase === 'idle'}
 						<DurationField seconds={remainingSeconds} onchange={onDurationChange} onsubmit={startWithCommitment} />
 					{:else}
-						<span class="timer-readout" role="timer" aria-label={`${formatClock(remainingSeconds)} remaining`}>{formatClock(remainingSeconds)}</span>
+						<DurationField seconds={remainingSeconds} editable={false} />
 					{/if}
 				</div>
 			{/if}
@@ -244,17 +244,6 @@
 </section>
 
 <style>
-	.timer-readout {
-		font-family: var(--font-timer);
-		font-size: clamp(4.5rem, 18vw, 8rem);
-		font-weight: 700;
-		font-variant-numeric: tabular-nums lining-nums;
-		font-feature-settings: 'tnum' 1, 'lnum' 1;
-		letter-spacing: -0.035em;
-		line-height: 1;
-		white-space: nowrap;
-	}
-
 	.minute-adjust {
 		min-width: 3.25rem;
 		border: 1px solid color-mix(in srgb, var(--color-moss) 13%, transparent);

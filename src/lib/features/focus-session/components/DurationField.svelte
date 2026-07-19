@@ -4,11 +4,13 @@
 	let {
 		seconds,
 		onchange,
-		onsubmit
+		onsubmit,
+		editable = true
 	}: {
 		seconds: number;
-		onchange: (seconds: number) => void;
-		onsubmit: () => void;
+		onchange?: (seconds: number) => void;
+		onsubmit?: () => void;
+		editable?: boolean;
 	} = $props();
 
 	let minutesInput: HTMLInputElement;
@@ -32,11 +34,12 @@
 		const duration = normalizeStartDuration(
 			numeric(minutesText, 999) * 60 + numeric(secondsText, 59)
 		);
-		onchange(duration);
+		onchange?.(duration);
 		return duration;
 	}
 
 	function finishEditing(event: FocusEvent) {
+		if (!editable) return;
 		const next = event.relatedTarget;
 		if (next instanceof Node && event.currentTarget instanceof Node && event.currentTarget.contains(next)) {
 			return;
@@ -70,6 +73,7 @@
 	}
 
 	function handleKeydown(event: KeyboardEvent, segment: 'minutes' | 'seconds') {
+		if (!editable) return;
 		if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
 			event.preventDefault();
 			step(segment, event.key === 'ArrowUp' ? 1 : -1);
@@ -84,16 +88,17 @@
 		} else if (event.key === 'Enter') {
 			event.preventDefault();
 			commit();
-			onsubmit();
+			onsubmit?.();
 		}
 	}
 </script>
 
 <div
 	class="duration-field"
-	role="group"
-	aria-label="Timer duration in minutes and seconds"
-	onfocusin={() => (editing = true)}
+	class:duration-field-editable={editable}
+	role={editable ? 'group' : 'timer'}
+	aria-label={editable ? 'Timer duration in minutes and seconds' : `${minutesText}:${secondsText} remaining`}
+	onfocusin={() => editable && (editing = true)}
 	onfocusout={finishEditing}
 >
 	<label class="sr-only" for="timer-minutes">Minutes</label>
@@ -105,6 +110,8 @@
 		inputmode="numeric"
 		pattern="[0-9]*"
 		maxlength="3"
+		readonly={!editable}
+		tabindex={editable ? 0 : -1}
 		value={minutesText}
 		onfocus={(event) => event.currentTarget.select()}
 		oninput={updateMinutes}
@@ -124,6 +131,7 @@
 		inputmode="numeric"
 		pattern="[0-9]*"
 		maxlength="2"
+		readonly={!editable}
 		tabindex="-1"
 		value={secondsText}
 		onfocus={(event) => event.currentTarget.select()}
@@ -151,27 +159,36 @@
 	}
 
 	.duration-segment {
+		box-sizing: content-box;
+		field-sizing: content;
 		min-width: 0;
+		margin: 0;
+		border: 0;
 		border-radius: 0.18em;
+		padding: 0;
 		background: transparent;
 		color: inherit;
+		font: inherit;
+		font-variant-numeric: inherit;
+		letter-spacing: inherit;
+		line-height: inherit;
 		text-align: center;
 		outline: none;
+		appearance: none;
 		transition: background 150ms, box-shadow 150ms;
 	}
 
-	.duration-minutes { width: 2.1ch; }
-	.duration-minutes:has(+ *) { field-sizing: content; min-width: 2.1ch; max-width: 3.1ch; }
-	.duration-seconds { width: 2.1ch; }
+	.duration-minutes { width: 2ch; }
+	.duration-seconds { width: 2ch; }
 
-	.duration-segment:hover {
+	.duration-field-editable .duration-segment:hover {
 		background: color-mix(in srgb, var(--color-mist) 60%, transparent);
 	}
 
-	.duration-segment:focus {
+	.duration-field-editable .duration-segment:focus {
 		background: color-mix(in srgb, var(--color-sprout) 42%, transparent);
 		box-shadow: 0 0 0 0.035em var(--color-moss);
 	}
 
-	.duration-separator { padding-inline: 0.025em 0.08em; }
+	.duration-separator { padding: 0; }
 </style>
