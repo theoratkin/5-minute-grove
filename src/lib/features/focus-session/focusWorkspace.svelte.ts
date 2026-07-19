@@ -408,13 +408,25 @@ export class FocusWorkspace {
 	}
 
 	startTask(task: FocusTask) {
+		let switchedTasks = false;
 		if (this.phase !== 'idle') {
-			this.toastMessage = 'Stop your current focus before starting another task.';
-			return false;
+			if (task.id === this.activeTaskId) return true;
+
+			switchedTasks = true;
+			this.syncTimer();
+			const previousTaskId = this.activeTaskId;
+			if (this.sessionTimeSeconds > 0) this.finishSession();
+			else this.resetSession();
+
+			if (previousTaskId === UNTITLED_TASK_ID) {
+				this.tasks = removeEmptyUntitledTask(this.tasks);
+				saveFocusTasks(this.tasks);
+			}
 		}
 		this.activeTaskId = task.id;
 		this.intention = task.title;
 		this.startSession();
+		if (switchedTasks) this.toastMessage = `Now focusing on “${task.title}”.`;
 		return true;
 	}
 
