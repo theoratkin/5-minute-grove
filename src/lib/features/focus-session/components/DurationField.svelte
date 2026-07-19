@@ -13,8 +13,8 @@
 		editable?: boolean;
 	} = $props();
 
-	let minutesInput: HTMLInputElement;
-	let secondsInput: HTMLInputElement;
+	let minutesInput = $state<HTMLInputElement>();
+	let secondsInput = $state<HTMLInputElement>();
 	let minutesText = $state('05');
 	let secondsText = $state('00');
 	let editing = $state(false);
@@ -79,12 +79,12 @@
 			step(segment, event.key === 'ArrowUp' ? 1 : -1);
 		} else if (event.key === 'ArrowLeft' && segment === 'seconds') {
 			event.preventDefault();
-			minutesInput.focus();
-			minutesInput.select();
+			minutesInput?.focus();
+			minutesInput?.select();
 		} else if (event.key === 'ArrowRight' && segment === 'minutes') {
 			event.preventDefault();
-			secondsInput.focus();
-			secondsInput.select();
+			secondsInput?.focus();
+			secondsInput?.select();
 		} else if (event.key === 'Enter') {
 			event.preventDefault();
 			commit();
@@ -101,47 +101,53 @@
 	onfocusin={() => editable && (editing = true)}
 	onfocusout={finishEditing}
 >
-	<label class="sr-only" for="timer-minutes">Minutes</label>
-	<input
-		bind:this={minutesInput}
-		id="timer-minutes"
-		class="duration-segment duration-minutes"
-		type="text"
-		inputmode="numeric"
-		pattern="[0-9]*"
-		maxlength="3"
-		readonly={!editable}
-		tabindex={editable ? 0 : -1}
-		value={minutesText}
-		onfocus={(event) => event.currentTarget.select()}
-		oninput={updateMinutes}
-		onkeydown={(event) => handleKeydown(event, 'minutes')}
-		aria-valuemin="0"
-		aria-valuemax="999"
-		aria-valuenow={numeric(minutesText, 999)}
-		role="spinbutton"
-	/>
+	{#if editable}
+		<label class="sr-only" for="timer-minutes">Minutes</label>
+		<input
+			bind:this={minutesInput}
+			id="timer-minutes"
+			class:duration-wide={minutesText.length > 2}
+			class="duration-segment duration-minutes"
+			type="text"
+			inputmode="numeric"
+			pattern="[0-9]*"
+			maxlength="3"
+			value={minutesText}
+			onfocus={(event) => event.currentTarget.select()}
+			oninput={updateMinutes}
+			onkeydown={(event) => handleKeydown(event, 'minutes')}
+			aria-valuemin="0"
+			aria-valuemax="999"
+			aria-valuenow={numeric(minutesText, 999)}
+			role="spinbutton"
+		/>
+	{:else}
+		<span class:duration-wide={minutesText.length > 2} class="duration-segment duration-minutes" aria-hidden="true">{minutesText}</span>
+	{/if}
 	<span class="duration-separator" aria-hidden="true">:</span>
-	<label class="sr-only" for="timer-seconds">Seconds</label>
-	<input
-		bind:this={secondsInput}
-		id="timer-seconds"
-		class="duration-segment duration-seconds"
-		type="text"
-		inputmode="numeric"
-		pattern="[0-9]*"
-		maxlength="2"
-		readonly={!editable}
-		tabindex="-1"
-		value={secondsText}
-		onfocus={(event) => event.currentTarget.select()}
-		oninput={updateSeconds}
-		onkeydown={(event) => handleKeydown(event, 'seconds')}
-		aria-valuemin="0"
-		aria-valuemax="59"
-		aria-valuenow={numeric(secondsText, 59)}
-		role="spinbutton"
-	/>
+	{#if editable}
+		<label class="sr-only" for="timer-seconds">Seconds</label>
+		<input
+			bind:this={secondsInput}
+			id="timer-seconds"
+			class="duration-segment duration-seconds"
+			type="text"
+			inputmode="numeric"
+			pattern="[0-9]*"
+			maxlength="2"
+			tabindex="-1"
+			value={secondsText}
+			onfocus={(event) => event.currentTarget.select()}
+			oninput={updateSeconds}
+			onkeydown={(event) => handleKeydown(event, 'seconds')}
+			aria-valuemin="0"
+			aria-valuemax="59"
+			aria-valuenow={numeric(secondsText, 59)}
+			role="spinbutton"
+		/>
+	{:else}
+		<span class="duration-segment duration-seconds" aria-hidden="true">{secondsText}</span>
+	{/if}
 </div>
 
 <style>
@@ -160,7 +166,6 @@
 
 	.duration-segment {
 		box-sizing: content-box;
-		field-sizing: content;
 		min-width: 0;
 		margin: 0;
 		border: 0;
@@ -180,6 +185,7 @@
 
 	.duration-minutes { width: 2ch; }
 	.duration-seconds { width: 2ch; }
+	.duration-wide { width: 3ch; }
 
 	.duration-field-editable .duration-segment:hover {
 		background: color-mix(in srgb, var(--color-mist) 60%, transparent);
