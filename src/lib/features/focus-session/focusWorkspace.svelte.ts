@@ -19,8 +19,6 @@ import {
 } from './focusSession.utils';
 import {
 	loadSessionHistory,
-	removeSessionById,
-	restoreSessionRecord,
 	saveSessionHistory
 } from '$lib/features/session-history/sessionHistory.storage';
 import {
@@ -33,7 +31,13 @@ import {
 import { loadOrInitializeGrove, saveGroveState } from '$lib/features/grove/grove.storage';
 import type { GroveState } from '$lib/features/grove/grove.types';
 import { loadFocusTasks, saveFocusTasks } from '$lib/features/focus-list/focusTask.storage';
-import { sortFocusTasks } from '$lib/features/focus-list/focusTask.state';
+import {
+	createUntitledTask,
+	removeEmptyUntitledTask,
+	sortFocusTasks,
+	UNTITLED_TASK_ID,
+	UNTITLED_TASK_TITLE
+} from '$lib/features/focus-list/focusTask.state';
 import type { FocusTask } from '$lib/features/focus-list/focusTask.types';
 
 const FOCUS_WORKSPACE_CONTEXT = Symbol('focus-workspace');
@@ -56,7 +60,6 @@ export class FocusWorkspace {
 	tasks = $state<FocusTask[]>([]);
 	hydrated = $state(false);
 	toastMessage = $state('');
-	deletedRecord = $state<FocusSessionRecord | null>(null);
 	groveState = $state<GroveState>(emptyGroveState());
 	groveGrowthToken = $state(0);
 
@@ -64,12 +67,21 @@ export class FocusWorkspace {
 	private addOneMinuteSound: HTMLAudioElement | null = null;
 	private timerFinishSound: HTMLAudioElement | null = null;
 	private timerInterval: ReturnType<typeof setInterval> | undefined;
-	private deleteTimeout: ReturnType<typeof setTimeout> | undefined;
 
 	constructor(private preferences: AppPreferences) {}
 
 	get activeTitle() {
+		const activeTask = this.tasks.find((task) => task.id === this.activeTaskId);
+		if (activeTask) return activeTask.title;
 		return getSessionTitle(this.intention);
+	}
+
+	get canCompleteActiveTask() {
+		return this.activeTaskId !== null && this.activeTaskId !== UNTITLED_TASK_ID;
+	}
+
+	get taskInputValue() {
+		return this.activeTaskId === UNTITLED_TASK_ID ? '' : this.intention;
 	}
 
 	get segmentProgress() {
@@ -145,10 +157,11 @@ export class FocusWorkspace {
 			this.sessionStartedAt = restored.sessionStartedAt;
 			this.activeSessionId = restored.activeSessionId;
 			this.activeTaskId = restored.taskId;
+			this.recoverActiveTask();
 			this.segmentEndsAt = restored.segmentEndsAt;
 			this.toastMessage = restored.completedWhileAway
 				? 'Your five-minute contract finished while you were away.'
-				: 'Your session was restored.';
+				: 'Your focus was restored.';
 			if (restored.completedWhileAway && this.preferences.notificationsEnabled) {
 				notifyContractComplete({
 					intention: this.activeTitle,
@@ -179,7 +192,6 @@ export class FocusWorkspace {
 
 	dispose() {
 		if (this.timerInterval) window.clearInterval(this.timerInterval);
-		if (this.deleteTimeout) window.clearTimeout(this.deleteTimeout);
 		document.removeEventListener('visibilitychange', this.syncTimer);
 	}
 
@@ -344,7 +356,7 @@ export class FocusWorkspace {
 		this.phase = 'running';
 	}
 
-	finishSession(message = 'Session saved.', clearIntention = false) {
+	finishSession(message = 'Focus saved.', clearIntention = false) {
 		if (!this.sessionStartedAt || !this.activeSessionId || this.sessionTimeSeconds <= 0) return;
 
 		const record: FocusSessionRecord = {
@@ -367,17 +379,13 @@ export class FocusWorkspace {
 		this.toastMessage = message;
 		if (clearIntention) {
 			requestAnimationFrame(() =>
-				document.querySelector<HTMLInputElement>('[data-session-name]')?.focus()
+				document.querySelector<HTMLInputElement>('[data-task-name]')?.focus()
 			);
 		}
 	}
 
 	stopSessionEarly() {
 		this.finishSession();
-	}
-
-	switchTask() {
-		this.finishSession('Session saved.', true);
 	}
 
 	addTask(title: string): FocusTask | null {
@@ -401,7 +409,7 @@ export class FocusWorkspace {
 
 	startTask(task: FocusTask) {
 		if (this.phase !== 'idle') {
-			this.toastMessage = 'Finish your current session before choosing another task.';
+			this.toastMessage = 'Stop your current focus before starting another task.';
 			return false;
 		}
 		this.activeTaskId = task.id;
@@ -410,9 +418,24 @@ export class FocusWorkspace {
 		return true;
 	}
 
+	assignActiveTask(id: string) {
+		if (this.phase === 'idle') return;
+		const task = this.tasks.find((item) => item.id === id && !item.completedAt);
+		if (!task || task.id === this.activeTaskId) return;
+
+		const previousTaskId = this.activeTaskId;
+		this.activeTaskId = task.id;
+		this.intention = task.title;
+		if (previousTaskId === UNTITLED_TASK_ID) {
+			this.tasks = removeEmptyUntitledTask(this.tasks);
+			saveFocusTasks(this.tasks);
+		}
+		this.toastMessage = `This focus is now assigned to “${task.title}”.`;
+	}
+
 	toggleTaskDone(id: string) {
 		const task = this.tasks.find((item) => item.id === id);
-		if (!task) return;
+		if (!task || id === UNTITLED_TASK_ID) return;
 
 		if (id === this.activeTaskId && this.phase !== 'idle') {
 			if (this.sessionTimeSeconds > 0) this.finishSession('Task marked done.');
@@ -434,7 +457,7 @@ export class FocusWorkspace {
 	}
 
 	completeActiveTask() {
-		if (!this.activeTaskId) {
+		if (!this.activeTaskId || this.activeTaskId === UNTITLED_TASK_ID) {
 			this.finishSession();
 			return;
 		}
@@ -443,7 +466,7 @@ export class FocusWorkspace {
 
 	updateTaskTitle(id: string, title: string) {
 		const cleanTitle = title.trim().slice(0, 80);
-		if (!cleanTitle) return;
+		if (!cleanTitle || id === UNTITLED_TASK_ID) return;
 		const now = new Date().toISOString();
 		this.tasks = sortFocusTasks(
 			this.tasks.map((task) =>
@@ -455,58 +478,21 @@ export class FocusWorkspace {
 	}
 
 	updateIntention(title: string) {
+		const cleanTitle = title.trim().slice(0, 80);
 		this.intention = title;
-		if (this.activeTaskId && title.trim()) this.updateTaskTitle(this.activeTaskId, title);
-	}
-
-	resumeSavedSession(record: FocusSessionRecord) {
-		if (this.phase !== 'idle') {
-			this.toastMessage = 'Finish your current session before continuing another one.';
-			return false;
-		}
-
-		const title = record.title === 'Session' || record.title === 'Sprint' ? '' : record.title;
-		let task = record.taskId ? this.tasks.find((item) => item.id === record.taskId) : undefined;
-		if (!task && title) task = this.addTask(title) ?? undefined;
-		if (task) return this.startTask(task);
-		this.activeTaskId = null;
-		this.intention = '';
-		this.startSession();
-		return true;
-	}
-
-	deleteSession(id: string) {
-		if (id === this.activeSessionId) return;
-		const result = removeSessionById(this.history, id);
-		if (!result.removed) return;
-
-		this.history = result.records;
-		this.deletedRecord = result.removed;
-		saveSessionHistory(this.history);
-		this.toastMessage = `Removed “${result.removed.title}”.`;
-		if (this.deleteTimeout) window.clearTimeout(this.deleteTimeout);
-		this.deleteTimeout = window.setTimeout(() => (this.deletedRecord = null), 6000);
-	}
-
-	undoDelete() {
-		if (!this.deletedRecord) return;
-		this.history = restoreSessionRecord(this.history, this.deletedRecord);
-		saveSessionHistory(this.history);
-		this.toastMessage = `Restored “${this.deletedRecord.title}”.`;
-		this.deletedRecord = null;
-		if (this.deleteTimeout) window.clearTimeout(this.deleteTimeout);
-	}
-
-	updateSessionTitle(id: string, title: string) {
-		if (id === this.activeSessionId) {
-			this.updateIntention(title === 'Session' ? '' : title);
+		if (!cleanTitle) {
+			if (this.phase === 'idle') this.activeTaskId = null;
 			return;
 		}
-
-		this.history = this.history.map((session) =>
-			session.id === id ? { ...session, title } : session
-		);
-		saveSessionHistory(this.history);
+		if (this.activeTaskId === UNTITLED_TASK_ID) {
+			const task = this.addTask(cleanTitle);
+			if (task) {
+				this.activeTaskId = task.id;
+				this.intention = task.title;
+			}
+			return;
+		}
+		if (this.activeTaskId) this.updateTaskTitle(this.activeTaskId, cleanTitle);
 	}
 
 	dismissToast() {
@@ -607,7 +593,9 @@ export class FocusWorkspace {
 	private ensureTaskForIntention() {
 		const title = this.intention.trim();
 		if (!title) {
-			this.activeTaskId = null;
+			const untitled = this.getOrCreateUntitledTask();
+			this.activeTaskId = untitled.id;
+			this.intention = untitled.title;
 			return;
 		}
 		if (this.activeTaskId && this.tasks.some((task) => task.id === this.activeTaskId)) return;
@@ -622,7 +610,6 @@ export class FocusWorkspace {
 				task.id === record.taskId
 					? {
 							...task,
-							title: record.title,
 							updatedAt: now,
 							accumulatedSeconds: task.accumulatedSeconds + record.totalSeconds,
 							sessionCount: task.sessionCount + 1
@@ -631,6 +618,30 @@ export class FocusWorkspace {
 			)
 		);
 		saveFocusTasks(this.tasks);
+	}
+
+	private getOrCreateUntitledTask(): FocusTask {
+		const existing = this.tasks.find((task) => task.id === UNTITLED_TASK_ID);
+		if (existing) return existing;
+
+		const untitled = createUntitledTask();
+		this.tasks = sortFocusTasks([untitled, ...this.tasks]);
+		saveFocusTasks(this.tasks);
+		return untitled;
+	}
+
+	private recoverActiveTask() {
+		if (this.activeTaskId && this.tasks.some((task) => task.id === this.activeTaskId)) return;
+		const title = this.intention.trim();
+		if (!title || title.toLocaleLowerCase() === UNTITLED_TASK_TITLE.toLocaleLowerCase() || title === 'Session') {
+			const untitled = this.getOrCreateUntitledTask();
+			this.activeTaskId = untitled.id;
+			this.intention = untitled.title;
+			return;
+		}
+		const task = this.addTask(title);
+		this.activeTaskId = task?.id ?? this.getOrCreateUntitledTask().id;
+		this.intention = task?.title ?? UNTITLED_TASK_TITLE;
 	}
 
 	private creditCurrentSessionMinutes() {

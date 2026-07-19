@@ -29,7 +29,7 @@ export function notifyContractComplete({
 
 	const blockLabel = completedContracts === 1 ? 'one focus block' : `${completedContracts} focus blocks`;
 	const notification = new Notification('Another five minutes?', {
-		body: `${intention || 'This session'} has reached ${blockLabel}. Add five minutes to continue.`,
+		body: `${intention || 'This focus'} has reached ${blockLabel}. Add five minutes to continue.`,
 		tag: 'five-minute-grove:contract-complete'
 	});
 

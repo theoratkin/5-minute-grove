@@ -33,8 +33,10 @@
 			groveGrowthToken={workspace.groveGrowthToken}
 			phase={workspace.phase}
 			onDurationChange={(seconds) => workspace.setStartDuration(seconds)}
-			intention={workspace.activeTitle}
-			intentionValue={workspace.intention}
+			intentionValue={workspace.taskInputValue}
+			tasks={workspace.tasks}
+			activeTaskId={workspace.activeTaskId}
+			onAssignTask={(id) => workspace.assignActiveTask(id)}
 			onIntentionChange={(nextValue) => workspace.updateIntention(nextValue)}
 			onStart={() => workspace.startSession()}
 			onAddFive={() => workspace.addFiveMinutes()}
@@ -44,19 +46,18 @@
 			onResume={() => workspace.resumeSession()}
 			onStop={() => workspace.stopSessionEarly()}
 			onDone={() => workspace.finishSession()}
-			hasActiveTask={workspace.activeTaskId !== null}
+			canCompleteTask={workspace.canCompleteActiveTask}
 			onCompleteTask={() => workspace.completeActiveTask()}
-			onSwitch={() => workspace.switchTask()}
 		/>
 
 		<p class="hidden text-center text-xs text-ink-muted sm:block" aria-label="Keyboard shortcuts">
 			{#if workspace.phase === 'idle'}Set a time, then press <kbd>Enter</kbd> to start{:else if workspace.phase === 'contract-complete'}Press <kbd>+</kbd> to add five minutes{:else}Press <kbd>Space</kbd> to {workspace.phase === 'paused' ? 'resume' : 'pause'}{#if import.meta.env.DEV} · <kbd>M</kbd> to skip 1 minute · <kbd>F</kbd> to fast-forward{/if}{/if}{#if import.meta.env.DEV} · <kbd>Shift</kbd> + <kbd>I</kbd> for intro{/if}
 		</p>
 
-		<div class="grid grid-cols-2 gap-3" aria-label="Current session progress">
+		<div class="grid grid-cols-2 gap-3" aria-label="Current focus progress">
 			<div class="metric-card metric-card-time border border-moss/10 bg-mist/60 p-4">
 				<strong class="block text-2xl leading-none font-extrabold text-moss-dark">{formatClock(workspace.sessionTimeSeconds)}</strong>
-				<span class="mt-1 block text-xs font-bold text-ink-muted">Session time</span>
+				<span class="mt-1 block text-xs font-bold text-ink-muted">Focused now</span>
 			</div>
 			<div class="metric-card metric-card-extensions border border-moss/10 bg-mist/60 p-4">
 				<strong class="block text-2xl leading-none font-extrabold text-moss-dark">{workspace.extensionCount}</strong>

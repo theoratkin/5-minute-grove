@@ -1,6 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeFocusTasks, sortFocusTasks } from '../src/lib/features/focus-list/focusTask.state.ts';
+import {
+	UNTITLED_TASK_ID,
+	normalizeFocusTasks,
+	removeEmptyUntitledTask,
+	sortFocusTasks
+} from '../src/lib/features/focus-list/focusTask.state.ts';
 
 test('normalizes durable task fields and rejects empty titles', () => {
 	const tasks = normalizeFocusTasks([
@@ -19,4 +24,28 @@ test('sorts open tasks before recently completed tasks', () => {
 		{ id: 'newer', title: 'Newer', createdAt: '2026-07-18T11:00:00.000Z', completedAt: '2026-07-18T12:00:00.000Z' }
 	]);
 	assert.deepEqual(sortFocusTasks([newer, older]).map((task) => task.id), ['older', 'newer']);
+});
+
+test('merges untitled tasks into one durable inbox', () => {
+	const tasks = normalizeFocusTasks([
+		{ id: 'old-one', title: 'Untitled task', createdAt: '2026-07-18T10:00:00.000Z', accumulatedSeconds: 120, sessionCount: 1 },
+		{ id: 'old-two', title: 'Untitled', createdAt: '2026-07-18T11:00:00.000Z', accumulatedSeconds: 180, sessionCount: 2 }
+	]);
+	assert.equal(tasks.length, 1);
+	assert.equal(tasks[0].id, UNTITLED_TASK_ID);
+	assert.equal(tasks[0].title, 'Untitled');
+	assert.equal(tasks[0].accumulatedSeconds, 300);
+	assert.equal(tasks[0].sessionCount, 3);
+});
+
+test('removes an empty untitled inbox but preserves one with saved focus', () => {
+	const empty = normalizeFocusTasks([
+		{ id: UNTITLED_TASK_ID, title: 'Untitled', createdAt: '2026-07-18T10:00:00.000Z' }
+	]);
+	assert.deepEqual(removeEmptyUntitledTask(empty), []);
+
+	const focused = normalizeFocusTasks([
+		{ id: UNTITLED_TASK_ID, title: 'Untitled', createdAt: '2026-07-18T10:00:00.000Z', accumulatedSeconds: 60, sessionCount: 1 }
+	]);
+	assert.equal(removeEmptyUntitledTask(focused).length, 1);
 });

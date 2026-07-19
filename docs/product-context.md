@@ -39,6 +39,8 @@ The first usable version should likely include:
 - Equally valid options to finish or switch tasks.
 - A lightweight local Focus list where tasks can be started, resumed, completed, and reopened.
 - Separate session records that accumulate focused time on a task without implying that the task is complete.
+- Direct timer starts without a title use one shared Untitled task rather than creating anonymous duplicates.
+- An in-progress focus attempt can be reassigned in full to another open task.
 - Honest accounting when a session ends early: partial time is saved without awarding a completed contract.
 - Recovery of an in-progress session after a refresh or accidental tab close.
 

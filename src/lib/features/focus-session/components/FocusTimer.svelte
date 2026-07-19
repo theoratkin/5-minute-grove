@@ -4,6 +4,7 @@
 	import { buttonSplash } from '$lib/actions/buttonSplash';
 	import EndOfTimerPrompt from './EndOfTimerPrompt.svelte';
 	import type { FocusPhase } from '$lib/features/focus-session/focusSession.types';
+	import type { FocusTask } from '$lib/features/focus-list/focusTask.types';
 	import TaskIntentionInput from '$lib/features/task-intention/components/TaskIntentionInput.svelte';
 	import GroveVignette from './GroveVignette.svelte';
 	import DurationField from './DurationField.svelte';
@@ -16,8 +17,10 @@
 		groveSettledMatureTreeCount,
 		groveGrowthToken,
 		phase,
-		intention,
 		intentionValue,
+		tasks,
+		activeTaskId,
+		onAssignTask,
 		onIntentionChange,
 		onDurationChange,
 		onStart,
@@ -28,9 +31,8 @@
 		onResume,
 		onStop,
 		onDone,
-		hasActiveTask,
+		canCompleteTask,
 		onCompleteTask,
-		onSwitch
 	}: {
 		remainingSeconds: number;
 		canRemoveOneMinute: boolean;
@@ -39,8 +41,10 @@
 		groveSettledMatureTreeCount: number;
 		groveGrowthToken: number;
 		phase: FocusPhase;
-		intention: string;
 		intentionValue: string;
+		tasks: FocusTask[];
+		activeTaskId: string | null;
+		onAssignTask: (id: string) => void;
 		onIntentionChange: (value: string) => void;
 		onDurationChange: (seconds: number) => void;
 		onStart: () => void;
@@ -51,9 +55,8 @@
 		onResume: () => void;
 		onStop: () => void;
 		onDone: () => void;
-		hasActiveTask: boolean;
+		canCompleteTask: boolean;
 		onCompleteTask: () => void;
-		onSwitch: () => void;
 	} = $props();
 
 	let isStarting = $state(false);
@@ -194,6 +197,16 @@
 
 		<div class="relative z-10 -mt-1">
 			<TaskIntentionInput value={intentionValue} onchange={onIntentionChange} />
+			{#if phase !== 'idle' && activeTaskId}
+				<label class="mx-auto mt-2 flex w-fit items-center gap-2 text-xs font-semibold text-ink-muted">
+					<span>Assign this focus to</span>
+					<select class="min-h-9 max-w-52 rounded-lg border border-moss/15 bg-paper px-2 font-bold text-moss outline-none focus:border-moss/40" value={activeTaskId} onchange={(event) => onAssignTask(event.currentTarget.value)}>
+						{#each tasks.filter((task) => !task.completedAt) as task (task.id)}
+							<option value={task.id}>{task.title}</option>
+						{/each}
+					</select>
+				</label>
+			{/if}
 		</div>
 
 		<div class="relative z-10 mt-7">
@@ -212,10 +225,9 @@
 							<span>{isExtending ? 'Another 5 minutes' : 'Add 5 minutes'}</span>
 						</button>
 					</div>
-					<div class={`grid gap-2 ${hasActiveTask ? 'grid-cols-3' : 'grid-cols-2'}`}>
-						<button class="flex min-h-12 items-center justify-center gap-1 rounded-xl border border-moss/15 bg-surface px-1.5 text-xs font-extrabold text-moss transition hover:bg-mist sm:px-2 sm:text-sm" type="button" onclick={onDone} title="Save this session without completing the task"><i class="ph-bold ph-stop" aria-hidden="true"></i><span>Finish session</span></button>
-						{#if hasActiveTask}<button class="flex min-h-12 items-center justify-center gap-1 rounded-xl border border-moss/20 bg-sprout/25 px-1.5 text-xs font-extrabold text-moss transition hover:bg-sprout/45 sm:px-2 sm:text-sm" type="button" onclick={onCompleteTask} title="Save this session and mark the task done"><i class="ph-bold ph-check" aria-hidden="true"></i><span>Mark done</span></button>{/if}
-						<button class="flex min-h-12 items-center justify-center gap-1 rounded-xl border border-moss/15 bg-surface px-1.5 text-xs font-bold text-ink-muted transition hover:bg-mist hover:text-moss sm:px-2 sm:text-sm" type="button" onclick={onSwitch} title="Save this session and choose another task"><i class="ph-bold ph-arrows-left-right" aria-hidden="true"></i><span>Choose another</span></button>
+					<div class={`grid gap-2 ${canCompleteTask ? 'grid-cols-2' : 'grid-cols-1'}`}>
+						<button class="flex min-h-12 items-center justify-center gap-1 rounded-xl border border-moss/15 bg-surface px-2 text-sm font-extrabold text-moss transition hover:bg-mist" type="button" onclick={onDone} title="Save this focus without completing the task"><i class="ph-bold ph-stop" aria-hidden="true"></i><span>Stop for now</span></button>
+						{#if canCompleteTask}<button class="flex min-h-12 items-center justify-center gap-1 rounded-xl border border-moss/20 bg-sprout/25 px-2 text-sm font-extrabold text-moss transition hover:bg-sprout/45" type="button" onclick={onCompleteTask} title="Save this focus and mark the task done"><i class="ph-bold ph-check" aria-hidden="true"></i><span>Mark done</span></button>{/if}
 					</div>
 				</div>
 			{:else if phase === 'paused'}
@@ -228,7 +240,7 @@
 					</div>
 					<button class="flex items-center justify-center gap-2 rounded-2xl border border-clay/30 bg-surface px-4 font-bold text-clay transition hover:bg-clay/10" type="button" onclick={onStop}>
 						<i class="ph-fill ph-stop-circle text-[1.0625rem]" aria-hidden="true"></i>
-						<span>End session</span>
+						<span>Stop for now</span>
 					</button>
 				</div>
 			{:else}
@@ -239,7 +251,7 @@
 					</button>
 					<button class="flex items-center justify-center gap-2 rounded-2xl border border-clay/30 bg-surface px-4 font-bold text-clay transition hover:bg-clay/10" type="button" onclick={onStop}>
 						<i class="ph-fill ph-stop-circle text-[1.0625rem]" aria-hidden="true"></i>
-						<span>End session</span>
+						<span>Stop for now</span>
 					</button>
 				</div>
 			{/if}

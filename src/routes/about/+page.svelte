@@ -29,12 +29,12 @@
 			Five Minute Grove is my attempt to wrap that way of working in a simple, cozy package. Start with five minutes. When the timer ends, add five more, switch tasks, or finish there. As you work, each focused minute helps your grove grow.
 		</p>
 		<p class="rounded-2xl border border-moss/10 bg-mist/60 p-5 font-semibold text-ink">
-			It isn’t about squeezing as much work as possible out of every session. It’s about making the first step approachable and letting momentum grow voluntarily.
+			It isn’t about squeezing as much work as possible out of every focus. It’s about making the first step approachable and letting momentum grow voluntarily.
 		</p>
 	</div>
 
 	<a class="mt-8 inline-flex min-h-12 items-center gap-2 rounded-xl bg-moss px-5 font-extrabold text-on-accent transition hover:bg-moss-dark" href="/">
 		<i class="ph-bold ph-arrow-left" aria-hidden="true"></i>
-		Start a tiny session
+		Start a tiny focus
 	</a>
 </article>

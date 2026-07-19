@@ -65,7 +65,7 @@
 
 	function confirmGroveReset() {
 		const confirmed = window.confirm(
-			'Reset your grove? This removes all trees and leaves. Your session history will stay, and this cannot be undone.'
+			'Reset your grove? This removes all trees and leaves. Your focused time will stay, and this cannot be undone.'
 		);
 		if (!confirmed) return;
 
@@ -148,7 +148,7 @@
 						<div class="px-1">
 							<p class="text-sm font-bold text-ink-muted">Grove</p>
 							<p class="mt-1 text-xs leading-relaxed text-ink-muted">
-								Start the grove over without removing session history.
+								Start the grove over without removing your focused time.
 							</p>
 						</div>
 						<button

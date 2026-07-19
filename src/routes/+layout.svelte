@@ -14,7 +14,6 @@
 		FocusWorkspace,
 		provideFocusWorkspace
 	} from '$lib/features/focus-session/focusWorkspace.svelte';
-	import type { FocusSessionRecord } from '$lib/features/focus-session/focusSession.types';
 	import type { FocusTask } from '$lib/features/focus-list/focusTask.types';
 	import FocusList from '$lib/features/focus-list/components/FocusList.svelte';
 	import '$lib/styles/tokens.css';
@@ -62,12 +61,6 @@
 		applyTheme(theme);
 	}
 
-	function resumeSavedSession(record: FocusSessionRecord) {
-		if (workspace.resumeSavedSession(record) && page.url.pathname !== '/') {
-			void goto('/');
-		}
-	}
-
 	function startTask(task: FocusTask) {
 		if (workspace.startTask(task) && page.url.pathname !== '/') void goto('/');
 	}
@@ -102,14 +95,11 @@
 	<aside class="rounded-[1.35rem_2rem_1.65rem_1.2rem] border border-surface/90 bg-paper/80 p-5 shadow-[0_18px_50px_rgb(0_0_0/8%)] backdrop-blur lg:sticky lg:top-8">
 		<FocusList
 			tasks={workspace.tasks}
-			records={workspace.history}
 			currentSession={workspace.currentSession}
 			activeTaskId={workspace.activeTaskId}
 			onadd={(title) => workspace.addTask(title)}
 			onstart={startTask}
 			ontoggle={(id) => workspace.toggleTaskDone(id)}
-			onresume={resumeSavedSession}
-			ondelete={(id) => workspace.deleteSession(id)}
 		/>
 	</aside>
 </main>
@@ -117,11 +107,7 @@
 {#if workspace.toastMessage}
 	<div class="fixed right-4 bottom-4 z-50 flex min-h-12 w-max max-w-[calc(100vw-2rem)] items-center justify-between gap-4 rounded-2xl border border-moss/15 bg-paper px-4 py-3 text-sm font-semibold text-ink shadow-[0_16px_45px_rgb(0_0_0/18%)]" role="status">
 		<span>{workspace.toastMessage}</span>
-		{#if workspace.deletedRecord}
-			<button class="min-h-11 shrink-0 rounded-xl px-3 font-extrabold text-moss transition hover:bg-mist" type="button" onclick={() => workspace.undoDelete()}>Undo</button>
-		{:else}
-			<button class="grid size-11 shrink-0 place-items-center rounded-xl text-ink-muted transition hover:bg-mist" type="button" aria-label="Dismiss message" onclick={() => workspace.dismissToast()}><i class="ph-bold ph-x" aria-hidden="true"></i></button>
-		{/if}
+		<button class="grid size-11 shrink-0 place-items-center rounded-xl text-ink-muted transition hover:bg-mist" type="button" aria-label="Dismiss message" onclick={() => workspace.dismissToast()}><i class="ph-bold ph-x" aria-hidden="true"></i></button>
 	</div>
 {/if}
 

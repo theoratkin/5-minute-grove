@@ -93,7 +93,8 @@ When implementation begins, a pragmatic MVP would be:
   - Done
   - Switch task
 - Current session summary with total elapsed time and extension count.
-- Separate local persistence for planned task state and recent session records. Ending a session does not complete its task.
+- Separate local persistence for planned task state and internal focus-attempt records. The task is the user-facing object; attempt records preserve timestamps, recovery, and honest accounting without appearing as a second workflow.
+- Use one stable system ID for the shared Untitled task, and assign an entire active attempt when its task changes.
 - Versioned local persistence for cumulative grove growth, credited idempotently per elapsed session minute.
 - Absolute end timestamps for timer accuracy across throttled background tabs and refresh recovery.
 
