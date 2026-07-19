@@ -180,9 +180,15 @@
 						{/if}
 						<span class="mt-0.5 block text-xs font-semibold text-ink-muted">{formatMinutes(taskSeconds(task))} focused{task.id === activeTaskId && currentSession ? ' · now' : ''}</span>
 					</div>
-					<button class="grid size-10 place-items-center rounded-xl border border-moss/15 bg-paper/60 text-moss transition hover:bg-sprout/35" type="button" use:buttonSplash onclick={() => onstart(task)} aria-label={`Start ${task.title}`} title="Start task">
-						<i class="ph-fill ph-play" aria-hidden="true"></i>
-					</button>
+					{#if task.id === activeTaskId && currentSession}
+						<span class="grid size-10 place-items-center text-moss" aria-label={`${task.title} is currently focused`} title="Current focus">
+							<i class="ph-bold ph-timer text-xl" aria-hidden="true"></i>
+						</span>
+					{:else}
+						<button class="grid size-10 place-items-center rounded-xl border border-moss/15 bg-paper/60 text-moss transition hover:bg-sprout/35" type="button" use:buttonSplash onclick={() => onstart(task)} aria-label={`Start ${task.title}`} title="Start task">
+							<i class="ph-fill ph-play" aria-hidden="true"></i>
+						</button>
+					{/if}
 					<div class="task-menu-control relative">
 							<button class="grid size-10 place-items-center rounded-xl text-ink-muted transition hover:bg-mist hover:text-ink" type="button" onclick={() => openMenuTaskId = openMenuTaskId === task.id ? null : task.id} aria-label={`More actions for ${task.title}`} aria-expanded={openMenuTaskId === task.id} title="More task actions"><i class="ph-bold ph-dots-three-vertical text-lg" aria-hidden="true"></i></button>
 							{#if openMenuTaskId === task.id}
