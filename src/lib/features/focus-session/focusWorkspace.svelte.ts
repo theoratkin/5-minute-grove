@@ -221,10 +221,12 @@ export class FocusWorkspace {
 	}
 
 	handleKeyboard(event: KeyboardEvent) {
-		const target = event.target as HTMLElement;
+		const target = event.target as Element | null;
 		if (
 			event.repeat ||
-			target.matches('input, textarea, select, button, a, summary, [contenteditable="true"]')
+			target?.closest(
+				'input, textarea, select, button, a, summary, [contenteditable]:not([contenteditable="false"])'
+			)
 		) {
 			return;
 		}

@@ -39,8 +39,14 @@
 			if (!import.meta.env.DEV || event.key.toLowerCase() !== 'i' || !event.shiftKey) return;
 			if (event.ctrlKey || event.metaKey || event.altKey) return;
 
-			const target = event.target as HTMLElement | null;
-			if (target?.matches('input, textarea, select, [contenteditable="true"]')) return;
+			const target = event.target as Element | null;
+			if (
+				target?.closest(
+					'input, textarea, select, [contenteditable]:not([contenteditable="false"])'
+				)
+			) {
+				return;
+			}
 
 			event.preventDefault();
 			introductionOpen = true;
