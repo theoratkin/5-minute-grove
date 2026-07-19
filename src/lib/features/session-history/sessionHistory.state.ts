@@ -14,6 +14,7 @@ export function normalizeSessionHistory(value: unknown): FocusSessionRecord[] {
 		)
 		.map((record) => ({
 			id: record.id,
+			taskId: typeof record.taskId === 'string' ? record.taskId : null,
 			title:
 				record.title?.trim() === 'Sprint'
 					? 'Session'

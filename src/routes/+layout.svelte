@@ -15,7 +15,8 @@
 		provideFocusWorkspace
 	} from '$lib/features/focus-session/focusWorkspace.svelte';
 	import type { FocusSessionRecord } from '$lib/features/focus-session/focusSession.types';
-	import SessionHistory from '$lib/features/session-history/components/SessionHistory.svelte';
+	import type { FocusTask } from '$lib/features/focus-list/focusTask.types';
+	import FocusList from '$lib/features/focus-list/components/FocusList.svelte';
 	import '$lib/styles/tokens.css';
 	import '@phosphor-icons/web/bold';
 	import '@phosphor-icons/web/fill';
@@ -67,6 +68,10 @@
 		}
 	}
 
+	function startTask(task: FocusTask) {
+		if (workspace.startTask(task) && page.url.pathname !== '/') void goto('/');
+	}
+
 	function dismissIntroduction() {
 		markIntroductionSeen();
 		introductionOpen = false;
@@ -95,12 +100,16 @@
 	{@render children()}
 
 	<aside class="rounded-[1.35rem_2rem_1.65rem_1.2rem] border border-surface/90 bg-paper/80 p-5 shadow-[0_18px_50px_rgb(0_0_0/8%)] backdrop-blur lg:sticky lg:top-8">
-		<SessionHistory
+		<FocusList
+			tasks={workspace.tasks}
 			records={workspace.history}
 			currentSession={workspace.currentSession}
+			activeTaskId={workspace.activeTaskId}
+			onadd={(title) => workspace.addTask(title)}
+			onstart={startTask}
+			ontoggle={(id) => workspace.toggleTaskDone(id)}
 			onresume={resumeSavedSession}
-			deleteSession={(id) => workspace.deleteSession(id)}
-			updateSessionTitle={(id, title) => workspace.updateSessionTitle(id, title)}
+			ondelete={(id) => workspace.deleteSession(id)}
 		/>
 	</aside>
 </main>

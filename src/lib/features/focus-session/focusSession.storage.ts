@@ -6,12 +6,13 @@ import { FIVE_MINUTES_SECONDS, normalizeStartDuration } from './focusSession.uti
 const ACTIVE_SESSION_KEY = storageKey('active-session');
 const START_DURATION_KEY = storageKey('start-duration');
 const activePhases: FocusPhase[] = ['running', 'paused', 'contract-complete'];
+type StoredActiveFocusSession = Omit<Partial<ActiveFocusSession>, 'version'> & { version?: number };
 
 export function loadActiveSession(): ActiveFocusSession | null {
-	const value = readJson<Partial<ActiveFocusSession> | null>(ACTIVE_SESSION_KEY, null);
+	const value = readJson<StoredActiveFocusSession | null>(ACTIVE_SESSION_KEY, null);
 	if (
 		!value ||
-		value.version !== 1 ||
+		(value.version !== 1 && value.version !== 2) ||
 		typeof value.activeSessionId !== 'string' ||
 		typeof value.sessionStartedAt !== 'string' ||
 		typeof value.phase !== 'string' ||
@@ -21,7 +22,8 @@ export function loadActiveSession(): ActiveFocusSession | null {
 	}
 
 	return {
-		version: 1,
+		version: 2,
+		taskId: typeof value.taskId === 'string' ? value.taskId : null,
 		intention: typeof value.intention === 'string' ? value.intention : '',
 		phase: value.phase as ActiveFocusSession['phase'],
 		remainingSeconds: finiteNonNegative(value.remainingSeconds, 300),

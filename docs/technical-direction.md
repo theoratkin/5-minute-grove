@@ -43,6 +43,13 @@ src/
         sessionHistory.types.ts
         sessionHistory.storage.ts
 
+      focus-list/
+        components/
+          FocusList.svelte
+        focusTask.types.ts
+        focusTask.state.ts
+        focusTask.storage.ts
+
       task-intention/
         components/
           TaskIntentionInput.svelte
@@ -79,14 +86,14 @@ This fits the product better than pure Atomic Design because the app's complexit
 When implementation begins, a pragmatic MVP would be:
 
 - Single main route.
-- Task/intention input.
+- Task/intention input and a lightweight local Focus list.
 - Direct minutes-and-seconds countdown input that remembers the last chosen starting duration.
 - End-of-timer decision screen with:
   - Add 5 minutes
   - Done
   - Switch task
 - Current session summary with total elapsed time and extension count.
-- Local persistence for recent sessions, grouped by start date and resumable in place.
+- Separate local persistence for planned task state and recent session records. Ending a session does not complete its task.
 - Versioned local persistence for cumulative grove growth, credited idempotently per elapsed session minute.
 - Absolute end timestamps for timer accuracy across throttled background tabs and refresh recovery.
 

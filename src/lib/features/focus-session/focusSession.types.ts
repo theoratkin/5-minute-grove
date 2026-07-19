@@ -2,6 +2,7 @@ export type FocusPhase = 'idle' | 'running' | 'paused' | 'contract-complete';
 
 export interface FocusSessionRecord {
 	id: string;
+	taskId?: string | null;
 	title: string;
 	startedAt: string;
 	endedAt: string;
@@ -11,7 +12,8 @@ export interface FocusSessionRecord {
 }
 
 export interface ActiveFocusSession {
-	version: 1;
+	version: 2;
+	taskId: string | null;
 	intention: string;
 	phase: Exclude<FocusPhase, 'idle'>;
 	remainingSeconds: number;

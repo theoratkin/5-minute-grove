@@ -5,7 +5,8 @@ import type { ActiveFocusSession } from '../src/lib/features/focus-session/focus
 import { normalizeStartDuration } from '../src/lib/features/focus-session/focusSession.utils.ts';
 
 const baseSession: ActiveFocusSession = {
-	version: 1,
+	version: 2,
+	taskId: 'task-1',
 	intention: 'Write the opening',
 	phase: 'running',
 	remainingSeconds: 300,

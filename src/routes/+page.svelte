@@ -35,7 +35,7 @@
 			onDurationChange={(seconds) => workspace.setStartDuration(seconds)}
 			intention={workspace.activeTitle}
 			intentionValue={workspace.intention}
-			onIntentionChange={(nextValue) => (workspace.intention = nextValue)}
+			onIntentionChange={(nextValue) => workspace.updateIntention(nextValue)}
 			onStart={() => workspace.startSession()}
 			onAddFive={() => workspace.addFiveMinutes()}
 			onAddOne={() => workspace.addOneMinute()}
@@ -44,6 +44,8 @@
 			onResume={() => workspace.resumeSession()}
 			onStop={() => workspace.stopSessionEarly()}
 			onDone={() => workspace.finishSession()}
+			hasActiveTask={workspace.activeTaskId !== null}
+			onCompleteTask={() => workspace.completeActiveTask()}
 			onSwitch={() => workspace.switchTask()}
 		/>
 

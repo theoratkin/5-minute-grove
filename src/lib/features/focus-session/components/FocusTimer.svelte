@@ -28,6 +28,8 @@
 		onResume,
 		onStop,
 		onDone,
+		hasActiveTask,
+		onCompleteTask,
 		onSwitch
 	}: {
 		remainingSeconds: number;
@@ -49,6 +51,8 @@
 		onResume: () => void;
 		onStop: () => void;
 		onDone: () => void;
+		hasActiveTask: boolean;
+		onCompleteTask: () => void;
 		onSwitch: () => void;
 	} = $props();
 
@@ -208,9 +212,10 @@
 							<span>{isExtending ? 'Another 5 minutes' : 'Add 5 minutes'}</span>
 						</button>
 					</div>
-					<div class="grid grid-cols-2 gap-2">
-						<button class="flex min-h-12 items-center justify-center gap-1.5 rounded-xl border border-moss/15 bg-surface px-2 text-xs font-extrabold text-moss transition hover:bg-mist sm:text-sm" type="button" onclick={onDone} title="Save this session and finish here"><i class="ph-bold ph-check" aria-hidden="true"></i><span>Finish here</span></button>
-						<button class="flex min-h-12 items-center justify-center gap-1.5 rounded-xl border border-moss/15 bg-surface px-2 text-xs font-bold text-ink-muted transition hover:bg-mist hover:text-moss sm:text-sm" type="button" onclick={onSwitch} title="Save this session and name another task"><i class="ph-bold ph-arrows-left-right" aria-hidden="true"></i><span>Switch task</span></button>
+					<div class={`grid gap-2 ${hasActiveTask ? 'grid-cols-3' : 'grid-cols-2'}`}>
+						<button class="flex min-h-12 items-center justify-center gap-1 rounded-xl border border-moss/15 bg-surface px-1.5 text-xs font-extrabold text-moss transition hover:bg-mist sm:px-2 sm:text-sm" type="button" onclick={onDone} title="Save this session without completing the task"><i class="ph-bold ph-stop" aria-hidden="true"></i><span>Finish session</span></button>
+						{#if hasActiveTask}<button class="flex min-h-12 items-center justify-center gap-1 rounded-xl border border-moss/20 bg-sprout/25 px-1.5 text-xs font-extrabold text-moss transition hover:bg-sprout/45 sm:px-2 sm:text-sm" type="button" onclick={onCompleteTask} title="Save this session and mark the task done"><i class="ph-bold ph-check" aria-hidden="true"></i><span>Mark done</span></button>{/if}
+						<button class="flex min-h-12 items-center justify-center gap-1 rounded-xl border border-moss/15 bg-surface px-1.5 text-xs font-bold text-ink-muted transition hover:bg-mist hover:text-moss sm:px-2 sm:text-sm" type="button" onclick={onSwitch} title="Save this session and choose another task"><i class="ph-bold ph-arrows-left-right" aria-hidden="true"></i><span>Choose another</span></button>
 					</div>
 				</div>
 			{:else if phase === 'paused'}

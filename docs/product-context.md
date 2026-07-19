@@ -31,13 +31,14 @@ The more nuanced opportunity is making the repeated, consent-based "+5 minutes" 
 
 The first usable version should likely include:
 
-- An optional session title, defaulting simply to "Session".
+- An optional task title, with the ability to plan a small task before starting.
 - A default 5-minute timer with a custom opening duration.
 - A brief first-visit introduction to the tiny-contract and voluntary-continuation idea.
 - A clear end-of-contract state.
 - A prominent "Add 5 minutes" action.
 - Equally valid options to finish or switch tasks.
-- A local session history grouped by the day each session began, with options to resume or delete a session.
+- A lightweight local Focus list where tasks can be started, resumed, completed, and reopened.
+- Separate session records that accumulate focused time on a task without implying that the task is complete.
 - Honest accounting when a session ends early: partial time is saved without awarding a completed contract.
 - Recovery of an in-progress session after a refresh or accidental tab close.
 
@@ -57,6 +58,7 @@ The grove is a keepsake rather than an economy: it has no streaks, decay, spendi
 
 - Do not make this a generic Pomodoro clone.
 - Do not require long up-front planning.
+- Do not turn the Focus list into a backlog-management system with deadlines, priorities, or overdue pressure.
 - Do not punish stopping after the first 5 minutes.
 - Do not over-encourage or congratulate users for stopping; acknowledge the saved session plainly.
 - Do not describe a partial block as a completed five-minute contract; encouragement should remain truthful.
