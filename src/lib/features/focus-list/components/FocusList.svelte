@@ -62,7 +62,7 @@
 						<span class="grid size-10 place-items-center text-ink-muted" title="Shared untitled focus"><i class="ph-bold ph-inbox text-lg" aria-hidden="true"></i></span>
 					{:else}
 						<button class="grid size-10 place-items-center rounded-xl text-moss transition hover:bg-sprout/40" type="button" onclick={() => ontoggle(task.id)} aria-label={`Mark ${task.title} done`} title="Mark task done">
-							<i class="ph-bold ph-circle text-lg" aria-hidden="true"></i>
+							<i class="ph-bold ph-square text-lg" aria-hidden="true"></i>
 						</button>
 					{/if}
 					<button class="min-w-0 text-left" type="button" onclick={() => onstart(task)} aria-label={`Focus on ${task.title}`}>
@@ -86,7 +86,7 @@
 			<ul class="mt-2 grid gap-2 p-0">
 				{#each completedTasks.slice(0, 12) as task (task.id)}
 					<li class="flex items-center gap-2 rounded-xl bg-mist/45 p-2">
-						<button class="grid size-10 shrink-0 place-items-center rounded-xl text-moss hover:bg-sprout/40" type="button" onclick={() => ontoggle(task.id)} aria-label={`Move ${task.title} back to open tasks`} title="Reopen task"><i class="ph-fill ph-check-circle text-lg" aria-hidden="true"></i></button>
+						<button class="grid size-10 shrink-0 place-items-center rounded-xl text-moss hover:bg-sprout/40" type="button" onclick={() => ontoggle(task.id)} aria-label={`Move ${task.title} back to open tasks`} title="Reopen task"><i class="ph-fill ph-check-square text-lg" aria-hidden="true"></i></button>
 						<div class="min-w-0"><span class="block truncate text-sm font-semibold text-ink-muted line-through">{task.title}</span><span class="text-xs text-ink-muted">{formatMinutes(task.accumulatedSeconds)} focused</span></div>
 					</li>
 				{/each}
