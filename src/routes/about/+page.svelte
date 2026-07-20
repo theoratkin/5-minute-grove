@@ -38,8 +38,20 @@
 		</p>
 	</div>
 
-	<a class="mt-8 inline-flex min-h-12 items-center gap-2 rounded-xl bg-moss px-5 font-extrabold text-on-accent transition hover:bg-moss-dark" href={localizeHref('/')}>
+	<a class="mt-8 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-moss px-5 font-extrabold text-on-accent transition hover:bg-moss-dark" href={localizeHref('/')}>
 		<i class="ph-bold ph-arrow-left" aria-hidden="true"></i>
 		{m.about_start_focus()}
 	</a>
+
+	<footer class="mt-8 border-t border-moss/10 pt-5">
+		<section class="flex gap-2 text-xs leading-relaxed text-ink-muted" aria-labelledby="privacy-data-heading">
+			<i class="ph-bold ph-lock-key mt-0.5 shrink-0 text-sm text-moss" aria-hidden="true"></i>
+			<div>
+				<h2 id="privacy-data-heading" class="font-extrabold text-ink-muted">
+					{m.about_privacy_heading()}
+				</h2>
+				<p class="mt-0.5">{m.about_privacy_body()}</p>
+			</div>
+		</section>
+	</footer>
 </article>
