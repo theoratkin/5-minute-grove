@@ -152,6 +152,10 @@ export class FocusWorkspace {
 		};
 	}
 
+	previewStartOrExtendSound() {
+		this.playSound(this.startOrExtendSound);
+	}
+
 	setup() {
 		const startDuration = loadStartDuration();
 		this.remainingSeconds = startDuration;
@@ -814,6 +818,7 @@ export class FocusWorkspace {
 
 	private playSound(sound: HTMLAudioElement | null) {
 		if (!sound || !this.preferences.soundEnabled) return;
+		sound.volume = this.preferences.soundVolume;
 		sound.currentTime = 0;
 		void sound.play().catch(() => {
 			// Some browsers may block non-gesture audio if autoplay permission is unavailable.

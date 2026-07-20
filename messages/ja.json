@@ -44,6 +44,7 @@
   "theme_gruvbox_dark": "Gruvbox Dark",
   "timer_feedback": "タイマーの通知",
   "sounds": "サウンド",
+  "sound_volume": "音量",
   "notifications": "通知",
   "notifications_enabled": "タイマー終了の通知はオンです。",
   "notifications_unsupported": "このブラウザでは通知を利用できません。",

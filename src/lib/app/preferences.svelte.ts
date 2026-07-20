@@ -7,6 +7,7 @@ const PREFERENCES_CONTEXT = Symbol('app-preferences');
 
 type StoredPreferences = {
 	soundEnabled?: boolean;
+	soundVolume?: number;
 	notificationsEnabled?: boolean;
 	sleepReminderEnabled?: boolean;
 	lastSleepReminderDate?: string;
@@ -15,6 +16,7 @@ type StoredPreferences = {
 export class AppPreferences {
 	loaded = $state(false);
 	soundEnabled = $state(true);
+	soundVolume = $state(1);
 	notificationsEnabled = $state(false);
 	sleepReminderEnabled = $state(true);
 	lastSleepReminderDate = $state<string | undefined>();
@@ -24,6 +26,7 @@ export class AppPreferences {
 		try {
 			const stored = JSON.parse(localStorage.getItem(PREFERENCES_KEY) ?? '{}') as StoredPreferences;
 			this.soundEnabled = stored.soundEnabled ?? true;
+			this.soundVolume = normalizeVolume(stored.soundVolume);
 			this.notificationsEnabled =
 				(stored.notificationsEnabled ?? false) &&
 				'Notification' in window &&
@@ -39,6 +42,11 @@ export class AppPreferences {
 
 	setSound(enabled: boolean) {
 		this.soundEnabled = enabled;
+		this.save();
+	}
+
+	setSoundVolume(volume: number) {
+		this.soundVolume = normalizeVolume(volume);
 		this.save();
 	}
 
@@ -63,12 +71,18 @@ export class AppPreferences {
 			PREFERENCES_KEY,
 			JSON.stringify({
 				soundEnabled: this.soundEnabled,
+				soundVolume: this.soundVolume,
 				notificationsEnabled: this.notificationsEnabled,
 				sleepReminderEnabled: this.sleepReminderEnabled,
 				lastSleepReminderDate: this.lastSleepReminderDate
 			})
 		);
 	}
+}
+
+function normalizeVolume(volume: number | undefined): number {
+	if (typeof volume !== 'number' || !Number.isFinite(volume)) return 1;
+	return Math.min(1, Math.max(0, volume));
 }
 
 export function providePreferences(preferences: AppPreferences) {

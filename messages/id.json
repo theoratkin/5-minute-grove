@@ -44,6 +44,7 @@
   "theme_gruvbox_dark": "Gruvbox Dark",
   "timer_feedback": "Umpan balik timer",
   "sounds": "Suara",
+  "sound_volume": "Volume",
   "notifications": "Notifikasi",
   "notifications_enabled": "Peringatan saat timer selesai aktif.",
   "notifications_unsupported": "Notifikasi tidak tersedia di browser ini.",

@@ -44,6 +44,7 @@
   "theme_gruvbox_dark": "Gruvbox Dark",
   "timer_feedback": "Feedback do temporizador",
   "sounds": "Sons",
+  "sound_volume": "Volume",
   "notifications": "Notificações",
   "notifications_enabled": "Os alertas de término do temporizador estão ativados.",
   "notifications_unsupported": "As notificações não estão disponíveis neste navegador.",

@@ -46,6 +46,7 @@
 	"theme_gruvbox_dark": "Gruvbox Dark",
 	"timer_feedback": "Timer feedback",
 	"sounds": "Sounds",
+	"sound_volume": "Volume",
 	"notifications": "Notifications",
 	"notifications_enabled": "Timer-finish alerts are on.",
 	"notifications_unsupported": "Notifications are not available in this browser.",

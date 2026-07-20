@@ -44,6 +44,7 @@
   "theme_gruvbox_dark": "Gruvbox Dark",
   "timer_feedback": "타이머 피드백",
   "sounds": "소리",
+  "sound_volume": "볼륨",
   "notifications": "알림",
   "notifications_enabled": "타이머 종료 알림이 켜져 있습니다.",
   "notifications_unsupported": "이 브라우저에서는 알림을 사용할 수 없습니다.",

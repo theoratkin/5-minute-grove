@@ -44,6 +44,7 @@
   "theme_gruvbox_dark": "Gruvbox Dark",
   "timer_feedback": "Обратная связь таймера",
   "sounds": "Звуки",
+  "sound_volume": "Громкость",
   "notifications": "Уведомления",
   "notifications_enabled": "Оповещения об окончании таймера включены.",
   "notifications_unsupported": "Уведомления недоступны в этом браузере.",

@@ -91,6 +91,7 @@
 	{preferences}
 	onThemeChange={changeTheme}
 	onResetGrove={() => workspace.resetGrove()}
+	onPreviewSound={() => workspace.previewStartOrExtendSound()}
 />
 
 <SleepReminder {preferences} />

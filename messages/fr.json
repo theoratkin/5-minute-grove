@@ -44,6 +44,7 @@
   "theme_gruvbox_dark": "Gruvbox sombre",
   "timer_feedback": "Retour du minuteur",
   "sounds": "Sons",
+  "sound_volume": "Volume",
   "notifications": "Notifications",
   "notifications_enabled": "Les alertes de fin du minuteur sont activées.",
   "notifications_unsupported": "Les notifications ne sont pas disponibles dans ce navigateur.",

@@ -44,6 +44,7 @@
   "theme_gruvbox_dark": "Gruvbox 深色",
   "timer_feedback": "计时器反馈",
   "sounds": "声音",
+  "sound_volume": "音量",
   "notifications": "通知",
   "notifications_enabled": "计时结束提醒已开启。",
   "notifications_unsupported": "此浏览器不支持通知。",

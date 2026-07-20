@@ -44,6 +44,7 @@
   "theme_gruvbox_dark": "Gruvbox Dark",
   "timer_feedback": "Timer-Rückmeldung",
   "sounds": "Töne",
+  "sound_volume": "Lautstärke",
   "notifications": "Benachrichtigungen",
   "notifications_enabled": "Benachrichtigungen zum Timer-Ende sind aktiviert.",
   "notifications_unsupported": "Benachrichtigungen sind in diesem Browser nicht verfügbar.",
