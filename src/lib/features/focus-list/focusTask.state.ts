@@ -2,7 +2,7 @@ import type { FocusTask } from './focusTask.types.ts';
 
 const TASK_LIMIT = 100;
 export const UNTITLED_TASK_ID = 'focus-task-untitled';
-export const UNTITLED_TASK_TITLE = 'Untitled';
+export const UNTITLED_TASK_TITLE = 'Anything';
 
 export function normalizeFocusTasks(value: unknown): FocusTask[] {
 	if (!Array.isArray(value)) return [];
@@ -150,6 +150,7 @@ function isUntitledTask(task: { id: string; title: string }): boolean {
 	return (
 		task.id === UNTITLED_TASK_ID ||
 		title === UNTITLED_TASK_TITLE.toLocaleLowerCase() ||
+		title === 'untitled' ||
 		title === 'untitled task'
 	);
 }

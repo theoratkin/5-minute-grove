@@ -118,7 +118,7 @@ test('merges untitled tasks into one durable inbox', () => {
 	]);
 	assert.equal(tasks.length, 1);
 	assert.equal(tasks[0].id, UNTITLED_TASK_ID);
-	assert.equal(tasks[0].title, 'Untitled');
+	assert.equal(tasks[0].title, 'Anything');
 	assert.equal(tasks[0].accumulatedSeconds, 300);
 	assert.equal(tasks[0].sessionCount, 3);
 });
