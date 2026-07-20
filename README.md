@@ -2,15 +2,15 @@
 
 ![5 Minute Grove wide logo](media/logo-wide.inkscape.svg)
 
-A calm, local-first focus timer built around tiny work contracts and voluntary continuation.
+A calm, local-first focus timer built around approachable starts and voluntary continuation.
 
-5 Minute Grove is for the moment when starting is harder than continuing. Choose an honest amount of time—five minutes by default—focus until the contract ends, and then decide whether to stop or add another five minutes. Finishing the first contract is enough; stopping is not failure.
+5 Minute Grove is for the moment when starting is harder than continuing. Choose an approachable amount of time—five minutes by default—focus until the timer ends, and then decide whether to stop or add another five minutes. Reaching that first stopping point is enough; continuing is always optional.
 
 ## How it works
 
 1. Choose a task, or begin with **Anything** when naming the work would add friction.
 2. Set a small starting duration and start the timer.
-3. When the contract ends, either finish or voluntarily add five minutes.
+3. When the timer ends, either finish or voluntarily add five minutes.
 4. Each completed whole minute grows one leaf in a persistent grove. A tree matures after 60 leaves.
 
 The grove is a keepsake, not a productivity economy. There are no streaks, penalties, missed-day states, or rewards that can be spent.
@@ -19,7 +19,7 @@ The grove is a keepsake, not a productivity economy. There are no streaks, penal
 
 - Custom starting durations with a prominent **Add 5 minutes** continuation loop
 - Pause, resume, stop early, and adjust the active timer by one minute
-- Honest partial-time accounting when a session ends before its contract
+- Honest partial-time accounting when a session ends before its chosen time
 - Active-session recovery after refreshes or accidental tab closures
 - A lightweight Focus list with task creation, editing, reordering, completion, reopening, and deletion
 - Inline hashtag recognition in task titles
@@ -33,14 +33,14 @@ The grove is a keepsake, not a productivity economy. There are no streaks, penal
 
 ## Product principles
 
-This is not a Pomodoro clone. Changes should preserve the product's core mental contract:
+This is not a Pomodoro clone. Changes should preserve the product's core principle:
 
 - Optimize for getting started, not for maximizing session length.
 - Keep the end-of-timer choice small and low-pressure.
-- Treat stopping after the agreed time as a valid outcome.
+- Treat stopping after the chosen time as a valid outcome.
 - Reward starts and voluntary continuations without shame or streak pressure.
 - Keep task planning lightweight; do not turn the Focus list into a backlog manager.
-- Describe partial work truthfully rather than calling it a completed contract.
+- Describe partial work truthfully rather than calling it a finished block.
 
 More context lives in [the product documentation](docs/product-context.md).
 
@@ -110,9 +110,9 @@ Shortcuts are ignored while typing in an input or editable control.
 | --- | --- | --- |
 | Timer idle | `Enter` | Start the selected duration |
 | Timer running or paused | `Space` | Pause or resume |
-| Contract complete | `+` | Add five minutes |
+| Timer complete | `+` | Add five minutes |
 
-Development builds also provide `M` to advance one minute, `F` to finish the current contract through the normal completion path, and `Shift+I` to reopen the introduction.
+Development builds also provide `M` to advance one minute, `F` to finish the current timer through the normal completion path, and `Shift+I` to reopen the introduction.
 
 ## Project structure
 
@@ -197,7 +197,7 @@ When behavior changes, update the relevant durable documentation alongside the c
 
 ## Contributing
 
-Issues and pull requests are welcome. Keep changes focused, follow the existing feature-oriented architecture, add tests for behavioral changes, and preserve the permission-to-stop contract described above.
+Issues and pull requests are welcome. Keep changes focused, follow the existing feature-oriented architecture, add tests for behavioral changes, and preserve the permission to stop described above.
 
 ## License
 

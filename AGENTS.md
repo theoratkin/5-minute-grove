@@ -20,8 +20,8 @@ This repository is for a SvelteKit web app called "5 Minute Grove".
 
 The app is based on a focus pattern the user discovered:
 
-1. Start with a tiny, honest 5-minute work contract.
-2. When the timer ends, the contract is complete and stopping is allowed.
+1. Start with an approachable 5-minute focus.
+2. When the timer ends, stopping is allowed.
 3. The app offers a prominent "Add 5 minutes" action.
 4. Repeated voluntary extensions turn activation into momentum.
 
@@ -29,7 +29,7 @@ The key nuance is consent-based continuation. This is not a standard Pomodoro cl
 
 ## Working Principles
 
-- Preserve the "permission to quit" mental contract.
+- Preserve the genuine permission to stop.
 - Optimize for getting started, not maximizing session length at all costs.
 - Make the end-of-timer decision small and low-pressure.
 - Reward starts and voluntary continuations.
