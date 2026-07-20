@@ -256,7 +256,8 @@
 							<i class="ph-fill ph-play" aria-hidden="true"></i>
 						</button>
 					{/if}
-					<div class="task-menu-control relative">
+					{#if task.id !== UNTITLED_TASK_ID || untitledAssignmentTargets.length > 0}
+						<div class="task-menu-control relative">
 							<button class="grid size-10 place-items-center rounded-xl text-ink-muted transition hover:bg-mist hover:text-ink" type="button" onclick={() => openMenuTaskId = openMenuTaskId === task.id ? null : task.id} aria-label={task.id === UNTITLED_TASK_ID ? m.timer_assign_focus() : m.focus_list_more_actions({ title: taskTitle(task) })} aria-expanded={openMenuTaskId === task.id} title={task.id === UNTITLED_TASK_ID ? m.timer_assign_focus() : m.focus_list_more_actions_title()}><i class={`ph-bold ${task.id === UNTITLED_TASK_ID ? 'ph-swap' : 'ph-dots-three-vertical'} text-lg`} aria-hidden="true"></i></button>
 							{#if openMenuTaskId === task.id}
 								<div class="task-menu absolute top-[calc(100%+0.35rem)] right-0 z-30 grid w-44 gap-1 rounded-xl border border-moss/15 bg-paper p-1.5 shadow-[0_12px_32px_rgb(0_0_0/18%)]" role="menu">
@@ -275,7 +276,8 @@
 									{/if}
 								</div>
 							{/if}
-					</div>
+						</div>
+					{/if}
 				</li>
 			{/each}
 		</ul>

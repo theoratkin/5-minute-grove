@@ -223,7 +223,10 @@
 		</a>
 
 		<nav class="hidden items-center gap-2 sm:flex" aria-label={m.primary_navigation()}>
-			<a class="rounded-xl px-3 py-2 text-sm font-bold text-ink-muted transition hover:bg-mist hover:text-moss" href={localizeHref('/about')}>{m.about_link()}</a>
+			<a class="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-bold text-ink-muted transition hover:bg-mist hover:text-moss" href={localizeHref('/about')}>
+				<i class="ph-bold ph-info text-lg text-moss" aria-hidden="true"></i>
+				{m.about_link()}
+			</a>
 			<details
 				bind:this={themeMenu}
 				class="group relative"
