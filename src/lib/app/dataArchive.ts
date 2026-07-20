@@ -4,9 +4,18 @@ import type { FocusSessionRecord } from '../features/focus-session/focusSession.
 import { normalizeGroveState } from '../features/grove/grove.state.ts';
 import type { GroveState } from '../features/grove/grove.types.ts';
 import { normalizeSessionHistory } from '../features/session-history/sessionHistory.state.ts';
+import {
+	MigrationRegistryError,
+	runMigrationRegistry,
+	type MigrationStep
+} from './migrationRegistry.ts';
 
 export const DATA_ARCHIVE_FORMAT = '5-minute-grove';
 export const DATA_ARCHIVE_SCHEMA_VERSION = 1;
+
+type ArchiveMigrationCandidate = Record<string, unknown>;
+
+const ARCHIVE_MIGRATIONS: readonly MigrationStep<ArchiveMigrationCandidate>[] = [];
 
 export interface DurableData {
 	tasks: FocusTask[];
@@ -62,12 +71,27 @@ export function parseDataArchive(input: string | unknown): DataArchive {
 		throw new DataArchiveError('This file is not a 5 Minute Grove archive.');
 	}
 
-	const candidate = value as Record<string, unknown>;
+	let candidate = value as ArchiveMigrationCandidate;
 	if (candidate.format !== DATA_ARCHIVE_FORMAT) {
 		throw new DataArchiveError('This file is not a 5 Minute Grove archive.');
 	}
+	if (!Number.isInteger(candidate.schemaVersion) || (candidate.schemaVersion as number) < 0) {
+		throw new DataArchiveError('The archive schema version is invalid.');
+	}
+	try {
+		candidate = runMigrationRegistry(
+			candidate,
+			candidate.schemaVersion as number,
+			DATA_ARCHIVE_SCHEMA_VERSION,
+			ARCHIVE_MIGRATIONS,
+			'Archive schema'
+		);
+	} catch (error) {
+		if (error instanceof MigrationRegistryError) throw new DataArchiveError(error.message);
+		throw error;
+	}
 	if (candidate.schemaVersion !== DATA_ARCHIVE_SCHEMA_VERSION) {
-		throw new DataArchiveError(`Archive schema version ${String(candidate.schemaVersion)} is not supported.`);
+		throw new DataArchiveError('The archive migration did not produce the current schema version.');
 	}
 	if (!isValidDate(candidate.exportedAt)) {
 		throw new DataArchiveError('The archive export timestamp is invalid.');

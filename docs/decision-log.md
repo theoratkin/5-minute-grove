@@ -80,3 +80,4 @@
 
 - Added optimistic revision checks to every durable IndexedDB transaction so a stale tab cannot overwrite a newer commit. Conflicts abort before mutation, refresh from the authoritative database state, and show localized feedback.
 - Added live same-browser synchronization through BroadcastChannel with a localStorage event fallback. Tasks, sessions, and grove progress update across tabs, and a stable session ID prevents a focus finished elsewhere from being credited twice.
+- Added one sequential migration registry for IndexedDB and portable archives. Database creation now runs as migration 0→1; future steps execute atomically in the browser upgrade transaction, while archive migrations complete in memory before validation or storage mutation. Missing, duplicate, and forward-version paths fail explicitly.

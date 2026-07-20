@@ -65,6 +65,16 @@ test('rejects malformed and unsupported archives before import', () => {
 		() => parseDataArchive({ format: '5-minute-grove', schemaVersion: 99 }),
 		/Archive schema version 99 is not supported/
 	);
+	assert.throws(
+		() =>
+			parseDataArchive({
+				format: '5-minute-grove',
+				schemaVersion: 0,
+				exportedAt,
+				data: data()
+			}),
+		/no migration registered from version 0 to version 1/
+	);
 
 	const archive = createDataArchive(data(), exportedAt) as unknown as Record<string, unknown>;
 	archive.data = { tasks: [{ id: '' }], sessions: [], grove: emptyGroveState() };

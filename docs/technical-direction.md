@@ -115,6 +115,7 @@ When implementation begins, a pragmatic MVP would be:
 - Keep the archive format independent of the IndexedDB layout so exports remain stable through future database migrations.
 - Increment a durable revision inside every IndexedDB write transaction. Abort stale writes atomically, announce commits through BroadcastChannel with a storage-event fallback, and reload the authoritative snapshot in other tabs.
 - Treat a simultaneous edit conflict as an explicit committed-change-wins outcome rather than attempting to merge ambiguous task deletions or ordering. Surface the conflict and converge both tabs on the stored revision.
+- Route both IndexedDB and portable archive upgrades through a sequential migration registry. Require an explicit step for every version boundary, reject gaps and newer data, and preserve old steps so direct upgrades from any released version remain possible.
 
 ## UX Constraints
 

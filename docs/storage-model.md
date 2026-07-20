@@ -32,7 +32,7 @@ An active timer is recovery state for the current device, not a portable complet
 }
 ```
 
-Parsing rejects invalid JSON, a foreign format, unknown schema versions, malformed task/session records, and unknown grove versions before storage is changed.
+Parsing rejects invalid JSON, a foreign format, newer or unregistered schema versions, malformed task/session records, and unknown grove versions before storage is changed. Registered older archive versions migrate sequentially to the current schema before validation.
 
 ## Import Semantics
 
@@ -57,6 +57,28 @@ On first open, the app reads the former localStorage task, session, and grove ke
 Writes are queued within an app instance to preserve user-action order. Finishing a session commits its completed record, task aggregates, and current grove together. A database error leaves the in-memory workspace available and displays a localized warning rather than silently claiming the change was saved.
 
 Unbounded history is intentionally no longer coupled to an interface limit. Active timer recovery and preferences remain in localStorage because they are small device-local values and benefit from synchronous startup access.
+
+### Adding a migration
+
+Both IndexedDB and archive upgrades use `src/lib/app/migrationRegistry.ts`. The registry requires one step for every version boundary, runs steps in ascending order, rejects duplicate targets and gaps, and refuses data newer than the current application understands.
+
+For an IndexedDB schema change:
+
+1. Increment `DATABASE_VERSION` by one.
+2. Append a `DATABASE_MIGRATIONS` entry whose `toVersion` equals the new version.
+3. Make object-store or index changes through the provided upgrade transaction. Do not open a separate transaction.
+4. Keep every older migration unchanged so a user can upgrade directly from any released version.
+5. Add a migration fixture and test the oldest supported direct-upgrade path.
+
+For a portable archive change:
+
+1. Increment `DATA_ARCHIVE_SCHEMA_VERSION` by one.
+2. Append an `ARCHIVE_MIGRATIONS` entry for that exact target version.
+3. Return a copied candidate with its `schemaVersion` advanced and all new fields populated deterministically.
+4. Keep exports on the newest version while continuing to parse every registered older version.
+5. Add fixtures covering each supported source version, malformed input, and a missing-step failure.
+
+IndexedDB upgrade steps run inside the browser's atomic version-change transaction. If any step throws or aborts, the database remains at its prior version. Archive migrations run entirely in memory before an import can mutate stored data.
 
 ## Multi-tab Consistency
 

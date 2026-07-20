@@ -1,6 +1,7 @@
 import { browser } from '$app/environment';
 import { normalizeDurableData, type DurableData } from './dataArchive';
 import { DurableStorageConflictError, nextDurableRevision } from './durableRevision';
+import { runMigrationRegistry, type MigrationStep } from './migrationRegistry';
 import { readJson } from './storage';
 import {
 	HISTORY_STORAGE_KEY,
@@ -34,6 +35,23 @@ type DatabaseRecord = {
 	key: string;
 	value: unknown;
 };
+
+type DatabaseMigrationContext = {
+	database: IDBDatabase;
+	transaction: IDBTransaction;
+};
+
+const DATABASE_MIGRATIONS: readonly MigrationStep<DatabaseMigrationContext>[] = [
+	{
+		toVersion: 1,
+		migrate(context) {
+			if (!context.database.objectStoreNames.contains(DATA_STORE)) {
+				context.database.createObjectStore(DATA_STORE, { keyPath: 'key' });
+			}
+			return context;
+		}
+	}
+];
 
 let databasePromise: Promise<IDBDatabase> | undefined;
 let migrationPromise: Promise<void> | undefined;
@@ -160,15 +178,29 @@ function openDatabase(): Promise<IDBDatabase> {
 	const opening = new Promise<IDBDatabase>((resolve, reject) => {
 		const request = indexedDB.open(DATABASE_NAME, DATABASE_VERSION);
 		let settled = false;
-		request.onupgradeneeded = () => {
-			const database = request.result;
-			if (!database.objectStoreNames.contains(DATA_STORE)) {
-				database.createObjectStore(DATA_STORE, { keyPath: 'key' });
+		let upgradeError: unknown;
+		request.onupgradeneeded = (event) => {
+			try {
+				runMigrationRegistry(
+					{ database: request.result, transaction: request.transaction! },
+					event.oldVersion,
+					event.newVersion ?? DATABASE_VERSION,
+					DATABASE_MIGRATIONS,
+					'IndexedDB schema'
+				);
+			} catch (error) {
+				upgradeError = error;
+				request.transaction?.abort();
 			}
 		};
 		request.onerror = () => {
 			settled = true;
-			reject(new DurableStorageError('Could not open the local database.', { cause: request.error }));
+			reject(
+				new DurableStorageError(
+					upgradeError ? 'Could not migrate the local database.' : 'Could not open the local database.',
+					{ cause: upgradeError ?? request.error }
+				)
+			);
 		};
 		request.onblocked = () => {
 			settled = true;
