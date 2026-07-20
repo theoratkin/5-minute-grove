@@ -154,6 +154,7 @@
   "task_clear": "Очистить фокус",
   "grove_tree_summary_one": "{matureTrees} взрослое дерево. На дереве {treeNumber} — {leaves} из {leafLimit} листьев.",
   "grove_tree_summary_other": "{matureTrees} взрослых деревьев. На дереве {treeNumber} — {leaves} из {leafLimit} листьев.",
+  "grove_growth_explanation": "1 минута сосредоточенной работы выращивает 1 лист. {leafLimit} листьев вырастают в дерево.",
   "minutes_short": "{minutes} мин",
   "page_title_running": "{time} — 5 Minute Grove",
   "page_title_paused": "Пауза — 5 Minute Grove",

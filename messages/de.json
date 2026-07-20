@@ -154,6 +154,7 @@
   "task_clear": "Fokus löschen",
   "grove_tree_summary_one": "{matureTrees} ausgewachsener Baum. Baum {treeNumber} hat {leaves} von {leafLimit} Blättern.",
   "grove_tree_summary_other": "{matureTrees} ausgewachsene Bäume. Baum {treeNumber} hat {leaves} von {leafLimit} Blättern.",
+  "grove_growth_explanation": "1 konzentrierte Minute lässt 1 Blatt wachsen. {leafLimit} Blätter ergeben einen Baum.",
   "minutes_short": "{minutes} Min.",
   "page_title_running": "{time} – 5 Minute Grove",
   "page_title_paused": "Pausiert – 5 Minute Grove",

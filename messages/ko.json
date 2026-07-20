@@ -154,6 +154,7 @@
   "task_clear": "집중 지우기",
   "grove_tree_summary_one": "성숙한 나무 {matureTrees}그루. {treeNumber}번 나무에 잎이 {leafLimit}개 중 {leaves}개 있습니다.",
   "grove_tree_summary_other": "성숙한 나무 {matureTrees}그루. {treeNumber}번 나무에 잎이 {leafLimit}개 중 {leaves}개 있습니다.",
+  "grove_growth_explanation": "1분 집중하면 잎이 1개 자랍니다. 잎 {leafLimit}개가 모이면 나무 한 그루가 자랍니다.",
   "minutes_short": "{minutes}분",
   "page_title_running": "{time} - 5 Minute Grove",
   "page_title_paused": "일시정지됨 - 5 Minute Grove",

@@ -160,6 +160,7 @@
 	"task_clear": "Clear focus",
 	"grove_tree_summary_one": "{matureTrees} mature tree. Tree {treeNumber} has {leaves} of {leafLimit} leaves.",
 	"grove_tree_summary_other": "{matureTrees} mature trees. Tree {treeNumber} has {leaves} of {leafLimit} leaves.",
+	"grove_growth_explanation": "1 focused minute grows 1 leaf. {leafLimit} leaves grow a tree.",
 
 	"minutes_short": "{minutes} min",
 	"page_title_running": "{time} - 5 Minute Grove",

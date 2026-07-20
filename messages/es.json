@@ -154,6 +154,7 @@
   "task_clear": "Borrar concentración",
   "grove_tree_summary_one": "{matureTrees} árbol maduro. El árbol {treeNumber} tiene {leaves} de {leafLimit} hojas.",
   "grove_tree_summary_other": "{matureTrees} árboles maduros. El árbol {treeNumber} tiene {leaves} de {leafLimit} hojas.",
+  "grove_growth_explanation": "1 minuto de concentración hace crecer 1 hoja. {leafLimit} hojas hacen crecer un árbol.",
   "minutes_short": "{minutes} min",
   "page_title_running": "{time} - 5 Minute Grove",
   "page_title_paused": "En pausa - 5 Minute Grove",

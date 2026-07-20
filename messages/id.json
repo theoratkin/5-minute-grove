@@ -154,6 +154,7 @@
   "task_clear": "Hapus fokus",
   "grove_tree_summary_one": "{matureTrees} pohon dewasa. Pohon {treeNumber} memiliki {leaves} dari {leafLimit} daun.",
   "grove_tree_summary_other": "{matureTrees} pohon dewasa. Pohon {treeNumber} memiliki {leaves} dari {leafLimit} daun.",
+  "grove_growth_explanation": "1 menit fokus menumbuhkan 1 daun. {leafLimit} daun menumbuhkan satu pohon.",
   "minutes_short": "{minutes} mnt",
   "page_title_running": "{time} - 5 Minute Grove",
   "page_title_paused": "Dijeda - 5 Minute Grove",

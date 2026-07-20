@@ -154,6 +154,7 @@
   "task_clear": "清除专注",
   "grove_tree_summary_one": "{matureTrees} 棵成熟的树。第 {treeNumber} 棵树有 {leaves}/{leafLimit} 片叶子。",
   "grove_tree_summary_other": "{matureTrees} 棵成熟的树。第 {treeNumber} 棵树有 {leaves}/{leafLimit} 片叶子。",
+  "grove_growth_explanation": "专注 1 分钟会长出 1 片叶子。{leafLimit} 片叶子会长成一棵树。",
   "minutes_short": "{minutes} 分钟",
   "page_title_running": "{time} - 5 Minute Grove",
   "page_title_paused": "已暂停 - 5 Minute Grove",

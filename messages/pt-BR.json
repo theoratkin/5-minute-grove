@@ -154,6 +154,7 @@
   "task_clear": "Limpar foco",
   "grove_tree_summary_one": "{matureTrees} árvore adulta. A árvore {treeNumber} tem {leaves} de {leafLimit} folhas.",
   "grove_tree_summary_other": "{matureTrees} árvores adultas. A árvore {treeNumber} tem {leaves} de {leafLimit} folhas.",
+  "grove_growth_explanation": "1 minuto de foco faz crescer 1 folha. {leafLimit} folhas fazem crescer uma árvore.",
   "minutes_short": "{minutes} min",
   "page_title_running": "{time} - Bosque de 5 Minutos",
   "page_title_paused": "Pausado - Bosque de 5 Minutos",

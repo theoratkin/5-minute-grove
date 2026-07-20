@@ -154,6 +154,7 @@
   "task_clear": "Effacer la concentration",
   "grove_tree_summary_one": "{matureTrees} arbre adulte. L’arbre {treeNumber} a {leaves} feuille(s) sur {leafLimit}.",
   "grove_tree_summary_other": "{matureTrees} arbres adultes. L’arbre {treeNumber} a {leaves} feuille(s) sur {leafLimit}.",
+  "grove_growth_explanation": "1 minute de concentration fait pousser 1 feuille. {leafLimit} feuilles font pousser un arbre.",
   "minutes_short": "{minutes} min",
   "page_title_running": "{time} - 5 Minute Grove",
   "page_title_paused": "En pause - 5 Minute Grove",

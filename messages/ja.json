@@ -154,6 +154,7 @@
   "task_clear": "集中を解除",
   "grove_tree_summary_one": "成熟した木が{matureTrees}本あります。木{treeNumber}には{leafLimit}枚中{leaves}枚の葉があります。",
   "grove_tree_summary_other": "成熟した木が{matureTrees}本あります。木{treeNumber}には{leafLimit}枚中{leaves}枚の葉があります。",
+  "grove_growth_explanation": "1分集中すると葉が1枚育ちます。{leafLimit}枚で木が1本育ちます。",
   "minutes_short": "{minutes}分",
   "page_title_running": "{time} - 5 Minute Grove",
   "page_title_paused": "一時停止中 - 5 Minute Grove",
