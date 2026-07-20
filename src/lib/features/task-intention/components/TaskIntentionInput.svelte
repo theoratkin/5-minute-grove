@@ -5,12 +5,14 @@
 		value = '',
 		disabled = false,
 		clearable = true,
-		onchange
+		onchange,
+		onsubmit
 	}: {
 		value?: string;
 		disabled?: boolean;
 		clearable?: boolean;
 		onchange?: (value: string) => void;
+		onsubmit?: () => void;
 	} = $props();
 
 	let input: HTMLInputElement;
@@ -19,9 +21,14 @@
 		onchange?.('');
 		input.focus();
 	}
+
+	function submit(event: SubmitEvent) {
+		event.preventDefault();
+		onsubmit?.();
+	}
 </script>
 
-<div class="relative">
+<form class="relative" onsubmit={submit}>
 	<label class="sr-only" for="task-name">{m.task_name_optional()}</label>
 	<input
 		bind:this={input}
@@ -46,4 +53,4 @@
 			<i class="ph-bold ph-x text-sm" aria-hidden="true"></i>
 		</button>
 	{/if}
-</div>
+</form>

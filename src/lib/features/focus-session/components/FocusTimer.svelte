@@ -204,7 +204,7 @@
 
 		<div class="relative z-10 -mt-1">
 			{#if phase === 'idle'}
-				<TaskIntentionInput value={intentionValue} onchange={onIntentionChange} />
+				<TaskIntentionInput value={intentionValue} onchange={onIntentionChange} onsubmit={startWithCommitment} />
 			{:else if activeTaskId}
 				<ActiveTaskPicker {tasks} {activeTaskId} onassign={onAssignTask} onrename={onRenameTask} oncreate={onCreateTask} />
 			{/if}
