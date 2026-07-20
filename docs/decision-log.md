@@ -58,6 +58,8 @@
 
 ## 2026-07-19
 
+- Added Gruvbox Light as the light counterpart to Gruvbox Dark, adapting its warm cream, olive, amber, and red palette to the app's semantic theme roles and accessible action contrast.
+
 - Restyled the product name from "Five Minute Grove" to "5 Minute Grove" for a more appealing, compact brand, including the internal package, storage, and notification namespaces. Used a temporary one-way migration from `five-minute-grove:*` browser storage to `5-minute-grove:*`, then removed it after the active development environment migrated.
 - Added local task renaming, deliberate one-step reordering, and confirmed deletion. These secondary actions stay behind a per-task menu, with inline editing and confirmation, so the focus list remains calm and Start/complete remain the primary card actions.
 - Widened the desktop focus-list column from 20rem to 24rem and the overall workspace from 72rem to 80rem; mobile keeps the existing full-width stacked layout.

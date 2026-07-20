@@ -13,7 +13,14 @@
 		<script>
 			try {
 				const theme = localStorage.getItem('5-minute-grove:theme');
-				const themes = ['soft-daylight', 'cozy-light', 'cozy-dark', 'quiet-night', 'gruvbox-dark'];
+				const themes = [
+					'soft-daylight',
+					'cozy-light',
+					'cozy-dark',
+					'quiet-night',
+					'gruvbox-light',
+					'gruvbox-dark'
+				];
 				document.documentElement.dataset.theme = themes.includes(theme) ? theme : 'soft-daylight';
 			} catch {
 				document.documentElement.dataset.theme = 'soft-daylight';

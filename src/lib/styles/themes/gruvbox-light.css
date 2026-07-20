@@ -1,0 +1,20 @@
+:root[data-theme='gruvbox-light'] {
+	color-scheme: light;
+	--theme-color-ink: #3c3836;
+	--theme-color-ink-muted: #665c54;
+	--theme-color-paper: #fbf1c7;
+	--theme-color-mist: #ebdbb2;
+	--theme-color-surface: #f9f5d7;
+	--theme-color-on-accent: #fbf1c7;
+	--theme-color-moss: #75700e;
+	--theme-color-moss-dark: #5f5c00;
+	--theme-color-moss-pressed: #5f5c00;
+	--theme-color-moss-hover-pressed: #4f4c00;
+	--theme-color-sprout: #d5c4a1;
+	--theme-color-sun: #d79921;
+	--theme-color-clay: #cc241d;
+	--splash-color: rgb(215 153 33 / 62%);
+	--splash-fill: rgb(121 116 14 / 10%);
+	--splash-glow: rgb(215 153 33 / 18%);
+	--splash-fade: rgb(121 116 14 / 5%);
+}

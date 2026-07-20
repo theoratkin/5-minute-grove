@@ -7,6 +7,7 @@ export const themes = [
 	{ id: 'cozy-light', label: m.theme_cozy_light, swatches: ['#f5f0e4', '#75552d', '#d99c43'] },
 	{ id: 'cozy-dark', label: m.theme_cozy_dark, swatches: ['#24201f', '#d6ae68', '#dc9589'] },
 	{ id: 'quiet-night', label: m.theme_quiet_night, swatches: ['#202725', '#739b86', '#d1ad72'] },
+	{ id: 'gruvbox-light', label: m.theme_gruvbox_light, swatches: ['#fbf1c7', '#75700e', '#d79921'] },
 	{ id: 'gruvbox-dark', label: m.theme_gruvbox_dark, swatches: ['#282828', '#b8bb26', '#fabd2f'] }
 ] as const;
 
