@@ -23,37 +23,44 @@
 	} = $props();
 
 	let themeMenu: HTMLDetailsElement;
+	let preferencesMenu: HTMLDetailsElement;
 	let notificationNote = $state('');
 	let soundPreviewTimeout: ReturnType<typeof setTimeout> | undefined;
 	let lastSoundPreviewAt = 0;
 	const soundPreviewIntervalMs = 350;
 
 	onMount(() => {
-		function closeThemeMenu(event: PointerEvent) {
-			if (themeMenu.open && !themeMenu.contains(event.target as Node)) {
-				themeMenu.open = false;
+		function closeHeaderMenus(event: PointerEvent) {
+			const target = event.target as Node;
+			if (themeMenu.open && !themeMenu.contains(target)) themeMenu.open = false;
+			if (preferencesMenu.open && !preferencesMenu.contains(target)) {
+				preferencesMenu.open = false;
 			}
 		}
 
-		function closeThemeMenuWithEscape(event: KeyboardEvent) {
-			if (event.key === 'Escape' && themeMenu.open) {
-				themeMenu.open = false;
-				themeMenu.querySelector('summary')?.focus();
-			}
+		function closeHeaderMenuWithEscape(event: KeyboardEvent) {
+			if (event.key !== 'Escape') return;
+
+			const openMenu = themeMenu.open ? themeMenu : preferencesMenu.open ? preferencesMenu : null;
+			if (!openMenu) return;
+
+			openMenu.open = false;
+			openMenu.querySelector('summary')?.focus();
 		}
 
-		document.addEventListener('pointerdown', closeThemeMenu);
-		document.addEventListener('keydown', closeThemeMenuWithEscape);
+		document.addEventListener('pointerdown', closeHeaderMenus);
+		document.addEventListener('keydown', closeHeaderMenuWithEscape);
 
 		return () => {
-			document.removeEventListener('pointerdown', closeThemeMenu);
-			document.removeEventListener('keydown', closeThemeMenuWithEscape);
+			document.removeEventListener('pointerdown', closeHeaderMenus);
+			document.removeEventListener('keydown', closeHeaderMenuWithEscape);
 			clearTimeout(soundPreviewTimeout);
 		};
 	});
 
 	function selectTheme(nextTheme: ThemeId) {
 		onThemeChange(nextTheme);
+		themeMenu.open = false;
 	}
 
 	async function toggleNotifications(enabled: boolean) {
@@ -80,7 +87,7 @@
 		if (!confirmed) return;
 
 		onResetGrove();
-		themeMenu.open = false;
+		preferencesMenu.open = false;
 	}
 
 	function setSoundVolume(percent: number) {
@@ -110,7 +117,57 @@
 
 		<nav class="flex items-center gap-1 sm:gap-2" aria-label={m.primary_navigation()}>
 			<a class="rounded-xl px-3 py-2 text-sm font-bold text-ink-muted transition hover:bg-mist hover:text-moss" href={localizeHref('/about')}>{m.about_link()}</a>
-			<details bind:this={themeMenu} class="group relative">
+			<details
+				bind:this={themeMenu}
+				class="group relative"
+				ontoggle={() => {
+					if (themeMenu.open) preferencesMenu.open = false;
+				}}
+			>
+				<summary
+					class="grid size-10 cursor-pointer list-none place-items-center rounded-xl text-ink-muted transition marker:hidden hover:bg-mist hover:text-moss group-open:bg-mist group-open:text-moss"
+					aria-label={m.theme()}
+				>
+					<i class="ph-bold ph-palette text-xl" aria-hidden="true"></i>
+				</summary>
+
+				<div class="absolute top-[calc(100%+0.5rem)] right-0 z-30 w-[min(18rem,calc(100vw-2rem))] rounded-2xl border border-surface/90 bg-paper p-3 shadow-[0_16px_45px_rgb(0_0_0/18%)]">
+					<p class="mb-2 px-1 text-sm font-bold text-ink-muted">{m.theme()}</p>
+					<div class="grid max-h-[calc(100vh-8rem)] gap-1 overflow-y-auto">
+						{#each themes as option (option.id)}
+							<button
+								class={`flex w-full items-center justify-between gap-4 rounded-xl px-3 py-2.5 text-left text-sm font-bold transition hover:bg-mist ${theme === option.id ? 'bg-sprout/50 text-moss' : 'text-ink-muted'}`}
+								type="button"
+								onclick={() => selectTheme(option.id)}
+								aria-pressed={theme === option.id}
+							>
+								<span class="flex items-center gap-2.5">
+									<span class="flex -space-x-1" aria-hidden="true">
+										{#each option.swatches as color}
+											<span
+												class="size-4 rounded-full border border-ink/20 shadow-sm ring-1 ring-paper"
+												style:background-color={color}
+											></span>
+										{/each}
+									</span>
+									<span>{option.label()}</span>
+								</span>
+								{#if theme === option.id}
+									<i class="ph-bold ph-check text-base" aria-hidden="true"></i>
+								{/if}
+							</button>
+						{/each}
+					</div>
+				</div>
+			</details>
+
+			<details
+				bind:this={preferencesMenu}
+				class="group relative"
+				ontoggle={() => {
+					if (preferencesMenu.open) themeMenu.open = false;
+				}}
+			>
 				<summary
 					class="grid size-10 cursor-pointer list-none place-items-center rounded-xl text-ink-muted transition marker:hidden hover:bg-mist hover:text-moss group-open:bg-mist group-open:text-moss"
 					aria-label={m.open_preferences()}
@@ -135,35 +192,6 @@
 							<i class="ph-bold ph-caret-down pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm text-ink-muted" aria-hidden="true"></i>
 						</span>
 					</label>
-
-					<div>
-						<p class="mb-2 px-1 text-sm font-bold text-ink-muted">{m.theme()}</p>
-						<div class="grid gap-1">
-					{#each themes as option (option.id)}
-						<button
-							class={`flex w-full items-center justify-between gap-4 rounded-xl px-3 py-2.5 text-left text-sm font-bold transition hover:bg-mist ${theme === option.id ? 'bg-sprout/50 text-moss' : 'text-ink-muted'}`}
-							type="button"
-							onclick={() => selectTheme(option.id)}
-							aria-pressed={theme === option.id}
-						>
-							<span class="flex items-center gap-2.5">
-								<span class="flex -space-x-1" aria-hidden="true">
-									{#each option.swatches as color}
-										<span
-											class="size-4 rounded-full border border-ink/20 shadow-sm ring-1 ring-paper"
-											style:background-color={color}
-										></span>
-									{/each}
-								</span>
-								<span>{option.label()}</span>
-							</span>
-							{#if theme === option.id}
-								<i class="ph-bold ph-check text-base" aria-hidden="true"></i>
-							{/if}
-						</button>
-					{/each}
-						</div>
-					</div>
 
 					<div class="grid gap-2 border-t border-moss/10 pt-4">
 						<p class="px-1 text-sm font-bold text-ink-muted">{m.timer_feedback()}</p>
