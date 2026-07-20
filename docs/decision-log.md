@@ -79,6 +79,7 @@
 ## 2026-07-20
 
 - Promoted theme selection from the general preferences panel to a dedicated palette dropdown in the global header, keeping frequent appearance changes direct while leaving device preferences grouped separately.
+- Split preferences into a quick menu for language and timer feedback plus a complete settings modal. Wellbeing and grove reset remain available without crowding the frequently used controls.
 - Added Catppuccin Latte, Catppuccin Mocha, Tokyo Night, Monokai, and Rosé Pine as familiar programmer-inspired themes. Each palette is adapted to the app's semantic color roles, with accessible primary-action contrast and unchanged consent-based interaction emphasis.
 - Added optimistic revision checks to every durable IndexedDB transaction so a stale tab cannot overwrite a newer commit. Conflicts abort before mutation, refresh from the authoritative database state, and show localized feedback.
 - Added live same-browser synchronization through BroadcastChannel with a localStorage event fallback. Tasks, sessions, and grove progress update across tabs, and a stable session ID prevents a focus finished elsewhere from being credited twice.

@@ -24,6 +24,7 @@
 
 	let themeMenu: HTMLDetailsElement;
 	let preferencesMenu: HTMLDetailsElement;
+	let moreSettingsDialog: HTMLDialogElement;
 	let notificationNote = $state('');
 	let soundPreviewTimeout: ReturnType<typeof setTimeout> | undefined;
 	let lastSoundPreviewAt = 0;
@@ -81,13 +82,21 @@
 	}
 
 	function confirmGroveReset() {
-		const confirmed = window.confirm(
-			m.reset_grove_confirmation()
-		);
+		const confirmed = window.confirm(m.reset_grove_confirmation());
 		if (!confirmed) return;
 
 		onResetGrove();
 		preferencesMenu.open = false;
+		moreSettingsDialog.close();
+	}
+
+	function openMoreSettings() {
+		preferencesMenu.open = false;
+		moreSettingsDialog.showModal();
+	}
+
+	function handleSettingsBackdropClick(event: MouseEvent) {
+		if (event.target === moreSettingsDialog) moreSettingsDialog.close();
 	}
 
 	function setSoundVolume(percent: number) {
@@ -107,6 +116,56 @@
 		}, soundPreviewIntervalMs - elapsedSincePreview);
 	}
 </script>
+
+{#snippet languageSetting()}
+	<label class="grid gap-2">
+		<span class="px-1 text-sm font-bold text-ink-muted">{m.language()}</span>
+		<span class="relative">
+			<i class="ph-bold ph-translate pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-lg text-moss" aria-hidden="true"></i>
+			<select
+				class="min-h-11 w-full cursor-pointer appearance-none rounded-xl border border-ink/15 bg-paper py-2 pr-10 pl-10 text-sm font-bold text-ink transition hover:border-ink/25 focus:border-moss focus:outline-none"
+				value={getLocale()}
+				onchange={(event) => void setLocale(event.currentTarget.value as Locale)}
+			>
+				{#each languageOptions as option (option.code)}
+					<option value={option.code}>{option.label}</option>
+				{/each}
+			</select>
+			<i class="ph-bold ph-caret-down pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm text-ink-muted" aria-hidden="true"></i>
+		</span>
+	</label>
+{/snippet}
+
+{#snippet timerFeedbackSetting(withTopBorder = true)}
+	<div class={`grid gap-2 ${withTopBorder ? 'border-t border-moss/10 pt-4' : ''}`}>
+		<p class="px-1 text-sm font-bold text-ink-muted">{m.timer_feedback()}</p>
+		<label class="flex min-h-11 cursor-pointer items-center justify-between gap-4 rounded-xl px-3 py-2 text-sm font-bold text-ink transition hover:bg-mist">
+			<span class="flex items-center gap-2"><i class="ph-bold ph-speaker-high text-lg text-moss" aria-hidden="true"></i> {m.sounds()}</span>
+			<input class="size-5 accent-moss" type="checkbox" checked={preferences.soundEnabled} onchange={(event) => preferences.setSound(event.currentTarget.checked)} />
+		</label>
+		<label class={`grid gap-2 rounded-xl px-3 py-2 transition ${preferences.soundEnabled ? 'text-ink' : 'text-ink-muted opacity-60'}`}>
+			<span class="flex items-center justify-between gap-4 text-sm font-bold">
+				<span>{m.sound_volume()}</span>
+				<output>{Math.round(preferences.soundVolume * 100)}%</output>
+			</span>
+			<input
+				class="h-5 w-full cursor-pointer accent-moss disabled:cursor-not-allowed"
+				type="range"
+				min="0"
+				max="100"
+				step="5"
+				value={Math.round(preferences.soundVolume * 100)}
+				disabled={!preferences.soundEnabled}
+				oninput={(event) => setSoundVolume(event.currentTarget.valueAsNumber)}
+			/>
+		</label>
+		<label class="flex min-h-11 cursor-pointer items-center justify-between gap-4 rounded-xl px-3 py-2 text-sm font-bold text-ink transition hover:bg-mist">
+			<span class="flex items-center gap-2"><i class="ph-bold ph-bell text-lg text-moss" aria-hidden="true"></i> {m.notifications()}</span>
+			<input class="size-5 accent-moss" type="checkbox" checked={preferences.notificationsEnabled} onchange={(event) => void toggleNotifications(event.currentTarget.checked)} />
+		</label>
+		{#if notificationNote}<p class="px-3 text-xs leading-relaxed text-ink-muted" aria-live="polite">{notificationNote}</p>{/if}
+	</div>
+{/snippet}
 
 <header class="relative z-20 mx-auto mt-4 w-[calc(100%-2rem)] max-w-[76rem] rounded-[1.1rem_1.7rem_1.25rem_1.5rem] border border-surface/90 bg-paper/95 shadow-[0_12px_36px_rgb(0_0_0/10%)] sm:w-[calc(100%-3rem)] lg:w-[calc(100%-4rem)]">
 	<div class="flex min-h-16 w-full items-center justify-between gap-5 px-4 sm:px-6">
@@ -176,85 +235,70 @@
 				</summary>
 
 				<div class="absolute top-[calc(100%+0.5rem)] right-0 z-30 grid max-h-[calc(100vh-6rem)] w-[min(20rem,calc(100vw-2rem))] gap-4 overflow-y-auto rounded-2xl border border-surface/90 bg-paper p-4 shadow-[0_16px_45px_rgb(0_0_0/18%)]">
-					<label class="grid gap-2">
-						<span class="px-1 text-sm font-bold text-ink-muted">{m.language()}</span>
-						<span class="relative">
-							<i class="ph-bold ph-translate pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-lg text-moss" aria-hidden="true"></i>
-							<select
-								class="min-h-11 w-full cursor-pointer appearance-none rounded-xl border border-ink/15 bg-paper py-2 pr-10 pl-10 text-sm font-bold text-ink transition hover:border-ink/25 focus:border-moss focus:outline-none"
-								value={getLocale()}
-								onchange={(event) => void setLocale(event.currentTarget.value as Locale)}
-							>
-								{#each languageOptions as option (option.code)}
-									<option value={option.code}>{option.label}</option>
-								{/each}
-							</select>
-							<i class="ph-bold ph-caret-down pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm text-ink-muted" aria-hidden="true"></i>
-						</span>
-					</label>
+					{@render languageSetting()}
+					{@render timerFeedbackSetting()}
 
-					<div class="grid gap-2 border-t border-moss/10 pt-4">
-						<p class="px-1 text-sm font-bold text-ink-muted">{m.timer_feedback()}</p>
-						<label class="flex min-h-11 cursor-pointer items-center justify-between gap-4 rounded-xl px-3 py-2 text-sm font-bold text-ink transition hover:bg-mist">
-							<span class="flex items-center gap-2"><i class="ph-bold ph-speaker-high text-lg text-moss" aria-hidden="true"></i> {m.sounds()}</span>
-							<input class="size-5 accent-moss" type="checkbox" checked={preferences.soundEnabled} onchange={(event) => preferences.setSound(event.currentTarget.checked)} />
-						</label>
-						<label class={`grid gap-2 rounded-xl px-3 py-2 transition ${preferences.soundEnabled ? 'text-ink' : 'text-ink-muted opacity-60'}`}>
-							<span class="flex items-center justify-between gap-4 text-sm font-bold">
-								<span>{m.sound_volume()}</span>
-								<output>{Math.round(preferences.soundVolume * 100)}%</output>
-							</span>
-							<input
-								class="h-5 w-full cursor-pointer accent-moss disabled:cursor-not-allowed"
-								type="range"
-								min="0"
-								max="100"
-								step="5"
-								value={Math.round(preferences.soundVolume * 100)}
-								disabled={!preferences.soundEnabled}
-								oninput={(event) => setSoundVolume(event.currentTarget.valueAsNumber)}
-							/>
-						</label>
-						<label class="flex min-h-11 cursor-pointer items-center justify-between gap-4 rounded-xl px-3 py-2 text-sm font-bold text-ink transition hover:bg-mist">
-							<span class="flex items-center gap-2"><i class="ph-bold ph-bell text-lg text-moss" aria-hidden="true"></i> {m.notifications()}</span>
-							<input class="size-5 accent-moss" type="checkbox" checked={preferences.notificationsEnabled} onchange={(event) => void toggleNotifications(event.currentTarget.checked)} />
-						</label>
-						{#if notificationNote}<p class="px-3 text-xs leading-relaxed text-ink-muted" aria-live="polite">{notificationNote}</p>{/if}
-					</div>
-
-					<div class="grid gap-2 border-t border-moss/10 pt-4">
-						<div class="px-1">
-							<p class="text-sm font-bold text-ink-muted">{m.wellbeing()}</p>
-							<p class="mt-1 text-xs leading-relaxed text-ink-muted">{m.wellbeing_description()}</p>
-						</div>
-						<label class="flex min-h-11 cursor-pointer items-center justify-between gap-4 rounded-xl px-3 py-2 text-sm font-bold text-ink transition hover:bg-mist">
-							<span class="flex items-center gap-2"><i class="ph-bold ph-moon-stars text-lg text-moss" aria-hidden="true"></i> {m.sleep_reminder_setting()}</span>
-							<input class="size-5 accent-moss" type="checkbox" checked={preferences.sleepReminderEnabled} onchange={(event) => preferences.setSleepReminder(event.currentTarget.checked)} />
-						</label>
-					</div>
-
-					<div class="grid gap-2 border-t border-moss/10 pt-4">
-						<div class="px-1">
-							<p class="text-sm font-bold text-ink-muted">{m.grove()}</p>
-							<p class="mt-1 text-xs leading-relaxed text-ink-muted">
-								{m.grove_reset_description()}
-							</p>
-						</div>
-						<button
-							class="min-h-11 rounded-xl border border-ink/15 px-3 py-2 text-left text-sm font-bold text-ink-muted transition hover:border-ink/25 hover:bg-mist hover:text-ink"
-							type="button"
-							onclick={confirmGroveReset}
-						>
-							<span class="flex items-center gap-2"
-								><i
-									class="ph-bold ph-arrow-counter-clockwise text-lg"
-									aria-hidden="true"
-								></i> {m.reset_grove()}</span
-							>
-						</button>
-					</div>
+					<button
+						class="flex min-h-11 items-center justify-between gap-4 border-t border-moss/10 px-1 pt-4 text-left text-sm font-bold text-moss transition hover:text-moss-dark"
+						type="button"
+						onclick={openMoreSettings}
+					>
+						<span>{m.more_settings()}</span>
+						<i class="ph-bold ph-arrow-right text-lg" aria-hidden="true"></i>
+					</button>
 				</div>
 			</details>
 		</nav>
 	</div>
 </header>
+
+<dialog
+	bind:this={moreSettingsDialog}
+	class="m-auto max-h-[calc(100%-2rem)] w-[min(34rem,calc(100%-2rem))] overflow-hidden rounded-[2rem_1.5rem_1.85rem_1.35rem] border border-surface/90 bg-paper p-0 text-ink shadow-[0_28px_90px_rgb(0_0_0/30%)] backdrop:bg-ink/45 backdrop:backdrop-blur-[2px]"
+	aria-labelledby="settings-title"
+	onclick={handleSettingsBackdropClick}
+>
+	<div class="relative grid max-h-[calc(100vh-2rem)] gap-5 overflow-y-auto p-6 sm:p-8">
+		<div class="pr-12">
+			<h2 id="settings-title" class="font-display text-2xl font-semibold tracking-[-0.03em] text-moss-dark sm:text-3xl">
+				{m.all_settings()}
+			</h2>
+		</div>
+		<button
+			class="absolute top-4 right-4 grid size-11 place-items-center rounded-xl text-ink-muted transition hover:bg-mist hover:text-moss"
+			type="button"
+			aria-label={m.close_settings()}
+			onclick={() => moreSettingsDialog.close()}
+		>
+			<i class="ph-bold ph-x text-lg" aria-hidden="true"></i>
+		</button>
+
+		{@render languageSetting()}
+		{@render timerFeedbackSetting()}
+
+		<div class="grid gap-2 border-t border-moss/10 pt-4">
+			<div class="px-1">
+				<p class="text-sm font-bold text-ink-muted">{m.wellbeing()}</p>
+				<p class="mt-1 text-xs leading-relaxed text-ink-muted">{m.wellbeing_description()}</p>
+			</div>
+			<label class="flex min-h-11 cursor-pointer items-center justify-between gap-4 rounded-xl px-3 py-2 text-sm font-bold text-ink transition hover:bg-mist">
+				<span class="flex items-center gap-2"><i class="ph-bold ph-moon-stars text-lg text-moss" aria-hidden="true"></i> {m.sleep_reminder_setting()}</span>
+				<input class="size-5 accent-moss" type="checkbox" checked={preferences.sleepReminderEnabled} onchange={(event) => preferences.setSleepReminder(event.currentTarget.checked)} />
+			</label>
+		</div>
+
+		<div class="grid gap-2 border-t border-moss/10 pt-4">
+			<div class="px-1">
+				<p class="text-sm font-bold text-ink-muted">{m.grove()}</p>
+				<p class="mt-1 text-xs leading-relaxed text-ink-muted">{m.grove_reset_description()}</p>
+			</div>
+			<button
+				class="min-h-11 rounded-xl border border-ink/15 px-3 py-2 text-left text-sm font-bold text-ink-muted transition hover:border-ink/25 hover:bg-mist hover:text-ink"
+				type="button"
+				onclick={confirmGroveReset}
+			>
+				<span class="flex items-center gap-2"><i class="ph-bold ph-arrow-counter-clockwise text-lg" aria-hidden="true"></i> {m.reset_grove()}</span>
+			</button>
+		</div>
+	</div>
+</dialog>
