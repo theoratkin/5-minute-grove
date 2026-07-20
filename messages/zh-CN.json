@@ -175,6 +175,7 @@
   "toast_task_deleted": "任务已删除。",
   "toast_task_restored": "任务已恢复。",
   "toast_grove_reset": "你的小树林已重置。",
+  "toast_storage_error": "无法保存你的更改。请保持此标签页打开并重试。",
   "notification_title": "再来五分钟？",
   "notification_focus_fallback": "此次专注",
   "notification_block_one": "一个专注时间块",

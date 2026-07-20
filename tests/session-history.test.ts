@@ -30,9 +30,9 @@ test('migrates legacy intention and Sprint titles', () => {
 		{ id: 'legacy-2', title: 'Sprint', startedAt: second.startedAt, totalSeconds: 600 }
 	]);
 
-	assert.equal(records[0].title, 'Outline chapter');
-	assert.equal(records[1].title, 'Session');
-	assert.equal(records[0].endedAt, first.startedAt);
+	assert.equal(records[0].title, 'Session');
+	assert.equal(records[1].title, 'Outline chapter');
+	assert.equal(records[1].endedAt, first.startedAt);
 });
 
 test('ignores malformed history and clamps negative counters', () => {
@@ -51,4 +51,16 @@ test('restores an undo deletion in chronological order', () => {
 
 	const restored = restoreSessionRecord(removed.records, removed.removed!);
 	assert.deepEqual(restored.map((record) => record.id), ['second', 'first']);
+});
+
+test('retains more than the former twelve-record display limit', () => {
+	const records = normalizeSessionHistory(
+		Array.from({ length: 20 }, (_, index) => ({
+			...first,
+			id: `session-${index}`,
+			startedAt: new Date(Date.parse(first.startedAt) + index * 60_000).toISOString()
+		}))
+	);
+
+	assert.equal(records.length, 20);
 });

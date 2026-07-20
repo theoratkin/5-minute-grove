@@ -34,7 +34,7 @@
 		theme = loadTheme();
 		applyTheme(theme);
 		preferences.load();
-		workspace.setup();
+		void workspace.setup();
 		introductionOpen = !hasSeenIntroduction();
 
 		function showIntroductionForDevelopment(event: KeyboardEvent) {
@@ -98,7 +98,7 @@
 
 <IntroductionModal open={introductionOpen} ondismiss={dismissIntroduction} />
 
-<main class="relative z-10 mx-auto grid min-h-[calc(100vh-5rem)] w-full max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-start lg:px-8 lg:pb-10">
+<main class="relative z-10 mx-auto grid min-h-[calc(100vh-5rem)] w-full max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-start lg:px-8 lg:pb-10" inert={!workspace.hydrated} aria-busy={!workspace.hydrated}>
 	{@render children()}
 
 	<aside class="rounded-[1.35rem_2rem_1.65rem_1.2rem] border border-surface/90 bg-paper/80 p-5 shadow-[0_18px_50px_rgb(0_0_0/8%)] backdrop-blur lg:sticky lg:top-8">

@@ -175,6 +175,7 @@
   "toast_task_deleted": "Tarefa excluída.",
   "toast_task_restored": "Tarefa restaurada.",
   "toast_grove_reset": "Seu bosque foi redefinido.",
+  "toast_storage_error": "Não foi possível salvar suas alterações. Mantenha esta aba aberta e tente novamente.",
   "notification_title": "Mais cinco minutos?",
   "notification_focus_fallback": "Este foco",
   "notification_block_one": "um bloco de foco",

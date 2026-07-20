@@ -160,3 +160,15 @@ test('assigns saved untitled focus to a named task and removes the untitled inbo
 	assert.equal(assigned[0].sessionCount, 3);
 	assert.equal(assigned[0].updatedAt, '2026-07-18T12:00:00.000Z');
 });
+
+test('retains more than the former one-hundred-task persistence limit', () => {
+	const tasks = normalizeFocusTasks(
+		Array.from({ length: 120 }, (_, index) => ({
+			id: `task-${index}`,
+			title: `Task ${index}`,
+			createdAt: new Date(Date.UTC(2026, 6, 18, 10, index)).toISOString()
+		}))
+	);
+
+	assert.equal(tasks.length, 120);
+});

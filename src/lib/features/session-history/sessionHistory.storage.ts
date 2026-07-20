@@ -1,15 +1,22 @@
-import { readJson, storageKey, writeJson } from '$lib/app/storage';
+import { readJson, storageKey } from '$lib/app/storage';
 import type { FocusSessionRecord } from '$lib/features/focus-session/focusSession.types';
 import { normalizeSessionHistory } from './sessionHistory.state';
 export { removeSessionById, restoreSessionRecord } from './sessionHistory.state';
 
-const HISTORY_KEY = storageKey('session-history');
-const HISTORY_LIMIT = 12;
+export const HISTORY_STORAGE_KEY = storageKey('session-history');
+
+// Legacy localStorage reader used only by the one-time IndexedDB migration.
+
+type StoredSessionHistory = {
+	version: 1;
+	items: unknown;
+};
 
 export function loadSessionHistory(): FocusSessionRecord[] {
-	return normalizeSessionHistory(readJson<unknown>(HISTORY_KEY, []));
+	const stored = readJson<unknown>(HISTORY_STORAGE_KEY, []);
+	return normalizeSessionHistory(isStoredSessionHistory(stored) ? stored.items : stored);
 }
 
-export function saveSessionHistory(records: FocusSessionRecord[]): void {
-	writeJson(HISTORY_KEY, records.slice(0, HISTORY_LIMIT));
+function isStoredSessionHistory(value: unknown): value is StoredSessionHistory {
+	return Boolean(value) && typeof value === 'object' && (value as StoredSessionHistory).version === 1;
 }

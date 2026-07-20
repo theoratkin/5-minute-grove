@@ -3,6 +3,13 @@ import type { AppPreferences } from '$lib/app/preferences.svelte';
 import { notifyContractComplete, prepareTimerNotifications } from '$lib/app/notifications';
 import { formatClock } from '$lib/app/time';
 import {
+	loadDurableData,
+	readLegacyDurableData,
+	replaceDurableData,
+	saveDurableGrove,
+	saveDurableTasks
+} from '$lib/app/durableData.storage';
+import {
 	clearActiveSession,
 	loadActiveSession,
 	loadStartDuration,
@@ -18,19 +25,14 @@ import {
 	normalizeStartDuration
 } from './focusSession.utils';
 import {
-	loadSessionHistory,
-	saveSessionHistory
-} from '$lib/features/session-history/sessionHistory.storage';
-import {
 	creditElapsedMinutes,
 	deriveGroveProgress,
 	emptyGroveState,
+	reconcileGroveState,
 	resetGroveState,
 	settleMatureTrees
 } from '$lib/features/grove/grove.state';
-import { loadOrInitializeGrove, saveGroveState } from '$lib/features/grove/grove.storage';
 import type { GroveState } from '$lib/features/grove/grove.types';
-import { loadFocusTasks, saveFocusTasks } from '$lib/features/focus-list/focusTask.storage';
 import {
 	assignUntitledTask,
 	createUntitledTask,
@@ -83,6 +85,7 @@ export class FocusWorkspace {
 	private taskDoneSound: HTMLAudioElement | null = null;
 	private timerInterval: ReturnType<typeof setInterval> | undefined;
 	private deletedTaskUndo = $state<DeletedTaskUndo | null>(null);
+	private disposed = false;
 
 	constructor(private preferences: AppPreferences) {}
 
@@ -156,12 +159,22 @@ export class FocusWorkspace {
 		this.playSound(this.startOrExtendSound);
 	}
 
-	setup() {
+	async setup() {
+		this.disposed = false;
 		const startDuration = loadStartDuration();
 		this.remainingSeconds = startDuration;
 		this.segmentDurationSeconds = startDuration;
-		this.history = loadSessionHistory();
-		this.tasks = sortFocusTasks(loadFocusTasks());
+		let durableData;
+		try {
+			durableData = await loadDurableData();
+		} catch (error) {
+			console.error('Could not load durable focus data from IndexedDB.', error);
+			durableData = readLegacyDurableData();
+			this.toastMessage = m.toast_storage_error();
+		}
+		if (this.disposed) return;
+		this.history = durableData.sessions;
+		this.tasks = sortFocusTasks(durableData.tasks);
 		this.startOrExtendSound = new Audio('/sounds/start-or-extend.wav');
 		this.addOneMinuteSound = new Audio('/sounds/add-1-minute.wav');
 		this.timerFinishSound = new Audio('/sounds/timer-finish.wav');
@@ -209,7 +222,8 @@ export class FocusWorkspace {
 				totalSeconds: this.sessionTimeSeconds
 			});
 		}
-		this.groveState = loadOrInitializeGrove(groveSeeds);
+		this.groveState = reconcileGroveState(durableData.grove, groveSeeds);
+		this.persistGrove();
 		this.creditCurrentSessionMinutes();
 
 		this.hydrated = true;
@@ -218,6 +232,7 @@ export class FocusWorkspace {
 	}
 
 	dispose() {
+		this.disposed = true;
 		if (this.timerInterval) window.clearInterval(this.timerInterval);
 		document.removeEventListener('visibilitychange', this.syncTimer);
 	}
@@ -246,6 +261,7 @@ export class FocusWorkspace {
 	}
 
 	handleKeyboard(event: KeyboardEvent) {
+		if (!this.hydrated) return;
 		const target = event.target as Element | null;
 		if (
 			event.repeat ||
@@ -400,10 +416,9 @@ export class FocusWorkspace {
 		};
 
 		this.history = [...this.history.filter((session) => session.id !== record.id), record]
-			.sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime())
-			.slice(0, 12);
-		saveSessionHistory(this.history);
+			.sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
 		this.creditTask(record);
+		this.persistAll();
 		this.resetSession(clearIntention);
 		this.toastMessage = message;
 		if (clearIntention) {
@@ -434,7 +449,7 @@ export class FocusWorkspace {
 			sessionCount: 0
 		};
 		this.tasks = sortFocusTasks([task, ...this.tasks]);
-		saveFocusTasks(this.tasks);
+		this.persistTasks();
 		return task;
 	}
 
@@ -469,7 +484,7 @@ export class FocusWorkspace {
 		this.intention = task.title;
 		if (previousTaskId === UNTITLED_TASK_ID) {
 			this.tasks = assignUntitledTask(this.tasks, task.id);
-			saveFocusTasks(this.tasks);
+			this.persistTasks();
 		}
 		this.toastMessage = m.toast_focus_assigned({ title: task.title });
 	}
@@ -481,7 +496,7 @@ export class FocusWorkspace {
 		if (!task || !this.tasks.some((item) => item.id === UNTITLED_TASK_ID)) return;
 
 		this.tasks = assignUntitledTask(this.tasks, task.id);
-		saveFocusTasks(this.tasks);
+		this.persistTasks();
 
 		if (this.activeTaskId === UNTITLED_TASK_ID) {
 			this.activeTaskId = task.id;
@@ -506,7 +521,7 @@ export class FocusWorkspace {
 				item.id === id ? { ...item, completedAt, updatedAt: now } : item
 			)
 		);
-		saveFocusTasks(this.tasks);
+		this.persistTasks();
 		this.toastMessage = completedAt ? m.toast_task_done() : m.toast_task_reopened();
 		if (completedAt) this.playSound(this.taskDoneSound);
 		if (completedAt && id === this.activeTaskId) {
@@ -533,21 +548,21 @@ export class FocusWorkspace {
 			)
 		);
 		if (id === this.activeTaskId) this.intention = cleanTitle;
-		saveFocusTasks(this.tasks);
+		this.persistTasks();
 	}
 
 	moveTask(id: string, direction: -1 | 1) {
 		const reordered = moveOpenFocusTask(this.tasks, id, direction);
 		if (reordered === this.tasks) return;
 		this.tasks = reordered;
-		saveFocusTasks(this.tasks);
+		this.persistTasks();
 	}
 
 	reorderTasks(orderedIds: string[]) {
 		const reordered = reorderOpenFocusTasks(this.tasks, orderedIds);
 		if (reordered === this.tasks) return;
 		this.tasks = reordered;
-		saveFocusTasks(this.tasks);
+		this.persistTasks();
 	}
 
 	deleteTask(id: string) {
@@ -571,7 +586,7 @@ export class FocusWorkspace {
 		}
 
 		this.tasks = this.tasks.filter((item) => item.id !== id);
-		saveFocusTasks(this.tasks);
+		this.persistTasks();
 		this.deletedTaskUndo = {
 			task,
 			index,
@@ -611,7 +626,7 @@ export class FocusWorkspace {
 			}
 		}
 
-		saveFocusTasks(this.tasks);
+		this.persistTasks();
 		this.deletedTaskUndo = null;
 		this.toastMessage = m.toast_task_restored();
 	}
@@ -640,6 +655,7 @@ export class FocusWorkspace {
 	}
 
 	resetGrove() {
+		if (!this.hydrated) return;
 		const groveSeeds = this.history.map((record) => ({
 			id: record.id,
 			completedContracts: record.completedContracts,
@@ -655,7 +671,7 @@ export class FocusWorkspace {
 
 		this.groveState = resetGroveState(groveSeeds);
 		this.groveGrowthToken += 1;
-		saveGroveState(this.groveState);
+		this.persistGrove();
 		this.toastMessage = m.toast_grove_reset();
 	}
 
@@ -757,7 +773,6 @@ export class FocusWorkspace {
 					: task
 			)
 		);
-		saveFocusTasks(this.tasks);
 	}
 
 	private getOrCreateUntitledTask(): FocusTask {
@@ -766,7 +781,7 @@ export class FocusWorkspace {
 
 		const untitled = createUntitledTask();
 		this.tasks = sortFocusTasks([untitled, ...this.tasks]);
-		saveFocusTasks(this.tasks);
+		this.persistTasks();
 		return untitled;
 	}
 
@@ -805,7 +820,7 @@ export class FocusWorkspace {
 		if (nextProgress.currentTreeLeaves !== previousProgress.currentTreeLeaves) {
 			this.groveGrowthToken += 1;
 		}
-		saveGroveState(this.groveState);
+		this.persistGrove();
 	}
 
 	private settleGrove() {
@@ -813,7 +828,32 @@ export class FocusWorkspace {
 		if (settledGrove === this.groveState) return;
 
 		this.groveState = settledGrove;
-		saveGroveState(this.groveState);
+		this.persistGrove();
+	}
+
+	private persistTasks() {
+		this.trackStorageWrite(saveDurableTasks(this.tasks));
+	}
+
+	private persistGrove() {
+		this.trackStorageWrite(saveDurableGrove(this.groveState));
+	}
+
+	private persistAll() {
+		this.trackStorageWrite(
+			replaceDurableData({
+				tasks: this.tasks,
+				sessions: this.history,
+				grove: this.groveState
+			})
+		);
+	}
+
+	private trackStorageWrite(write: Promise<void>) {
+		void write.catch((error) => {
+			console.error('Could not save durable focus data.', error);
+			this.toastMessage = m.toast_storage_error();
+		});
 	}
 
 	private playSound(sound: HTMLAudioElement | null) {

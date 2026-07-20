@@ -175,6 +175,7 @@
   "toast_task_deleted": "Задача удалена.",
   "toast_task_restored": "Задача восстановлена.",
   "toast_grove_reset": "Роща сброшена.",
+  "toast_storage_error": "Не удалось сохранить изменения. Не закрывайте эту вкладку и попробуйте снова.",
   "notification_title": "Ещё пять минут?",
   "notification_focus_fallback": "Эта сессия",
   "notification_block_one": "один блок фокусировки",

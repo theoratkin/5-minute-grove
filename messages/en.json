@@ -182,6 +182,7 @@
 	"toast_task_deleted": "Task deleted.",
 	"toast_task_restored": "Task restored.",
 	"toast_grove_reset": "Your grove has been reset.",
+	"toast_storage_error": "Your changes could not be saved. Keep this tab open and try again.",
 	"notification_title": "Another five minutes?",
 	"notification_focus_fallback": "This focus",
 	"notification_block_one": "one focus block",

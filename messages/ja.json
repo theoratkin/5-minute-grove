@@ -175,6 +175,7 @@
   "toast_task_deleted": "タスクを削除しました。",
   "toast_task_restored": "タスクを復元しました。",
   "toast_grove_reset": "木立をリセットしました。",
+  "toast_storage_error": "変更を保存できませんでした。このタブを開いたまま、もう一度お試しください。",
   "notification_title": "さらに5分続けますか？",
   "notification_focus_fallback": "この集中",
   "notification_block_one": "1ブロックの集中",

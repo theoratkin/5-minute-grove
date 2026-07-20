@@ -175,6 +175,7 @@
   "toast_task_deleted": "Tâche supprimée.",
   "toast_task_restored": "Tâche restaurée.",
   "toast_grove_reset": "Votre bosquet a été réinitialisé.",
+  "toast_storage_error": "Vos modifications n’ont pas pu être enregistrées. Gardez cet onglet ouvert et réessayez.",
   "notification_title": "Encore cinq minutes ?",
   "notification_focus_fallback": "Cette concentration",
   "notification_block_one": "un bloc de concentration",

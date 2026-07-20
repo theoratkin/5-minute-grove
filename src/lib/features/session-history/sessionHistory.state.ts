@@ -1,31 +1,45 @@
 import type { FocusSessionRecord } from '../focus-session/focusSession.types.ts';
 
-const HISTORY_LIMIT = 12;
-
 type LegacySessionRecord = Partial<FocusSessionRecord> & { intention?: string };
 
 export function normalizeSessionHistory(value: unknown): FocusSessionRecord[] {
 	if (!Array.isArray(value)) return [];
 
-	return (value as LegacySessionRecord[])
+	const records = (value as LegacySessionRecord[])
 		.filter(
 			(record): record is LegacySessionRecord & { id: string; startedAt: string } =>
-				Boolean(record) && typeof record.id === 'string' && typeof record.startedAt === 'string'
+				Boolean(record) &&
+				typeof record.id === 'string' &&
+				record.id.trim().length > 0 &&
+				typeof record.startedAt === 'string' &&
+				isValidDate(record.startedAt)
 		)
 		.map((record) => ({
-			id: record.id,
-			taskId: typeof record.taskId === 'string' ? record.taskId : null,
-			 title:
-				record.title?.trim() === 'Sprint'
+			id: record.id.trim(),
+			taskId:
+				typeof record.taskId === 'string' && record.taskId.trim() ? record.taskId.trim() : null,
+			title:
+				normalizeTitle(record.title) === 'Sprint'
 					? 'Session'
-					: record.title?.trim() || record.intention?.trim() || 'Session',
+					: normalizeTitle(record.title) || normalizeTitle(record.intention) || 'Session',
 			startedAt: record.startedAt,
-			endedAt: record.endedAt || record.startedAt,
-			completedContracts: Math.max(0, record.completedContracts || 0),
-			extensionCount: Math.max(0, record.extensionCount || 0),
-			totalSeconds: Math.max(0, record.totalSeconds || 0)
-		}))
-		.slice(0, HISTORY_LIMIT);
+			endedAt: isValidDate(record.endedAt) ? record.endedAt : record.startedAt,
+			completedContracts: finiteCount(record.completedContracts),
+			extensionCount: finiteCount(record.extensionCount),
+			totalSeconds: finiteCount(record.totalSeconds)
+		}));
+
+	const recordsById = new Map<string, FocusSessionRecord>();
+	for (const record of records) {
+		const existing = recordsById.get(record.id);
+		if (!existing || new Date(record.endedAt).getTime() >= new Date(existing.endedAt).getTime()) {
+			recordsById.set(record.id, record);
+		}
+	}
+
+	return [...recordsById.values()].sort(
+		(a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime()
+	);
 }
 
 export function removeSessionById(
@@ -43,6 +57,19 @@ export function restoreSessionRecord(
 	record: FocusSessionRecord
 ): FocusSessionRecord[] {
 	return [...records.filter((item) => item.id !== record.id), record]
-		.sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime())
-		.slice(0, HISTORY_LIMIT);
+		.sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
+}
+
+function finiteCount(value: unknown): number {
+	return typeof value === 'number' && Number.isFinite(value)
+		? Math.max(0, Math.floor(value))
+		: 0;
+}
+
+function isValidDate(value: unknown): value is string {
+	return typeof value === 'string' && Number.isFinite(Date.parse(value));
+}
+
+function normalizeTitle(value: unknown): string {
+	return typeof value === 'string' ? value.trim() : '';
 }

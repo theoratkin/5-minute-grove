@@ -102,6 +102,18 @@ When implementation begins, a pragmatic MVP would be:
 - Versioned local persistence for cumulative grove growth, credited idempotently per elapsed session minute.
 - Absolute end timestamps for timer accuracy across throttled background tabs and refresh recovery.
 
+## Durable Storage
+
+- Treat tasks, completed sessions, and grove state as the portable durable dataset. Active timer recovery and interface preferences remain device-local because restoring a running timer on another device would have ambiguous clock and notification semantics.
+- Retain completed session records without an artificial display-oriented cap. UI projections may show a smaller window, but persistence and exports must keep the canonical records.
+- Wrap locally stored task and session collections in independently versioned records and continue accepting the original unwrapped arrays as a one-way migration path.
+- Use the versioned `5-minute-grove` data archive as the public portability boundary. Validate and normalize an entire archive before any write; reject unknown archive or grove versions rather than silently discarding data.
+- Support explicit replace and merge imports. Merge by stable task/session IDs, preserve aggregate task baselines left by the former capped history, and add only previously uncredited grove minutes so a local grove reset is not undone.
+- Store the unbounded canonical collections in the native `5-minute-grove` IndexedDB database. Serialize writes from one app instance and commit related task, session, and grove updates in one transaction.
+- On the first database open, atomically copy the legacy localStorage task, session, and grove values into IndexedDB, record the completed migration in the same transaction, and then remove the migrated keys. A failed transaction leaves the original localStorage data intact for retry.
+- Keep active timer recovery and lightweight device preferences in localStorage; these values are small, synchronous, and intentionally outside the portable durable dataset.
+- Keep the archive format independent of the IndexedDB layout so exports remain stable through future database migrations.
+
 ## UX Constraints
 
 - Starting should take as few interactions as possible.
@@ -124,7 +136,7 @@ When implementation begins, a pragmatic MVP would be:
 
 ## Future Technical Questions
 
-- Whether to use localStorage, IndexedDB, or a small local-first library.
+- Whether multi-tab editing needs optimistic revision conflicts, live synchronization, or an explicit single-writer policy as usage patterns become clearer.
 - Whether future grove interactions outgrow the current inline SVG and CSS approach.
 - Whether to support PWA installability.
 - Whether to add account sync later.

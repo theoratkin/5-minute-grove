@@ -1,6 +1,5 @@
 import type { FocusTask } from './focusTask.types.ts';
 
-const TASK_LIMIT = 100;
 export const UNTITLED_TASK_ID = 'focus-task-untitled';
 export const UNTITLED_TASK_TITLE = 'Anything';
 
@@ -10,25 +9,35 @@ export function normalizeFocusTasks(value: unknown): FocusTask[] {
 	const normalized = value
 		.filter(
 			(task): task is Partial<FocusTask> & { id: string; title: string; createdAt: string } =>
-				Boolean(task) &&
-				typeof task.id === 'string' &&
-				typeof task.title === 'string' &&
-				typeof task.createdAt === 'string' &&
-				task.title.trim().length > 0
+					Boolean(task) &&
+					typeof task.id === 'string' &&
+					task.id.trim().length > 0 &&
+					typeof task.title === 'string' &&
+					typeof task.createdAt === 'string' &&
+					isValidDate(task.createdAt) &&
+					task.title.trim().length > 0
 		)
 		.map((task) => ({
-			id: isUntitledTask(task) ? UNTITLED_TASK_ID : task.id,
+			id: isUntitledTask(task) ? UNTITLED_TASK_ID : task.id.trim(),
 			title: isUntitledTask(task) ? UNTITLED_TASK_TITLE : task.title.trim().slice(0, 80),
 			createdAt: task.createdAt,
-			updatedAt: typeof task.updatedAt === 'string' ? task.updatedAt : task.createdAt,
+			updatedAt: isValidDate(task.updatedAt) ? task.updatedAt : task.createdAt,
 			completedAt:
-				isUntitledTask(task) ? null : typeof task.completedAt === 'string' ? task.completedAt : null,
+				isUntitledTask(task) ? null : isValidDate(task.completedAt) ? task.completedAt : null,
 			accumulatedSeconds: finiteNonNegative(task.accumulatedSeconds),
 			sessionCount: finiteNonNegative(task.sessionCount)
 		}));
 
+	const tasksById = new Map<string, FocusTask>();
+	for (const task of normalized.filter((item) => item.id !== UNTITLED_TASK_ID)) {
+		const existing = tasksById.get(task.id);
+		if (!existing || new Date(task.updatedAt).getTime() >= new Date(existing.updatedAt).getTime()) {
+			tasksById.set(task.id, task);
+		}
+	}
+
 	const untitledTasks = normalized.filter((task) => task.id === UNTITLED_TASK_ID);
-	if (untitledTasks.length === 0) return normalized.slice(0, TASK_LIMIT);
+	if (untitledTasks.length === 0) return [...tasksById.values()];
 
 	const untitled = untitledTasks.reduce((merged, task) => ({
 		...merged,
@@ -46,8 +55,8 @@ export function normalizeFocusTasks(value: unknown): FocusTask[] {
 
 	return [
 		untitled,
-		...normalized.filter((task) => task.id !== UNTITLED_TASK_ID)
-	].slice(0, TASK_LIMIT);
+		...tasksById.values()
+	];
 }
 
 export function createUntitledTask(now = new Date().toISOString()): FocusTask {
@@ -143,6 +152,10 @@ export function reorderOpenFocusTasks(tasks: FocusTask[], orderedIds: string[]):
 
 function finiteNonNegative(value: unknown): number {
 	return typeof value === 'number' && Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0;
+}
+
+function isValidDate(value: unknown): value is string {
+	return typeof value === 'string' && Number.isFinite(Date.parse(value));
 }
 
 function isUntitledTask(task: { id: string; title: string }): boolean {

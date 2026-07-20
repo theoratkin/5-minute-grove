@@ -175,6 +175,7 @@
   "toast_task_deleted": "Tarea eliminada.",
   "toast_task_restored": "Tarea restaurada.",
   "toast_grove_reset": "Tu arboleda se ha reiniciado.",
+  "toast_storage_error": "No se pudieron guardar tus cambios. Mantén esta pestaña abierta e inténtalo de nuevo.",
   "notification_title": "¿Otros cinco minutos?",
   "notification_focus_fallback": "Esta concentración",
   "notification_block_one": "un bloque de concentración",
