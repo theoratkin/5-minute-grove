@@ -6,7 +6,7 @@
 
 A calm, local-first focus timer built around approachable starts and voluntary continuation.
 
-5 Minute Grove is for the moment when starting is harder than continuing. Choose an approachable amount of time—five minutes by default—focus until the timer ends, and then decide whether to stop or add another five minutes. Reaching that first stopping point is enough; continuing is always optional.
+**5 Minute Grove** is for the moment when starting is harder than continuing. Choose an approachable amount of time—five minutes by default—focus until the timer ends, and then decide whether to stop or add another five minutes. Reaching that first stopping point is enough; continuing is always optional.
 
 ## How it works
 
@@ -142,7 +142,7 @@ Routes should remain focused on composition. Product behavior belongs with its f
 
 ## Data and privacy
 
-5 Minute Grove is local-first. It has no account requirement and does not send focus data to an application backend.
+**5 Minute Grove** is local-first. It has no account requirement and does not send focus data to an application backend.
 
 - Tasks, completed sessions, and grove state are stored in the browser's IndexedDB database.
 - Active-timer recovery and interface preferences are device-local in `localStorage`.
