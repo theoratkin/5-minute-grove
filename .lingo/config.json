@@ -1,0 +1,21 @@
+{
+  "sourceLocale": "en",
+  "targetLocales": [
+    "es",
+    "pt-BR",
+    "fr",
+    "de",
+    "zh-CN",
+    "ja",
+    "ko",
+    "id",
+    "ru"
+  ],
+  "files": [
+    {
+      "pattern": "messages/en.json"
+    }
+  ],
+  "orgId": "org_7dPHcpJwE0z7EuzchaBS",
+  "engineId": "eng_ureGID4eZlCJ5N6riEsB"
+}
