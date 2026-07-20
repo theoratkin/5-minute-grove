@@ -10,6 +10,9 @@ type ButtonSplashOptions = {
 const DEFAULT_COLOR = 'rgb(49 94 76 / 72%)';
 const DEFAULT_FILL = 'rgb(49 94 76 / 12%)';
 const DEFAULT_GLOW = 'rgb(49 94 76 / 24%)';
+// Keep the composited splash layer small. Its dimensions, border, and shadows are
+// scaled together below, so the resulting on-screen geometry remains unchanged.
+const MAX_TEXTURE_WIDTH = 320;
 
 export const buttonSplash: Action<HTMLElement, ButtonSplashOptions | undefined> = (
 	node,
@@ -43,6 +46,7 @@ export const buttonSplash: Action<HTMLElement, ButtonSplashOptions | undefined> 
 		const color = config.color ?? (styles.getPropertyValue('--splash-color').trim() || DEFAULT_COLOR);
 		const fill = styles.getPropertyValue('--splash-fill').trim() || DEFAULT_FILL;
 		const glow = styles.getPropertyValue('--splash-glow').trim() || DEFAULT_GLOW;
+		const background = document.getElementById('button-splash-background') ?? document.body;
 
 		for (let index = 0; index < config.ripples; index += 1) {
 			const ripple = document.createElement('span');
@@ -50,31 +54,48 @@ export const buttonSplash: Action<HTMLElement, ButtonSplashOptions | undefined> 
 			const duration = config.durationMs + index * 140;
 			const width = finalSize * (0.96 + Math.random() * 0.16);
 			const height = finalSize * (0.82 + Math.random() * 0.2);
+			const textureWidth = Math.min(width, MAX_TEXTURE_WIDTH);
+			const textureScale = width / textureWidth;
+			const textureHeight = height / textureScale;
 			const rotation = -18 + Math.random() * 36;
 			const skewX = -5 + Math.random() * 10;
 			const skewY = -3 + Math.random() * 6;
 			const radius = config.simple ? '9999px' : createOrganicRadius();
-			const initialTransform = createTransform(0.02, rotation, skewX, skewY);
-			const middleTransform = createTransform(config.simple ? 0.26 : 0.58, rotation + 7, skewX * 0.6, skewY * 0.6);
-			const fadeTransform = createTransform(0.44, rotation + 10, skewX * 0.3, skewY * 0.3);
-			const finalTransform = createTransform(1, rotation + 13, 0, 0);
+			const borderWidth = (config.simple ? 5 : 10) / textureScale;
+			const outerGlow = 28 / textureScale;
+			const innerGlow = 22 / textureScale;
+			const initialTransform = createTransform(0.02 * textureScale, rotation, skewX, skewY);
+			const middleTransform = createTransform(
+				(config.simple ? 0.26 : 0.58) * textureScale,
+				rotation + 7,
+				skewX * 0.6,
+				skewY * 0.6
+			);
+			const fadeTransform = createTransform(
+				0.44 * textureScale,
+				rotation + 10,
+				skewX * 0.3,
+				skewY * 0.3
+			);
+			const finalTransform = createTransform(textureScale, rotation + 13, 0, 0);
 
 			ripple.setAttribute('aria-hidden', 'true');
 			ripple.style.position = 'fixed';
 			ripple.style.left = `${originX}px`;
 			ripple.style.top = `${originY}px`;
-			ripple.style.width = `${width}px`;
-			ripple.style.height = `${height}px`;
-			ripple.style.border = `${config.simple ? 5 : 10}px solid ${color}`;
+			ripple.style.width = `${textureWidth}px`;
+			ripple.style.height = `${textureHeight}px`;
+			ripple.style.border = `${borderWidth}px solid ${color}`;
 			ripple.style.background = config.simple ? 'transparent' : fill;
 			ripple.style.borderRadius = radius;
-			ripple.style.boxShadow = config.simple ? 'none' : `0 0 28px ${glow}, inset 0 0 22px ${fill}`;
+			ripple.style.boxShadow = config.simple
+				? 'none'
+				: `0 0 ${outerGlow}px ${glow}, inset 0 0 ${innerGlow}px ${fill}`;
 			ripple.style.pointerEvents = 'none';
 			ripple.style.zIndex = '0';
 			ripple.style.transform = initialTransform;
 			ripple.style.willChange = 'transform, opacity';
 
-			const background = document.getElementById('button-splash-background') ?? document.body;
 			background.appendChild(ripple);
 
 			const keyframes = config.simple
