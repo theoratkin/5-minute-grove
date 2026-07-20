@@ -293,7 +293,7 @@
 				<p class="mt-1 text-xs leading-relaxed text-ink-muted">{m.grove_reset_description()}</p>
 			</div>
 			<button
-				class="min-h-11 rounded-xl border border-ink/15 px-3 py-2 text-left text-sm font-bold text-ink-muted transition hover:border-ink/25 hover:bg-mist hover:text-ink"
+				class="min-h-11 rounded-xl border border-red-700 bg-red-600 px-3 py-2 text-left text-sm font-bold text-white transition hover:border-red-800 hover:bg-red-700"
 				type="button"
 				onclick={confirmGroveReset}
 			>
