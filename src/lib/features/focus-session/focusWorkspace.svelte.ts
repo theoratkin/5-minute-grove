@@ -410,6 +410,8 @@ export class FocusWorkspace {
 	}
 
 	stopSessionEarly() {
+		if (!this.sessionStartedAt || !this.activeSessionId || this.sessionTimeSeconds <= 0) return;
+		this.playSound(this.timerFinishSound);
 		this.finishSession();
 	}
 

@@ -51,7 +51,7 @@
 			onPause={() => workspace.pauseSession()}
 			onResume={() => workspace.resumeSession()}
 			onStop={() => workspace.stopSessionEarly()}
-			onDone={() => workspace.finishSession()}
+			onDone={() => workspace.stopSessionEarly()}
 			canCompleteTask={workspace.canCompleteActiveTask}
 			onCompleteTask={() => workspace.completeActiveTask()}
 		/>
