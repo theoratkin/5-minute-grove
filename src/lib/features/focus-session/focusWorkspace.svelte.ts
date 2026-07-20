@@ -23,7 +23,8 @@ import {
 	FIVE_MINUTES_SECONDS,
 	createSessionId,
 	getSessionTitle,
-	normalizeStartDuration
+	normalizeStartDuration,
+	resolveFocusListStartAction
 } from './focusSession.utils';
 import {
 	creditElapsedMinutes,
@@ -474,15 +475,9 @@ export class FocusWorkspace {
 	}
 
 	startTask(task: FocusTask) {
-		let switchedTasks = false;
-		if (this.phase !== 'idle') {
-			if (task.id === this.activeTaskId) return true;
-			if (this.activeTaskId === UNTITLED_TASK_ID) {
-				this.assignActiveTask(task.id);
-				return true;
-			}
-
-			switchedTasks = true;
+		const action = resolveFocusListStartAction(this.phase, this.activeTaskId, task.id);
+		if (action === 'keep-current') return true;
+		if (action === 'switch') {
 			this.syncTimer();
 			if (this.sessionTimeSeconds > 0) this.finishSession();
 			else this.resetSession();
@@ -490,7 +485,7 @@ export class FocusWorkspace {
 		this.activeTaskId = task.id;
 		this.intention = task.title;
 		this.startSession();
-		if (switchedTasks) this.toastMessage = m.toast_now_focusing({ title: task.title });
+		if (action === 'switch') this.toastMessage = m.toast_now_focusing({ title: task.title });
 		return true;
 	}
 

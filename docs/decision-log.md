@@ -54,7 +54,7 @@
 - Replaced the forced five-minute starting duration with a segmented minutes-and-seconds field that remembers the user's last choice. Five minutes remains the deliberate post-timer extension, preserving the product's consent-based momentum loop without making every new session reset prescriptive.
 - Replaced the session journal as the primary sidebar with a lightweight local Focus list. Tasks can be planned, focused, completed, and reopened, while sessions remain separate effort records that accumulate time without implying completion. Existing history stays available in a collapsible archive, and “Finish session” remains distinct from “Mark done.”
 - Made tasks the sole user-facing work model. Direct unnamed starts now accumulate under one system-managed Untitled task, an active focus attempt can be reassigned in full to any open task, and internal session records are no longer exposed as an archive. “Stop for now” remains distinct from completing a named task.
-- Made the shared Untitled inbox ephemeral on assignment: assigning its active focus to a named task removes the Untitled row, folding any focus already saved there into the chosen task so credited time is not lost.
+- Made the shared Untitled inbox ephemeral on explicit assignment: choosing a named task through the assignment control removes the Untitled row, folding any focus already saved there into the chosen task so credited time is not lost.
 
 ## 2026-07-19
 
@@ -87,3 +87,4 @@
 - Established the unreleased IndexedDB/archive implementation as the first public storage baseline after confirming the sole development browser had migrated. Removed the pre-public localStorage bridge, active-session v1, grove v1, Sprint/intention history conversion, and title-based Untitled aliases while retaining corruption-safe normalization and future migration registries.
 - Kept the button splash's two-layer shape, timing, fill, and glow while rendering it from capped 320px textures whose geometry is scaled proportionally. This avoids rasterizing viewport-diagonal DOM layers on high-density mobile displays.
 - Made Anything directly editable in the Focus list. Committing a different title creates a normal named task, transfers Anything's saved focus and session count, moves any active attempt to the new task, and removes the shared inbox.
+- Distinguished starting from assigning: starting another task from the Focus list now saves the current Anything attempt and begins a fresh attempt on the selected task, preserving Anything and its credited focus. Only explicit assignment or renaming transfers Anything's focus and removes it.

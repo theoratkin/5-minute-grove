@@ -2,7 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { elapsedInCurrentContract, restoreFocusSession } from '../src/lib/features/focus-session/focusSession.state.ts';
 import type { ActiveFocusSession } from '../src/lib/features/focus-session/focusSession.types.ts';
-import { normalizeStartDuration } from '../src/lib/features/focus-session/focusSession.utils.ts';
+import {
+	normalizeStartDuration,
+	resolveFocusListStartAction
+} from '../src/lib/features/focus-session/focusSession.utils.ts';
+import { UNTITLED_TASK_ID } from '../src/lib/features/focus-list/focusTask.state.ts';
 
 const baseSession: ActiveFocusSession = {
 	version: 2,
@@ -71,4 +75,15 @@ test('normalizes a custom starting duration without forcing five minutes', () =>
 	assert.equal(normalizeStartDuration(0), 1);
 	assert.equal(normalizeStartDuration(Number.NaN), 300);
 	assert.equal(normalizeStartDuration(1000 * 60), 999 * 60 + 59);
+});
+
+test('starting a Focus-list task switches from Anything instead of assigning it', () => {
+	assert.equal(
+		resolveFocusListStartAction('running', UNTITLED_TASK_ID, 'named-task'),
+		'switch'
+	);
+});
+
+test('starting the current Focus-list task keeps its attempt running', () => {
+	assert.equal(resolveFocusListStartAction('paused', 'named-task', 'named-task'), 'keep-current');
 });
