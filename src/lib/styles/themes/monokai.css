@@ -1,0 +1,17 @@
+:root[data-theme='monokai'] {
+	color-scheme: dark;
+	--theme-color-ink: #f8f8f2;
+	--theme-color-ink-muted: #b7b7aa;
+	--theme-color-paper: #272822;
+	--theme-color-mist: #1e1f1c;
+	--theme-color-surface: #3e3d32;
+	--theme-color-on-accent: #272822;
+	--theme-color-moss: #a6e22e;
+	--theme-color-moss-dark: #baf34a;
+	--theme-color-moss-pressed: #6f971a;
+	--theme-color-moss-hover-pressed: #83ae22;
+	--theme-color-sprout: #49483e;
+	--theme-color-sun: #e6db74;
+	--theme-color-clay: #f92672;
+	--splash-color: rgb(166 226 46 / 68%);
+}

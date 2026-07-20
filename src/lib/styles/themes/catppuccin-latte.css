@@ -1,0 +1,17 @@
+:root[data-theme='catppuccin-latte'] {
+	color-scheme: light;
+	--theme-color-ink: #4c4f69;
+	--theme-color-ink-muted: #6c6f85;
+	--theme-color-paper: #eff1f5;
+	--theme-color-mist: #dce0e8;
+	--theme-color-surface: #ffffff;
+	--theme-color-on-accent: #eff1f5;
+	--theme-color-moss: #347823;
+	--theme-color-moss-dark: #285f1c;
+	--theme-color-moss-pressed: #245419;
+	--theme-color-moss-hover-pressed: #1e4615;
+	--theme-color-sprout: #c7e9c1;
+	--theme-color-sun: #df8e1d;
+	--theme-color-clay: #fe640b;
+	--splash-color: rgb(52 120 35 / 62%);
+}

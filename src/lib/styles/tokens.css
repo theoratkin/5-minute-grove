@@ -5,6 +5,11 @@
 @import './themes/gruvbox-light.css';
 @import './themes/gruvbox-dark.css';
 @import './themes/quiet-night.css';
+@import './themes/catppuccin-latte.css';
+@import './themes/catppuccin-mocha.css';
+@import './themes/tokyo-night.css';
+@import './themes/monokai.css';
+@import './themes/rose-pine.css';
 
 @theme inline {
 	--font-sans: 'Nunito Sans', 'Avenir Next', Avenir, 'Segoe UI', sans-serif;

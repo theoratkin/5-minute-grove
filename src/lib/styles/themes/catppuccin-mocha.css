@@ -1,0 +1,17 @@
+:root[data-theme='catppuccin-mocha'] {
+	color-scheme: dark;
+	--theme-color-ink: #cdd6f4;
+	--theme-color-ink-muted: #a6adc8;
+	--theme-color-paper: #1e1e2e;
+	--theme-color-mist: #11111b;
+	--theme-color-surface: #313244;
+	--theme-color-on-accent: #1e1e2e;
+	--theme-color-moss: #a6e3a1;
+	--theme-color-moss-dark: #b5edb0;
+	--theme-color-moss-pressed: #6c9f68;
+	--theme-color-moss-hover-pressed: #7fb97b;
+	--theme-color-sprout: #45475a;
+	--theme-color-sun: #f9e2af;
+	--theme-color-clay: #fab387;
+	--splash-color: rgb(166 227 161 / 68%);
+}

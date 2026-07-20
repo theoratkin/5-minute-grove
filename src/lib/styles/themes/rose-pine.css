@@ -1,0 +1,17 @@
+:root[data-theme='rose-pine'] {
+	color-scheme: dark;
+	--theme-color-ink: #e0def4;
+	--theme-color-ink-muted: #908caa;
+	--theme-color-paper: #191724;
+	--theme-color-mist: #12101b;
+	--theme-color-surface: #1f1d2e;
+	--theme-color-on-accent: #191724;
+	--theme-color-moss: #9ccfd8;
+	--theme-color-moss-dark: #b5dfe5;
+	--theme-color-moss-pressed: #507d88;
+	--theme-color-moss-hover-pressed: #60919b;
+	--theme-color-sprout: #26233a;
+	--theme-color-sun: #f6c177;
+	--theme-color-clay: #eb6f92;
+	--splash-color: rgb(156 207 216 / 68%);
+}

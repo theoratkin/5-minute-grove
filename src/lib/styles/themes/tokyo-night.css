@@ -1,0 +1,17 @@
+:root[data-theme='tokyo-night'] {
+	color-scheme: dark;
+	--theme-color-ink: #c0caf5;
+	--theme-color-ink-muted: #a9b1d6;
+	--theme-color-paper: #1a1b26;
+	--theme-color-mist: #13141c;
+	--theme-color-surface: #24283b;
+	--theme-color-on-accent: #1a1b26;
+	--theme-color-moss: #9ece6a;
+	--theme-color-moss-dark: #b3e17d;
+	--theme-color-moss-pressed: #658b46;
+	--theme-color-moss-hover-pressed: #759f51;
+	--theme-color-sprout: #2f3b4d;
+	--theme-color-sun: #e0af68;
+	--theme-color-clay: #f7768e;
+	--splash-color: rgb(125 207 255 / 68%);
+}
