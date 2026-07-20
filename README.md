@@ -87,6 +87,7 @@ No environment variables or external services are required.
 | --- | --- |
 | `npm run dev` | Start the Vite development server |
 | `npm run build` | Create a production build |
+| `npm run generate:i18n` | Compile the generated Paraglide localization modules |
 | `npm run preview` | Preview the production build locally |
 | `npm run check` | Run Svelte and TypeScript diagnostics |
 | `npm run check:watch` | Run diagnostics in watch mode |
@@ -151,7 +152,7 @@ The portable archive contract and migration policy are documented in [docs/stora
 
 ## Localization
 
-English is the base locale. Source catalogs live in `messages/{locale}.json`; generated Paraglide files under `src/lib/paraglide/` must not be edited by hand.
+English is the base locale. Source catalogs live in `messages/{locale}.json`; generated Paraglide files under `src/lib/paraglide/` must not be edited by hand or committed. `npm ci`, `npm run check`, and the deployment workflow regenerate them explicitly so clean checkouts have the modules before type-checking.
 
 When changing user-facing copy:
 
