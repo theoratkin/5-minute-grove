@@ -257,7 +257,7 @@
 						</button>
 					{/if}
 					<div class="task-menu-control relative">
-							<button class="grid size-10 place-items-center rounded-xl text-ink-muted transition hover:bg-mist hover:text-ink" type="button" onclick={() => openMenuTaskId = openMenuTaskId === task.id ? null : task.id} aria-label={m.focus_list_more_actions({ title: taskTitle(task) })} aria-expanded={openMenuTaskId === task.id} title={m.focus_list_more_actions_title()}><i class="ph-bold ph-dots-three-vertical text-lg" aria-hidden="true"></i></button>
+							<button class="grid size-10 place-items-center rounded-xl text-ink-muted transition hover:bg-mist hover:text-ink" type="button" onclick={() => openMenuTaskId = openMenuTaskId === task.id ? null : task.id} aria-label={task.id === UNTITLED_TASK_ID ? m.timer_assign_focus() : m.focus_list_more_actions({ title: taskTitle(task) })} aria-expanded={openMenuTaskId === task.id} title={task.id === UNTITLED_TASK_ID ? m.timer_assign_focus() : m.focus_list_more_actions_title()}><i class={`ph-bold ${task.id === UNTITLED_TASK_ID ? 'ph-swap' : 'ph-dots-three-vertical'} text-lg`} aria-hidden="true"></i></button>
 							{#if openMenuTaskId === task.id}
 								<div class="task-menu absolute top-[calc(100%+0.35rem)] right-0 z-30 grid w-44 gap-1 rounded-xl border border-moss/15 bg-paper p-1.5 shadow-[0_12px_32px_rgb(0_0_0/18%)]" role="menu">
 									{#if task.id === UNTITLED_TASK_ID && untitledAssignmentTargets.length > 0}
@@ -267,7 +267,6 @@
 												<button class="menu-action w-full" type="button" onclick={() => { onassignuntitled(target.id); openMenuTaskId = null; }} role="menuitem"><i class="ph-bold ph-arrow-right" aria-hidden="true"></i><span class="truncate">{target.title}</span></button>
 											{/each}
 										</div>
-										<div class="mx-1 my-1 border-t border-moss/10"></div>
 									{/if}
 									{#if task.id !== UNTITLED_TASK_ID}
 										<button class="menu-action" type="button" onclick={() => { onmove(task.id, -1); openMenuTaskId = null; }} disabled={index === 0 || openTasks[index - 1]?.id === UNTITLED_TASK_ID} role="menuitem"><i class="ph-bold ph-arrow-up" aria-hidden="true"></i>{m.focus_list_move_up()}</button>
@@ -296,14 +295,7 @@
 							<div class="editable-title task-title rounded-md text-sm font-bold text-ink-muted line-through" contenteditable="plaintext-only" role="textbox" tabindex="0" aria-label={m.focus_list_edit_completed({ title: task.title })} spellcheck="true" onfocus={() => editingTitles[task.id] = task.title} oninput={(event) => handleTitleInput(event, task)} oncompositionend={(event) => void updateEditableTitle(event.currentTarget as HTMLElement, task)} onblur={() => void commitTitle(task)} onkeydown={(event) => handleTitleKeydown(event, task)}>{#key `${editableTitle(task)}:${titleRenderRevision}`}{@render highlightedTaskTitle(editableTitle(task))}{/key}</div>
 							<span class="text-xs text-ink-muted">{m.focus_list_minutes_focused({ minutes: formatMinutes(task.accumulatedSeconds) })}</span>
 						</div>
-						<div class="task-menu-control relative">
-								<button class="grid size-10 place-items-center rounded-xl text-ink-muted hover:bg-paper" type="button" onclick={() => openMenuTaskId = openMenuTaskId === task.id ? null : task.id} aria-label={m.focus_list_more_actions({ title: task.title })} aria-expanded={openMenuTaskId === task.id}><i class="ph-bold ph-dots-three-vertical text-lg" aria-hidden="true"></i></button>
-								{#if openMenuTaskId === task.id}
-									<div class="task-menu absolute top-[calc(100%+0.35rem)] right-0 z-30 grid w-44 gap-1 rounded-xl border border-moss/15 bg-paper p-1.5 shadow-[0_12px_32px_rgb(0_0_0/18%)]" role="menu">
-									<button class="menu-action menu-action-delete" type="button" onclick={() => { ondelete(task.id); openMenuTaskId = null; }} role="menuitem"><i class="ph-bold ph-trash" aria-hidden="true"></i>{m.focus_list_delete()}</button>
-								</div>
-							{/if}
-						</div>
+						<button class="grid size-10 place-items-center rounded-xl text-clay transition hover:bg-clay/10" type="button" onclick={() => ondelete(task.id)} aria-label={m.focus_list_delete()} title={m.focus_list_delete()}><i class="ph-bold ph-trash text-lg" aria-hidden="true"></i></button>
 					</li>
 				{/each}
 			</ul>
