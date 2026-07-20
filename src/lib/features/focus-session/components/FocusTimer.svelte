@@ -7,6 +7,7 @@
 	import type { FocusPhase } from '$lib/features/focus-session/focusSession.types';
 	import type { FocusTask } from '$lib/features/focus-list/focusTask.types';
 	import TaskIntentionInput from '$lib/features/task-intention/components/TaskIntentionInput.svelte';
+	import ActiveTaskPicker from './ActiveTaskPicker.svelte';
 	import GroveVignette from './GroveVignette.svelte';
 	import DurationField from './DurationField.svelte';
 	import * as m from '$lib/paraglide/messages.js';
@@ -23,6 +24,8 @@
 		tasks,
 		activeTaskId,
 		onAssignTask,
+		onRenameTask,
+		onCreateTask,
 		onIntentionChange,
 		onDurationChange,
 		onStart,
@@ -47,6 +50,8 @@
 		tasks: FocusTask[];
 		activeTaskId: string | null;
 		onAssignTask: (id: string) => void;
+		onRenameTask: (id: string, title: string) => void;
+		onCreateTask: (title: string) => void;
 		onIntentionChange: (value: string) => void;
 		onDurationChange: (seconds: number) => void;
 		onStart: () => void;
@@ -198,16 +203,10 @@
 		</div>
 
 		<div class="relative z-10 -mt-1">
-			<TaskIntentionInput value={intentionValue} clearable={phase === 'idle'} onchange={onIntentionChange} />
-			{#if phase !== 'idle' && activeTaskId}
-				<label class="mx-auto mt-2 flex w-fit items-center gap-2 text-xs font-semibold text-ink-muted">
-					<span>{m.timer_assign_focus()}</span>
-					<select class="min-h-9 max-w-52 rounded-lg border border-moss/15 bg-paper px-2 font-bold text-moss outline-none focus:border-moss/40" value={activeTaskId} onchange={(event) => onAssignTask(event.currentTarget.value)}>
-						{#each tasks.filter((task) => !task.completedAt) as task (task.id)}
-							<option value={task.id}>{task.title}</option>
-						{/each}
-					</select>
-				</label>
+			{#if phase === 'idle'}
+				<TaskIntentionInput value={intentionValue} onchange={onIntentionChange} />
+			{:else if activeTaskId}
+				<ActiveTaskPicker {tasks} {activeTaskId} onassign={onAssignTask} onrename={onRenameTask} oncreate={onCreateTask} />
 			{/if}
 		</div>
 

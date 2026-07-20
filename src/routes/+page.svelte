@@ -38,6 +38,11 @@
 			tasks={workspace.tasks}
 			activeTaskId={workspace.activeTaskId}
 			onAssignTask={(id) => workspace.assignActiveTask(id)}
+			onRenameTask={(id, title) => workspace.updateTaskTitle(id, title)}
+			onCreateTask={(title) => {
+				const task = workspace.addTask(title);
+				if (task) workspace.assignActiveTask(task.id);
+			}}
 			onIntentionChange={(nextValue) => workspace.updateIntention(nextValue)}
 			onStart={() => workspace.startSession()}
 			onAddFive={() => workspace.addFiveMinutes()}
