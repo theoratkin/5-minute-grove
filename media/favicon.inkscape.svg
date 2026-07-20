@@ -2,9 +2,9 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="1000.0001"
-   height="1000.0001"
-   viewBox="0 0 264.58335 264.58335"
+   width="1000"
+   height="1000"
+   viewBox="0 0 264.58333 264.58333"
    version="1.1"
    id="svg1"
    inkscape:version="1.4.4 (dcaf3e7d9e, 2026-05-05)"
@@ -36,16 +36,7 @@
      inkscape:window-y="0"
      inkscape:window-maximized="1"
      inkscape:current-layer="g32"
-     inkscape:export-bgcolor="#e9deceff">
-    <inkscape:page
-       x="0"
-       y="0"
-       width="264.58334"
-       height="264.58334"
-       id="page2"
-       margin="0"
-       bleed="0" />
-  </sodipodi:namedview>
+     inkscape:export-bgcolor="#e9deceff" />
   <defs
      id="defs1" />
   <g
@@ -66,6 +57,12 @@
        transform="matrix(10.672257,2.6846359,-2.6846359,10.672257,-383.81361,-266.51114)">
       <path
          style="opacity:1;fill:#a05a2c;stroke:#000000;stroke-width:0;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:20"
+         d="m 55.061237,44.493407 c 5.219321,-2.89388 12.47986,-10.12858 12.789917,-10.231932 0.31006,-0.103354 -5.198989,6.300852 -8.092869,8.316232 -0.874222,0.608833 -4.929592,3.465994 -4.929592,3.465994 z"
+         id="path33"
+         sodipodi:nodetypes="csscc"
+         inkscape:label="branch right" />
+      <path
+         style="opacity:1;fill:#a05a2c;stroke:#000000;stroke-width:0;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:20"
          d="M 50.35316,51.81479 C 41.875707,42.752684 39.537097,33.252087 39.537097,33.252087 c 0,0 0.294576,4.251212 3.837227,11.561569 1.48528,3.064918 6.028779,10.435966 6.028779,10.435966 z"
          id="path34"
          sodipodi:nodetypes="ccscc"
@@ -76,6 +73,12 @@
          id="path32"
          sodipodi:nodetypes="csssssscc"
          inkscape:label="trunk" />
+      <path
+         style="opacity:1;fill:#502d16;stroke:#000000;stroke-width:0;stroke-linecap:square;stroke-miterlimit:20"
+         d="m 63.365698,69.785149 c -2.982666,0.773919 -4.714537,-1.879518 -6.013442,-0.497519 -1.298902,1.381998 -3.848602,3.814315 -5.917225,2.819276 -2.068624,-0.995039 -5.532366,-3.427356 -6.975592,-1.879518 -1.443226,1.547839 -2.501592,1.216159 -4.377784,0.49752 -1.876195,-0.71864 -4.955077,-0.939759 -3.944818,-1.547838 1.010258,-0.60808 10.629618,-8.358771 12.123097,-8.623672 1.583159,-0.280807 1.876193,-0.331679 3.944818,0.88448 2.068623,1.216158 11.160946,8.347271 11.160946,8.347271 z"
+         id="path28"
+         inkscape:label="dirt"
+         sodipodi:nodetypes="csssssssc" />
       <path
          style="opacity:1;fill:#315e4c;fill-opacity:1;stroke:#000000;stroke-width:0;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:20"
          d="m 55.907356,22.472563 c 3.14448,-1.957184 4.717296,-6.026786 3.617534,-9.427514 -0.248224,-0.767568 -1.170109,-1.954527 -1.498169,-1.790497 -1.637199,0.818599 -2.722001,2.344304 -3.376124,4.117643 -0.76781,2.081547 0.103917,6.441601 1.256759,7.100368 z"
@@ -112,6 +115,26 @@
          id="path37"
          sodipodi:nodetypes="csssc"
          inkscape:label="leaf" />
+      <path
+         style="opacity:1;fill:#315e4c;fill-opacity:1;stroke:#000000;stroke-width:0;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:20"
+         d="m 61.751078,40.776279 c 1.693751,1.823448 4.58851,2.347882 6.702627,1.197778 0.47717,-0.259587 1.147116,-1.015008 0.997015,-1.210284 -0.749083,-0.974529 -1.896866,-1.496925 -3.15432,-1.704897 -1.476,-0.244118 -4.254473,0.876267 -4.545322,1.717403 z"
+         id="path38"
+         sodipodi:nodetypes="csssc"
+         inkscape:label="leaf" />
+      <path
+         style="opacity:1;fill:#315e4c;fill-opacity:1;stroke:#000000;stroke-width:0;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:20"
+         d="m 46.954201,47.883264 c 2.760196,-2.012426 3.60824,-5.4997 1.938937,-8.07486 -0.376774,-0.581232 -1.489398,-1.404498 -1.784287,-1.226779 -1.471654,0.886917 -2.27733,2.263828 -2.616099,3.779031 -0.397647,1.778545 1.212337,5.155719 2.461449,5.522608 z"
+         id="path39"
+         sodipodi:nodetypes="csssc"
+         inkscape:label="leaf" />
+      <use
+         x="0"
+         y="0"
+         xlink:href="#path35"
+         id="use40"
+         transform="rotate(-51.732876,66.042517,45.937049)"
+         inkscape:label="leaf"
+         style="fill:#315e4c;fill-opacity:1" />
     </g>
   </g>
 </svg>
