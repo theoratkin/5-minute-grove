@@ -4,11 +4,8 @@ const STORAGE_PREFIX = '5-minute-grove';
 
 type StoredValueName =
 	| 'active-session'
-	| 'focus-tasks'
-	| 'grove'
 	| 'introduction-seen-v1'
 	| 'preferences'
-	| 'session-history'
 	| 'start-duration'
 	| 'theme';
 

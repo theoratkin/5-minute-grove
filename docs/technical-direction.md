@@ -43,14 +43,12 @@ src/
           SessionHistoryItem.svelte
         sessionHistory.store.ts
         sessionHistory.types.ts
-        sessionHistory.storage.ts
 
       focus-list/
         components/
           FocusList.svelte
         focusTask.types.ts
         focusTask.state.ts
-        focusTask.storage.ts
 
       task-intention/
         components/
@@ -64,6 +62,8 @@ src/
       ProgressRing.svelte
 
     app/
+      durableData.storage.ts
+      migrationRegistry.ts
       storage.ts
       time.ts
       notifications.ts
@@ -110,7 +110,7 @@ When implementation begins, a pragmatic MVP would be:
 - Use the versioned `5-minute-grove` data archive as the public portability boundary. Validate and normalize an entire archive before any write; reject unknown archive or grove versions rather than silently discarding data.
 - Support explicit replace and merge imports. Merge by stable task/session IDs, preserve aggregate task baselines left by the former capped history, and add only previously uncredited grove minutes so a local grove reset is not undone.
 - Store the unbounded canonical collections in the native `5-minute-grove` IndexedDB database. Serialize writes from one app instance and commit related task, session, and grove updates in one transaction.
-- On the first database open, atomically copy the legacy localStorage task, session, and grove values into IndexedDB, record the completed migration in the same transaction, and then remove the migrated keys. A failed transaction leaves the original localStorage data intact for retry.
+- Treat IndexedDB schema version 1 and archive schema version 1 as the first public persistence baseline. Pre-public localStorage and record-shape conversions are intentionally unsupported.
 - Keep active timer recovery and lightweight device preferences in localStorage; these values are small, synchronous, and intentionally outside the portable durable dataset.
 - Keep the archive format independent of the IndexedDB layout so exports remain stable through future database migrations.
 - Increment a durable revision inside every IndexedDB write transaction. Abort stale writes atomically, announce commits through BroadcastChannel with a storage-event fallback, and reload the authoritative snapshot in other tabs.

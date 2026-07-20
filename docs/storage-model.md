@@ -42,23 +42,23 @@ Merge imports are destination-aware:
 
 - sessions deduplicate by stable ID, with the later-ended record winning a conflict;
 - task fields use the later `updatedAt` record;
-- retained session totals are combined with the maximum non-reconstructable aggregate baseline from either copy, avoiding both double-counting shared history and losing older sessions discarded by the former cap;
+- retained session totals are combined with the maximum non-reconstructable aggregate baseline from either copy, avoiding both double-counting shared history and losing aggregate-only time;
 - grove credit ledgers take the maximum credited minute per session;
 - only credits new to the destination increase its visible leaves, preserving the destination's intentional reset baseline.
 
 Archive imports validate and merge in memory first, then replace all three records in one IndexedDB transaction. Callers should reload or rehydrate the workspace after a successful import.
 
-## Migration Direction
+## Public Schema Baseline
 
-The canonical browser database is IndexedDB database `5-minute-grove`, version 1, with one `app-data` object store. It contains `tasks`, `sessions`, and `grove` records plus migration metadata. Keeping related records in one store allows atomic replacement without coupling the public archive to the physical database layout.
+The canonical browser database is IndexedDB database `5-minute-grove`, version 1, with one `app-data` object store. It contains `tasks`, `sessions`, and `grove` records plus revision metadata. Keeping related records in one store allows atomic replacement without coupling the public archive to the physical database layout.
 
-On first open, the app reads the former localStorage task, session, and grove keys. Legacy arrays and version 1 collection wrappers are both accepted, and grove versions 1 and 2 remain supported. The data and a completed-migration marker are written in one database transaction. Only after it commits are the migrated localStorage keys removed, so an interrupted migration is retryable without data loss.
+IndexedDB version 1, archive version 1, active-session version 2, and grove version 2 are the first public formats. Pre-public localStorage task/history/grove keys, active-session version 1, grove version 1, and old task/session title aliases are intentionally unsupported. Fresh installations create the empty version 1 database through migration `0 → 1`.
 
 Writes are queued within an app instance to preserve user-action order. Finishing a session commits its completed record, task aggregates, and current grove together. A database error leaves the in-memory workspace available and displays a localized warning rather than silently claiming the change was saved.
 
 Unbounded history is intentionally no longer coupled to an interface limit. Active timer recovery and preferences remain in localStorage because they are small device-local values and benefit from synchronous startup access.
 
-### Adding a migration
+## Adding a Migration
 
 Both IndexedDB and archive upgrades use `src/lib/app/migrationRegistry.ts`. The registry requires one step for every version boundary, runs steps in ascending order, rejects duplicate targets and gaps, and refuses data newer than the current application understands.
 

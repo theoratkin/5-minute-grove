@@ -153,7 +153,7 @@ function assertValidDataShape(data: Record<string, unknown>): void {
 		throw new DataArchiveError('The archive contains invalid grove data.');
 	}
 	const groveVersion = (data.grove as Record<string, unknown>).version;
-	if (groveVersion !== 1 && groveVersion !== 2) {
+	if (groveVersion !== 2) {
 		throw new DataArchiveError(`Grove schema version ${String(groveVersion)} is not supported.`);
 	}
 }

@@ -90,7 +90,7 @@ test('replace imports use only normalized archive data', () => {
 	assert.equal(replaced.tasks[0].title, 'New title');
 });
 
-test('merge deduplicates sessions and preserves legacy task aggregate baselines', () => {
+test('merge deduplicates sessions and preserves non-reconstructable task aggregate baselines', () => {
 	const oldSession = session();
 	const newSession = session({
 		id: 'session-two',

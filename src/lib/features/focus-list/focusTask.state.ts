@@ -158,12 +158,6 @@ function isValidDate(value: unknown): value is string {
 	return typeof value === 'string' && Number.isFinite(Date.parse(value));
 }
 
-function isUntitledTask(task: { id: string; title: string }): boolean {
-	const title = task.title.trim().toLocaleLowerCase();
-	return (
-		task.id === UNTITLED_TASK_ID ||
-		title === UNTITLED_TASK_TITLE.toLocaleLowerCase() ||
-		title === 'untitled' ||
-		title === 'untitled task'
-	);
+function isUntitledTask(task: { id: string }): boolean {
+	return task.id.trim() === UNTITLED_TASK_ID;
 }

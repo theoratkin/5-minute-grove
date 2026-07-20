@@ -1,13 +1,11 @@
 import type { FocusSessionRecord } from '../focus-session/focusSession.types.ts';
 
-type LegacySessionRecord = Partial<FocusSessionRecord> & { intention?: string };
-
 export function normalizeSessionHistory(value: unknown): FocusSessionRecord[] {
 	if (!Array.isArray(value)) return [];
 
-	const records = (value as LegacySessionRecord[])
+	const records = (value as Partial<FocusSessionRecord>[])
 		.filter(
-			(record): record is LegacySessionRecord & { id: string; startedAt: string } =>
+			(record): record is Partial<FocusSessionRecord> & { id: string; startedAt: string } =>
 				Boolean(record) &&
 				typeof record.id === 'string' &&
 				record.id.trim().length > 0 &&
@@ -18,10 +16,7 @@ export function normalizeSessionHistory(value: unknown): FocusSessionRecord[] {
 			id: record.id.trim(),
 			taskId:
 				typeof record.taskId === 'string' && record.taskId.trim() ? record.taskId.trim() : null,
-			title:
-				normalizeTitle(record.title) === 'Sprint'
-					? 'Session'
-					: normalizeTitle(record.title) || normalizeTitle(record.intention) || 'Session',
+			title: normalizeTitle(record.title) || 'Session',
 			startedAt: record.startedAt,
 			endedAt: isValidDate(record.endedAt) ? record.endedAt : record.startedAt,
 			completedContracts: finiteCount(record.completedContracts),

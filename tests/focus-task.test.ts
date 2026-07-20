@@ -66,19 +66,19 @@ test('preserves the chosen order of open tasks', () => {
 	assert.equal(moveOpenFocusTask(tasks, 'one', -1), tasks);
 });
 
-test('pins an untitled task first when loading', () => {
+test('pins the Anything task first when loading', () => {
 	const tasks = normalizeFocusTasks([
 		{ id: 'one', title: 'One', createdAt: '2026-07-18T10:00:00.000Z' },
-		{ id: UNTITLED_TASK_ID, title: 'Untitled', createdAt: '2026-07-18T11:00:00.000Z', accumulatedSeconds: 60 },
+		{ id: UNTITLED_TASK_ID, title: 'Anything', createdAt: '2026-07-18T11:00:00.000Z', accumulatedSeconds: 60 },
 		{ id: 'two', title: 'Two', createdAt: '2026-07-18T12:00:00.000Z' }
 	]);
 	assert.deepEqual(tasks.map((task) => task.id), [UNTITLED_TASK_ID, 'one', 'two']);
 });
 
-test('does not move the untitled task or move another task above it', () => {
+test('does not move the Anything task or move another task above it', () => {
 	const tasks = normalizeFocusTasks([
 		{ id: 'one', title: 'One', createdAt: '2026-07-18T10:00:00.000Z' },
-		{ id: UNTITLED_TASK_ID, title: 'Untitled', createdAt: '2026-07-18T11:00:00.000Z' },
+		{ id: UNTITLED_TASK_ID, title: 'Anything', createdAt: '2026-07-18T11:00:00.000Z' },
 		{ id: 'two', title: 'Two', createdAt: '2026-07-18T12:00:00.000Z' }
 	]);
 	assert.equal(moveOpenFocusTask(tasks, UNTITLED_TASK_ID, 1), tasks);
@@ -99,10 +99,10 @@ test('persists a complete ordered list from drag and drop', () => {
 	assert.equal(reorderOpenFocusTasks(tasks, ['one', 'one', 'three']), tasks);
 });
 
-test('keeps the untitled task pinned when persisting drag and drop', () => {
+test('keeps the Anything task pinned when persisting drag and drop', () => {
 	const tasks = normalizeFocusTasks([
 		{ id: 'one', title: 'One', createdAt: '2026-07-18T10:00:00.000Z' },
-		{ id: UNTITLED_TASK_ID, title: 'Untitled', createdAt: '2026-07-18T11:00:00.000Z' },
+		{ id: UNTITLED_TASK_ID, title: 'Anything', createdAt: '2026-07-18T11:00:00.000Z' },
 		{ id: 'two', title: 'Two', createdAt: '2026-07-18T12:00:00.000Z' }
 	]);
 	assert.deepEqual(
@@ -111,10 +111,10 @@ test('keeps the untitled task pinned when persisting drag and drop', () => {
 	);
 });
 
-test('merges untitled tasks into one durable inbox', () => {
+test('merges duplicate Anything task records defensively', () => {
 	const tasks = normalizeFocusTasks([
-		{ id: 'old-one', title: 'Untitled task', createdAt: '2026-07-18T10:00:00.000Z', accumulatedSeconds: 120, sessionCount: 1 },
-		{ id: 'old-two', title: 'Untitled', createdAt: '2026-07-18T11:00:00.000Z', accumulatedSeconds: 180, sessionCount: 2 }
+		{ id: UNTITLED_TASK_ID, title: 'Anything', createdAt: '2026-07-18T10:00:00.000Z', accumulatedSeconds: 120, sessionCount: 1 },
+		{ id: UNTITLED_TASK_ID, title: 'Anything', createdAt: '2026-07-18T11:00:00.000Z', accumulatedSeconds: 180, sessionCount: 2 }
 	]);
 	assert.equal(tasks.length, 1);
 	assert.equal(tasks[0].id, UNTITLED_TASK_ID);
@@ -123,23 +123,23 @@ test('merges untitled tasks into one durable inbox', () => {
 	assert.equal(tasks[0].sessionCount, 3);
 });
 
-test('removes an empty untitled inbox but preserves one with saved focus', () => {
+test('removes an empty Anything inbox but preserves one with saved focus', () => {
 	const empty = normalizeFocusTasks([
-		{ id: UNTITLED_TASK_ID, title: 'Untitled', createdAt: '2026-07-18T10:00:00.000Z' }
+		{ id: UNTITLED_TASK_ID, title: 'Anything', createdAt: '2026-07-18T10:00:00.000Z' }
 	]);
 	assert.deepEqual(removeEmptyUntitledTask(empty), []);
 
 	const focused = normalizeFocusTasks([
-		{ id: UNTITLED_TASK_ID, title: 'Untitled', createdAt: '2026-07-18T10:00:00.000Z', accumulatedSeconds: 60, sessionCount: 1 }
+		{ id: UNTITLED_TASK_ID, title: 'Anything', createdAt: '2026-07-18T10:00:00.000Z', accumulatedSeconds: 60, sessionCount: 1 }
 	]);
 	assert.equal(removeEmptyUntitledTask(focused).length, 1);
 });
 
-test('assigns saved untitled focus to a named task and removes the untitled inbox', () => {
+test('assigns saved Anything focus to a named task and removes the shared inbox', () => {
 	const tasks = normalizeFocusTasks([
 		{
 			id: UNTITLED_TASK_ID,
-			title: 'Untitled',
+			title: 'Anything',
 			createdAt: '2026-07-18T10:00:00.000Z',
 			updatedAt: '2026-07-18T12:00:00.000Z',
 			accumulatedSeconds: 90,

@@ -37,14 +37,14 @@ test('backfills whole elapsed minutes without double-counting an active session'
 		{ id: 'saved', completedContracts: 2, totalSeconds: 600 },
 		{ id: 'active', completedContracts: 1, totalSeconds: 300 },
 		{ id: 'active', completedContracts: 3, totalSeconds: 900 },
-		{ id: 'legacy', completedContracts: 0, totalSeconds: 750 }
+		{ id: 'partial', completedContracts: 0, totalSeconds: 750 }
 	]);
 
 	assert.equal(state.totalLeaves, 37);
 	assert.deepEqual(state.creditedMinutesBySession, {
 		saved: 10,
 		active: 15,
-		legacy: 12
+		partial: 12
 	});
 });
 
@@ -63,7 +63,7 @@ test('credits each completed minute exactly once', () => {
 	assert.equal(resumedCredit.state.totalLeaves, 8);
 });
 
-test('normalizes invalid storage and migrates contract credits to elapsed minutes', () => {
+test('normalizes current grove storage and rejects unsupported versions', () => {
 	assert.deepEqual(normalizeGroveState({ version: 3, totalLeaves: 20 }), {
 		version: 2,
 		totalLeaves: 0,
@@ -71,13 +71,20 @@ test('normalizes invalid storage and migrates contract credits to elapsed minute
 		settledMatureTreeCount: 0
 	});
 
-	const state = normalizeGroveState({
-		version: 1,
-		totalLeaves: 9,
-		creditedContractsBySession: { valid: 3.8, negative: -4, broken: 'many' }
+	assert.deepEqual(normalizeGroveState({ version: 1, totalLeaves: 20 }), {
+		version: 2,
+		totalLeaves: 0,
+		creditedMinutesBySession: {},
+		settledMatureTreeCount: 0
 	});
-	assert.equal(state.totalLeaves, 15);
-	assert.deepEqual(state.creditedMinutesBySession, { valid: 15, negative: 0 });
+
+	const state = normalizeGroveState({
+		version: 2,
+		totalLeaves: 9,
+		creditedMinutesBySession: { valid: 3.8, negative: -4, broken: 'many' }
+	});
+	assert.equal(state.totalLeaves, 9);
+	assert.deepEqual(state.creditedMinutesBySession, { valid: 3, negative: 0 });
 	assert.equal(state.settledMatureTreeCount, 0);
 });
 

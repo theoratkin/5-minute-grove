@@ -2,34 +2,22 @@ import { browser } from '$app/environment';
 import { normalizeDurableData, type DurableData } from './dataArchive';
 import { DurableStorageConflictError, nextDurableRevision } from './durableRevision';
 import { runMigrationRegistry, type MigrationStep } from './migrationRegistry';
-import { readJson } from './storage';
-import {
-	HISTORY_STORAGE_KEY,
-	loadSessionHistory as loadLegacySessionHistory
-} from '../features/session-history/sessionHistory.storage';
-import {
-	TASKS_STORAGE_KEY,
-	loadFocusTasks as loadLegacyFocusTasks
-} from '../features/focus-list/focusTask.storage';
-import { GROVE_STORAGE_KEY } from '../features/grove/grove.storage';
 import { normalizeFocusTasks } from '../features/focus-list/focusTask.state';
 import type { FocusTask } from '../features/focus-list/focusTask.types';
 import type { FocusSessionRecord } from '../features/focus-session/focusSession.types';
-import { normalizeGroveState, seedGroveState } from '../features/grove/grove.state';
+import { normalizeGroveState } from '../features/grove/grove.state';
 import type { GroveState } from '../features/grove/grove.types';
 import { normalizeSessionHistory } from '../features/session-history/sessionHistory.state';
 
 const DATABASE_NAME = '5-minute-grove';
 const DATABASE_VERSION = 1;
 const DATA_STORE = 'app-data';
-const MIGRATION_KEY = 'meta:local-storage-migrated';
 const REVISION_KEY = 'meta:revision';
 const TASKS_KEY = 'tasks';
 const SESSIONS_KEY = 'sessions';
 const GROVE_KEY = 'grove';
 const SYNC_CHANNEL_NAME = '5-minute-grove:durable-data';
 const SYNC_STORAGE_KEY = '5-minute-grove:durable-sync';
-const LEGACY_STORAGE_KEYS = [TASKS_STORAGE_KEY, HISTORY_STORAGE_KEY, GROVE_STORAGE_KEY] as const;
 
 type DatabaseRecord = {
 	key: string;
@@ -54,7 +42,6 @@ const DATABASE_MIGRATIONS: readonly MigrationStep<DatabaseMigrationContext>[] = 
 ];
 
 let databasePromise: Promise<IDBDatabase> | undefined;
-let migrationPromise: Promise<void> | undefined;
 let writeQueue: Promise<void> = Promise.resolve();
 let knownRevision = 0;
 let syncChannel: BroadcastChannel | undefined;
@@ -148,24 +135,8 @@ export function replaceDurableData(data: DurableData): Promise<void> {
 	});
 }
 
-export function readLegacyDurableData(): DurableData {
-	assertBrowser();
-	const sessions = loadLegacySessionHistory();
-	const grove =
-		localStorage.getItem(GROVE_STORAGE_KEY) === null
-			? seedGroveState(sessions)
-			: normalizeGroveState(readJson<unknown>(GROVE_STORAGE_KEY, null));
-	return normalizeDurableData({ tasks: loadLegacyFocusTasks(), sessions, grove });
-}
-
 async function readyDatabase(): Promise<IDBDatabase> {
-	const database = await openDatabase();
-	migrationPromise ??= migrateLocalStorage(database).catch((error) => {
-		migrationPromise = undefined;
-		throw error;
-	});
-	await migrationPromise;
-	return database;
+	return openDatabase();
 }
 
 function openDatabase(): Promise<IDBDatabase> {
@@ -223,63 +194,6 @@ function openDatabase(): Promise<IDBDatabase> {
 	});
 
 	return databasePromise;
-}
-
-async function migrateLocalStorage(database: IDBDatabase): Promise<void> {
-	const legacyData = readLegacyDurableData();
-	const migration = await migrateDataIfNeeded(database, legacyData);
-	knownRevision = migration.revision;
-	if (!migration.migrated) return;
-	for (const key of LEGACY_STORAGE_KEYS) {
-		try {
-			localStorage.removeItem(key);
-		} catch {
-			// The database transaction is already durable; stale migration input is harmless.
-		}
-	}
-}
-
-function migrateDataIfNeeded(
-	database: IDBDatabase,
-	data: DurableData
-): Promise<{ migrated: boolean; revision: number }> {
-	return new Promise((resolve, reject) => {
-		const transaction = database.transaction(DATA_STORE, 'readwrite');
-		const store = transaction.objectStore(DATA_STORE);
-		let migrated = false;
-		let revision = 0;
-		let failure: Error | undefined;
-		const markerRequest = store.get(MIGRATION_KEY);
-
-		markerRequest.onsuccess = () => {
-			const revisionRequest = store.get(REVISION_KEY);
-			revisionRequest.onsuccess = () => {
-				revision = finiteRevision(recordValue(revisionRequest.result));
-				if (recordValue(markerRequest.result) === true) return;
-
-				migrated = true;
-				revision += 1;
-				for (const record of dataRecords(data)) store.put(record);
-				store.put({ key: MIGRATION_KEY, value: true } satisfies DatabaseRecord);
-				store.put({ key: REVISION_KEY, value: revision } satisfies DatabaseRecord);
-			};
-			revisionRequest.onerror = () => {
-				failure = new DurableStorageError('Could not read the database revision.', {
-					cause: revisionRequest.error
-				});
-			};
-		};
-		markerRequest.onerror = () => {
-			failure = new DurableStorageError('Could not read the database migration state.', {
-				cause: markerRequest.error
-			});
-		};
-		transaction.oncomplete = () => resolve({ migrated, revision });
-		transaction.onerror = () =>
-			reject(failure ?? new DurableStorageError('The database migration failed.', { cause: transaction.error }));
-		transaction.onabort = () =>
-			reject(failure ?? new DurableStorageError('The database migration was aborted.', { cause: transaction.error }));
-	});
 }
 
 function writeRecords(database: IDBDatabase, records: DatabaseRecord[]): Promise<number> {

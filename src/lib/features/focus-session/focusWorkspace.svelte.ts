@@ -5,7 +5,6 @@ import { formatClock } from '$lib/app/time';
 import {
 	DurableStorageConflictError,
 	loadDurableData,
-	readLegacyDurableData,
 	replaceDurableData,
 	saveDurableGrove,
 	saveDurableTasks,
@@ -182,7 +181,7 @@ export class FocusWorkspace {
 			durableData = await loadDurableData();
 		} catch (error) {
 			console.error('Could not load durable focus data from IndexedDB.', error);
-			durableData = readLegacyDurableData();
+			durableData = { tasks: [], sessions: [], grove: emptyGroveState() };
 			this.toastMessage = m.toast_storage_error();
 		}
 		if (this.disposed) return;

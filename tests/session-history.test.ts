@@ -24,14 +24,14 @@ const second: FocusSessionRecord = {
 	startedAt: '2026-07-16T11:00:00.000Z'
 };
 
-test('migrates legacy intention and Sprint titles', () => {
+test('defaults missing titles while preserving current titles', () => {
 	const records = normalizeSessionHistory([
-		{ id: 'legacy-1', intention: 'Outline chapter', startedAt: first.startedAt, totalSeconds: 300 },
-		{ id: 'legacy-2', title: 'Sprint', startedAt: second.startedAt, totalSeconds: 600 }
+		{ id: 'untitled', startedAt: first.startedAt, totalSeconds: 300 },
+		{ id: 'titled', title: 'Outline chapter', startedAt: second.startedAt, totalSeconds: 600 }
 	]);
 
-	assert.equal(records[0].title, 'Session');
-	assert.equal(records[1].title, 'Outline chapter');
+	assert.equal(records[0].title, 'Outline chapter');
+	assert.equal(records[1].title, 'Session');
 	assert.equal(records[1].endedAt, first.startedAt);
 });
 

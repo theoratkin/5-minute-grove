@@ -16,33 +16,19 @@ export function normalizeGroveState(value: unknown): GroveState {
 	if (!value || typeof value !== 'object') return emptyGroveState();
 
 	const candidate = value as Record<string, unknown>;
-	const creditedMinutesBySession =
-		candidate.version === 2
-			? normalizeCreditMap(candidate.creditedMinutesBySession, 1)
-			: candidate.version === 1
-				? normalizeCreditMap(candidate.creditedContractsBySession, 5)
-				: null;
-	if (!creditedMinutesBySession) return emptyGroveState();
-
-	const creditedLeafTotal = Object.values(creditedMinutesBySession).reduce(
-		(total, count) => total + count,
-		0
-	);
+	if (candidate.version !== 2) return emptyGroveState();
+	const creditedMinutesBySession = normalizeCreditMap(candidate.creditedMinutesBySession);
 	const storedTotal =
 		typeof candidate.totalLeaves === 'number' && Number.isFinite(candidate.totalLeaves)
 			? Math.max(0, Math.floor(candidate.totalLeaves))
 			: 0;
-	// The visible total is independent from the credit ledger in version 2. That lets a
+	// The visible total is independent from the credit ledger. That lets a
 	// reset keep old sessions credited without growing their leaves again after reload.
-	const totalLeaves =
-		candidate.version === 1 ? Math.max(storedTotal, creditedLeafTotal) : storedTotal;
-	const settledMatureTreeCount =
-		candidate.version === 2
-			? Math.min(
-					finiteCount(candidate.settledMatureTreeCount),
-					Math.floor(totalLeaves / LEAVES_PER_TREE)
-				)
-			: Math.floor(totalLeaves / LEAVES_PER_TREE);
+	const totalLeaves = storedTotal;
+	const settledMatureTreeCount = Math.min(
+		finiteCount(candidate.settledMatureTreeCount),
+		Math.floor(totalLeaves / LEAVES_PER_TREE)
+	);
 
 	return {
 		version: 2,
@@ -128,12 +114,12 @@ export function deriveGroveProgress(
 	};
 }
 
-function normalizeCreditMap(value: unknown, multiplier: number): Record<string, number> {
+function normalizeCreditMap(value: unknown): Record<string, number> {
 	const credits: Record<string, number> = {};
 	if (!value || typeof value !== 'object') return credits;
 	for (const [sessionId, count] of Object.entries(value)) {
 		if (!sessionId || typeof count !== 'number' || !Number.isFinite(count)) continue;
-		credits[sessionId] = Math.max(0, Math.floor(count)) * multiplier;
+		credits[sessionId] = Math.max(0, Math.floor(count));
 	}
 	return credits;
 }
