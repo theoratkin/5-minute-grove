@@ -44,15 +44,10 @@ export function normalizeFocusTasks(value: unknown): FocusTask[] {
 		sessionCount: merged.sessionCount + task.sessionCount
 	}));
 
-	let insertedUntitled = false;
-	return normalized
-		.flatMap((task) => {
-			if (task.id !== UNTITLED_TASK_ID) return [task];
-			if (insertedUntitled) return [];
-			insertedUntitled = true;
-			return [untitled];
-		})
-		.slice(0, TASK_LIMIT);
+	return [
+		untitled,
+		...normalized.filter((task) => task.id !== UNTITLED_TASK_ID)
+	].slice(0, TASK_LIMIT);
 }
 
 export function createUntitledTask(now = new Date().toISOString()): FocusTask {
@@ -95,11 +90,14 @@ export function assignUntitledTask(tasks: FocusTask[], targetId: string): FocusT
 }
 
 export function sortFocusTasks(tasks: FocusTask[]): FocusTask[] {
-	const openTasks = tasks.filter((task) => !task.completedAt);
+	const untitled = tasks.find((task) => task.id === UNTITLED_TASK_ID);
+	const openTasks = tasks.filter(
+		(task) => !task.completedAt && task.id !== UNTITLED_TASK_ID
+	);
 	const completedTasks = tasks
 		.filter((task) => task.completedAt)
 		.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
-	return [...openTasks, ...completedTasks];
+	return [...(untitled ? [untitled] : []), ...openTasks, ...completedTasks];
 }
 
 export function moveOpenFocusTask(
@@ -111,7 +109,13 @@ export function moveOpenFocusTask(
 	const completedTasks = tasks.filter((task) => task.completedAt);
 	const currentIndex = openTasks.findIndex((task) => task.id === id);
 	const nextIndex = currentIndex + direction;
-	if (currentIndex < 0 || nextIndex < 0 || nextIndex >= openTasks.length) return tasks;
+	if (
+		currentIndex < 0 ||
+		id === UNTITLED_TASK_ID ||
+		nextIndex < 0 ||
+		nextIndex >= openTasks.length ||
+		openTasks[nextIndex].id === UNTITLED_TASK_ID
+	) return tasks;
 
 	const reordered = [...openTasks];
 	[reordered[currentIndex], reordered[nextIndex]] = [
@@ -129,7 +133,10 @@ export function reorderOpenFocusTasks(tasks: FocusTask[], orderedIds: string[]):
 	if (new Set(orderedIds).size !== openTasks.length || orderedIds.some((id) => !tasksById.has(id))) {
 		return tasks;
 	}
-	const reordered = orderedIds.map((id) => tasksById.get(id)!);
+	const reorderedIds = orderedIds.includes(UNTITLED_TASK_ID)
+		? [UNTITLED_TASK_ID, ...orderedIds.filter((id) => id !== UNTITLED_TASK_ID)]
+		: orderedIds;
+	const reordered = reorderedIds.map((id) => tasksById.get(id)!);
 	if (reordered.every((task, index) => task.id === openTasks[index].id)) return tasks;
 	return [...reordered, ...completedTasks];
 }

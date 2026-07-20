@@ -148,14 +148,14 @@
 	}
 
 	function handleDndConsider(event: CustomEvent<DndEvent<FocusTask>>) {
-		consideredOpenTasks = event.detail.items;
+		consideredOpenTasks = pinUntitledTask(event.detail.items);
 		draggedTaskId = event.detail.info.id;
 		openMenuTaskId = null;
 	}
 
 	function handleDndFinalize(event: CustomEvent<DndEvent<FocusTask>>) {
-		consideredOpenTasks = event.detail.items;
-		onreorder(event.detail.items.map((task) => task.id));
+		consideredOpenTasks = pinUntitledTask(event.detail.items);
+		onreorder(consideredOpenTasks.map((task) => task.id));
 		consideredOpenTasks = null;
 		if (
 			event.detail.info.source === SOURCES.POINTER ||
@@ -163,6 +163,13 @@
 		) {
 			draggedTaskId = null;
 		}
+	}
+
+	function pinUntitledTask(items: FocusTask[]) {
+		const untitled = items.find((task) => task.id === UNTITLED_TASK_ID);
+		return untitled
+			? [untitled, ...items.filter((task) => task.id !== UNTITLED_TASK_ID)]
+			: items;
 	}
 
 	function closeTransientControls() {
@@ -222,7 +229,9 @@
 					class="task-row relative grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-2 border border-moss/10 bg-surface/60 p-2.5"
 					animate:flip={{ duration: flipDurationMs }}
 				>
-					<button class="drag-handle absolute top-3.5 -left-5 z-10 grid h-8 w-7 place-items-center rounded-lg text-ink-muted hover:bg-mist hover:text-ink" type="button" use:dragHandle aria-label={m.focus_list_drag_task({ title: taskTitle(task) })} title={m.focus_list_drag_title()}><i class="ph-bold ph-dots-six-vertical" aria-hidden="true"></i></button>
+					{#if task.id !== UNTITLED_TASK_ID}
+						<button class="drag-handle absolute top-3.5 -left-5 z-10 grid h-8 w-7 place-items-center rounded-lg text-ink-muted hover:bg-mist hover:text-ink" type="button" use:dragHandle aria-label={m.focus_list_drag_task({ title: taskTitle(task) })} title={m.focus_list_drag_title()}><i class="ph-bold ph-dots-six-vertical" aria-hidden="true"></i></button>
+					{/if}
 					{#if task.id === UNTITLED_TASK_ID}
 						<span class="grid size-10 place-items-center text-ink-muted" title={m.focus_list_shared_untitled()}><i class="ph-bold ph-inbox text-lg" aria-hidden="true"></i></span>
 					{:else}
@@ -260,9 +269,9 @@
 										</div>
 										<div class="mx-1 my-1 border-t border-moss/10"></div>
 									{/if}
-									<button class="menu-action" type="button" onclick={() => { onmove(task.id, -1); openMenuTaskId = null; }} disabled={index === 0} role="menuitem"><i class="ph-bold ph-arrow-up" aria-hidden="true"></i>{m.focus_list_move_up()}</button>
-									<button class="menu-action" type="button" onclick={() => { onmove(task.id, 1); openMenuTaskId = null; }} disabled={index === openTasks.length - 1} role="menuitem"><i class="ph-bold ph-arrow-down" aria-hidden="true"></i>{m.focus_list_move_down()}</button>
 									{#if task.id !== UNTITLED_TASK_ID}
+										<button class="menu-action" type="button" onclick={() => { onmove(task.id, -1); openMenuTaskId = null; }} disabled={index === 0 || openTasks[index - 1]?.id === UNTITLED_TASK_ID} role="menuitem"><i class="ph-bold ph-arrow-up" aria-hidden="true"></i>{m.focus_list_move_up()}</button>
+										<button class="menu-action" type="button" onclick={() => { onmove(task.id, 1); openMenuTaskId = null; }} disabled={index === openTasks.length - 1} role="menuitem"><i class="ph-bold ph-arrow-down" aria-hidden="true"></i>{m.focus_list_move_down()}</button>
 										<button class="menu-action menu-action-delete" type="button" onclick={() => { ondelete(task.id); openMenuTaskId = null; }} role="menuitem"><i class="ph-bold ph-trash" aria-hidden="true"></i>{m.focus_list_delete()}</button>
 									{/if}
 								</div>
