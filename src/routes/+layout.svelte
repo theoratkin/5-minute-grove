@@ -134,5 +134,10 @@
 			class="font-semibold text-ink transition hover:text-moss focus-visible:text-moss"
 			href="https://theoratkin.com"
 		>theoratkin.com</a>)
+		<span aria-hidden="true"> · </span>
+		<a
+			class="font-semibold text-ink transition hover:text-moss focus-visible:text-moss"
+			href="https://github.com/theoratkin/5-minute-grove"
+		>GitHub</a>
 	</p>
 </footer>
