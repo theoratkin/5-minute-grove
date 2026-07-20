@@ -71,10 +71,6 @@
 		return task.id === UNTITLED_TASK_ID ? m.focus_list_untitled() : task.title;
 	}
 
-	function editableTitle(task: FocusTask) {
-		return editingTitles[task.id] ?? task.title;
-	}
-
 	function caretOffset(element: HTMLElement) {
 		const selection = window.getSelection();
 		if (!selection?.rangeCount) return (element.textContent ?? '').length;
@@ -115,11 +111,14 @@
 
 	async function updateEditableTitle(element: HTMLElement, task: FocusTask) {
 		const offset = caretOffset(element);
-		const title = (element.textContent ?? '').replace(/[\r\n]+/g, ' ').slice(0, 80);
+		const text = (element.textContent ?? '').replace(/[\r\n]+/g, ' ');
+		const title = text.slice(0, 80);
 		editingTitles[task.id] = title;
-		titleRenderRevision += 1;
-		await tick();
-		restoreCaret(element, Math.min(offset, title.length));
+		if (title !== text) {
+			element.textContent = title;
+			await tick();
+			restoreCaret(element, Math.min(offset, title.length));
+		}
 	}
 
 	function handleTitleInput(event: Event, task: FocusTask) {
@@ -129,11 +128,12 @@
 	}
 
 	async function commitTitle(task: FocusTask) {
-		const title = (editingTitles[task.id] ?? task.title).replace(/\s+/g, ' ').trim().slice(0, 80);
-		if (title && title !== task.title) onrename(task.id, title);
-		editingTitles[task.id] = title || task.title;
-		await tick();
+		const originalTitle = taskTitle(task);
+		const title = (editingTitles[task.id] ?? originalTitle).replace(/\s+/g, ' ').trim().slice(0, 80);
+		if (title && title !== originalTitle) onrename(task.id, title);
 		delete editingTitles[task.id];
+		titleRenderRevision += 1;
+		await tick();
 	}
 
 	function handleTitleKeydown(event: KeyboardEvent, task: FocusTask) {
@@ -142,7 +142,7 @@
 			(event.currentTarget as HTMLElement).blur();
 		} else if (event.key === 'Escape') {
 			event.preventDefault();
-			editingTitles[task.id] = task.title;
+			editingTitles[task.id] = taskTitle(task);
 			(event.currentTarget as HTMLElement).blur();
 		}
 	}
@@ -240,11 +240,7 @@
 						</button>
 					{/if}
 					<div class="min-w-0 self-center">
-						{#if task.id === UNTITLED_TASK_ID}
-							<strong class="task-title block text-sm text-ink">{m.focus_list_untitled()}</strong>
-						{:else}
-							<div class="editable-title task-title rounded-md text-sm font-bold text-ink" contenteditable="plaintext-only" role="textbox" tabindex="0" aria-label={m.focus_list_edit_title({ title: task.title })} spellcheck="true" onfocus={() => editingTitles[task.id] = task.title} oninput={(event) => handleTitleInput(event, task)} oncompositionend={(event) => void updateEditableTitle(event.currentTarget as HTMLElement, task)} onblur={() => void commitTitle(task)} onkeydown={(event) => handleTitleKeydown(event, task)}>{#key `${editableTitle(task)}:${titleRenderRevision}`}{@render highlightedTaskTitle(editableTitle(task))}{/key}</div>
-						{/if}
+						<div class="editable-title task-title rounded-md text-sm font-bold text-ink" contenteditable="plaintext-only" role="textbox" tabindex="0" aria-label={m.focus_list_edit_title({ title: taskTitle(task) })} spellcheck="true" onfocus={() => editingTitles[task.id] = taskTitle(task)} oninput={(event) => handleTitleInput(event, task)} oncompositionend={(event) => void updateEditableTitle(event.currentTarget as HTMLElement, task)} onblur={() => void commitTitle(task)} onkeydown={(event) => handleTitleKeydown(event, task)}>{#key titleRenderRevision}{@render highlightedTaskTitle(taskTitle(task))}{/key}</div>
 						<span class="mt-0.5 block text-xs font-semibold text-ink-muted">{m.focus_list_minutes_focused({ minutes: formatMinutes(taskSeconds(task)) })}{task.id === activeTaskId && currentSession ? m.focus_list_now() : ''}</span>
 					</div>
 					{#if task.id === activeTaskId && currentSession}
@@ -294,7 +290,7 @@
 					<li class="relative grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 rounded-xl bg-mist/45 p-2">
 						<button class="grid size-10 shrink-0 place-items-center rounded-xl text-moss hover:bg-sprout/40" type="button" onclick={() => ontoggle(task.id)} aria-label={m.focus_list_reopen({ title: task.title })} title={m.focus_list_reopen_title()}><i class="ph-fill ph-check-square text-lg" aria-hidden="true"></i></button>
 						<div class="min-w-0">
-							<div class="editable-title task-title rounded-md text-sm font-bold text-ink-muted line-through" contenteditable="plaintext-only" role="textbox" tabindex="0" aria-label={m.focus_list_edit_completed({ title: task.title })} spellcheck="true" onfocus={() => editingTitles[task.id] = task.title} oninput={(event) => handleTitleInput(event, task)} oncompositionend={(event) => void updateEditableTitle(event.currentTarget as HTMLElement, task)} onblur={() => void commitTitle(task)} onkeydown={(event) => handleTitleKeydown(event, task)}>{#key `${editableTitle(task)}:${titleRenderRevision}`}{@render highlightedTaskTitle(editableTitle(task))}{/key}</div>
+							<div class="editable-title task-title rounded-md text-sm font-bold text-ink-muted line-through" contenteditable="plaintext-only" role="textbox" tabindex="0" aria-label={m.focus_list_edit_completed({ title: task.title })} spellcheck="true" onfocus={() => editingTitles[task.id] = task.title} oninput={(event) => handleTitleInput(event, task)} oncompositionend={(event) => void updateEditableTitle(event.currentTarget as HTMLElement, task)} onblur={() => void commitTitle(task)} onkeydown={(event) => handleTitleKeydown(event, task)}>{#key titleRenderRevision}{@render highlightedTaskTitle(task.title)}{/key}</div>
 							<span class="text-xs text-ink-muted">{m.focus_list_minutes_focused({ minutes: formatMinutes(task.accumulatedSeconds) })}</span>
 						</div>
 						<button class="grid size-10 place-items-center rounded-xl text-clay transition hover:bg-clay/10" type="button" onclick={() => ondelete(task.id)} aria-label={m.focus_list_delete()} title={m.focus_list_delete()}><i class="ph-bold ph-trash text-lg" aria-hidden="true"></i></button>

@@ -41,6 +41,7 @@ The first usable version should likely include:
 - Inline hashtags can organize task titles without turning task planning into a separate setup step.
 - Separate session records that accumulate focused time on a task without implying that the task is complete.
 - Direct timer starts without a title use one shared Anything task rather than creating anonymous duplicates.
+- Renaming Anything from the Focus list creates a named task and transfers all focus credited there to it.
 - An in-progress focus attempt can be reassigned in full to another open task.
 - Honest accounting when a session ends early: partial time is saved without awarding a completed contract.
 - Recovery of an in-progress session after a refresh or accidental tab close.

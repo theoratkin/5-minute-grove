@@ -560,7 +560,30 @@ export class FocusWorkspace {
 
 	updateTaskTitle(id: string, title: string) {
 		const cleanTitle = title.trim().slice(0, 80);
-		if (!cleanTitle || id === UNTITLED_TASK_ID) return;
+		if (!cleanTitle) return;
+		if (id === UNTITLED_TASK_ID) {
+			const untitled = this.tasks.find((task) => task.id === UNTITLED_TASK_ID);
+			if (!untitled) return;
+
+			const now = new Date().toISOString();
+			const task: FocusTask = {
+				id: createSessionId().replace('session', 'task'),
+				title: cleanTitle,
+				createdAt: now,
+				updatedAt: now,
+				completedAt: null,
+				accumulatedSeconds: 0,
+				sessionCount: 0
+			};
+			this.tasks = sortFocusTasks(assignUntitledTask([task, ...this.tasks], task.id));
+			if (this.activeTaskId === UNTITLED_TASK_ID) {
+				this.activeTaskId = task.id;
+				this.intention = task.title;
+			}
+			this.persistTasks();
+			this.toastMessage = m.toast_focus_assigned({ title: task.title });
+			return;
+		}
 		const now = new Date().toISOString();
 		this.tasks = sortFocusTasks(
 			this.tasks.map((task) =>
