@@ -143,3 +143,12 @@ When implementation begins, a pragmatic MVP would be:
 - Whether future grove interactions outgrow the current inline SVG and CSS approach.
 - Whether to support PWA installability.
 - Whether to add account sync later.
+
+## GitHub Pages Deployment
+
+- Build with `@sveltejs/adapter-static` into `build/`, prerendering every localized route with trailing slashes and retaining `404.html` as the client-side fallback for unknown URLs.
+- Deploy pushes to `main` with the GitHub Actions workflow in `.github/workflows/deploy-pages.yml`; the workflow checks, tests, builds, and uploads the static artifact before deploying it.
+- Serve the site from the apex custom domain `5minutegrove.com`. Keep `static/CNAME` and `static/.nojekyll` in the published artifact.
+- In the repository's **Settings → Pages**, select **GitHub Actions** as the source and set the custom domain to `5minutegrove.com`.
+- At the DNS provider, create apex `A` records for `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, and `185.199.111.153`. Point `www` with a `CNAME` record to `theoratkin.github.io` so GitHub Pages can redirect it to the apex domain.
+- Enable **Enforce HTTPS** after GitHub provisions the certificate and reports the DNS check as successful.

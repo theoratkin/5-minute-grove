@@ -174,13 +174,16 @@ This regenerates `src/lib/app/GroveLogo.svelte` and maps the source palette to t
 
 ## Deployment
 
-Create a production build with:
+The production site is a static SvelteKit build deployed to GitHub Pages at
+[`5minutegrove.com`](https://5minutegrove.com). Create the same build locally with:
 
 ```sh
 npm run build
 ```
 
-The project currently uses SvelteKit's `adapter-auto`, which selects an adapter for supported deployment platforms. Choose and configure a platform-specific adapter if the target host is not detected by `adapter-auto`.
+Output is written to `build/`. Pushing to `main` runs checks, tests, builds the site, and deploys it through `.github/workflows/deploy-pages.yml`. Every localized route is prerendered so direct links and refreshes work without an application server; the static adapter also emits a `404.html` fallback for unknown URLs.
+
+The repository must use **GitHub Actions** as its Pages source and have `5minutegrove.com` configured as its custom domain. DNS setup and the one-time repository settings are described in [the technical direction](docs/technical-direction.md#github-pages-deployment).
 
 ## Documentation
 
