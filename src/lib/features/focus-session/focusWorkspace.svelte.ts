@@ -468,6 +468,23 @@ export class FocusWorkspace {
 		this.toastMessage = m.toast_focus_assigned({ title: task.title });
 	}
 
+	assignUntitledTask(id: string) {
+		const task = this.tasks.find(
+			(item) => item.id === id && item.id !== UNTITLED_TASK_ID && !item.completedAt
+		);
+		if (!task || !this.tasks.some((item) => item.id === UNTITLED_TASK_ID)) return;
+
+		this.tasks = assignUntitledTask(this.tasks, task.id);
+		saveFocusTasks(this.tasks);
+
+		if (this.activeTaskId === UNTITLED_TASK_ID) {
+			this.activeTaskId = task.id;
+			this.intention = task.title;
+		}
+
+		this.toastMessage = m.toast_focus_assigned({ title: task.title });
+	}
+
 	toggleTaskDone(id: string) {
 		const task = this.tasks.find((item) => item.id === id);
 		if (!task || id === UNTITLED_TASK_ID) return;

@@ -112,6 +112,7 @@
 			onmove={(id, direction) => workspace.moveTask(id, direction)}
 			onreorder={(orderedIds) => workspace.reorderTasks(orderedIds)}
 			ondelete={(id) => workspace.deleteTask(id)}
+			onassignuntitled={(id) => workspace.assignUntitledTask(id)}
 		/>
 	</aside>
 </main>

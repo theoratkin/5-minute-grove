@@ -26,7 +26,8 @@
 		onrename,
 		onmove,
 		onreorder,
-		ondelete
+		ondelete,
+		onassignuntitled
 	}: {
 		tasks: FocusTask[];
 		currentSession?: { totalSeconds: number } | null;
@@ -38,6 +39,7 @@
 		onmove: (id: string, direction: -1 | 1) => void;
 		onreorder: (orderedIds: string[]) => void;
 		ondelete: (id: string) => void;
+		onassignuntitled: (id: string) => void;
 	} = $props();
 
 	let draft = $state('');
@@ -48,6 +50,9 @@
 	let consideredOpenTasks = $state<FocusTask[] | null>(null);
 	let openTasks = $derived(consideredOpenTasks ?? tasks.filter((task) => !task.completedAt));
 	let completedTasks = $derived(tasks.filter((task) => task.completedAt));
+	let untitledAssignmentTargets = $derived(
+		tasks.filter((task) => !task.completedAt && task.id !== UNTITLED_TASK_ID)
+	);
 	const flipDurationMs = 150;
 
 	function addTask(event: SubmitEvent) {
@@ -246,6 +251,15 @@
 							<button class="grid size-10 place-items-center rounded-xl text-ink-muted transition hover:bg-mist hover:text-ink" type="button" onclick={() => openMenuTaskId = openMenuTaskId === task.id ? null : task.id} aria-label={m.focus_list_more_actions({ title: taskTitle(task) })} aria-expanded={openMenuTaskId === task.id} title={m.focus_list_more_actions_title()}><i class="ph-bold ph-dots-three-vertical text-lg" aria-hidden="true"></i></button>
 							{#if openMenuTaskId === task.id}
 								<div class="task-menu absolute top-[calc(100%+0.35rem)] right-0 z-30 grid w-44 gap-1 rounded-xl border border-moss/15 bg-paper p-1.5 shadow-[0_12px_32px_rgb(0_0_0/18%)]" role="menu">
+									{#if task.id === UNTITLED_TASK_ID && untitledAssignmentTargets.length > 0}
+										<p class="px-2 pb-0.5 pt-1 text-[0.6875rem] font-bold uppercase tracking-wide text-ink-muted">{m.timer_assign_focus()}</p>
+										<div class="max-h-44 overflow-y-auto">
+											{#each untitledAssignmentTargets as target (target.id)}
+												<button class="menu-action w-full" type="button" onclick={() => { onassignuntitled(target.id); openMenuTaskId = null; }} role="menuitem"><i class="ph-bold ph-arrow-right" aria-hidden="true"></i><span class="truncate">{target.title}</span></button>
+											{/each}
+										</div>
+										<div class="mx-1 my-1 border-t border-moss/10"></div>
+									{/if}
 									<button class="menu-action" type="button" onclick={() => { onmove(task.id, -1); openMenuTaskId = null; }} disabled={index === 0} role="menuitem"><i class="ph-bold ph-arrow-up" aria-hidden="true"></i>{m.focus_list_move_up()}</button>
 									<button class="menu-action" type="button" onclick={() => { onmove(task.id, 1); openMenuTaskId = null; }} disabled={index === openTasks.length - 1} role="menuitem"><i class="ph-bold ph-arrow-down" aria-hidden="true"></i>{m.focus_list_move_down()}</button>
 									{#if task.id !== UNTITLED_TASK_ID}
