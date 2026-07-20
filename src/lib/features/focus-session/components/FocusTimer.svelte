@@ -150,7 +150,7 @@
 		{#if isStarting || isExtending}
 			<div class="start-commit-glow" aria-hidden="true"></div>
 		{/if}
-		{#if phase !== 'contract-complete'}
+		{#if phase === 'running' || phase === 'paused'}
 			<div
 				class:paused-fill={phase === 'paused'}
 				class="timer-progress-fill"
