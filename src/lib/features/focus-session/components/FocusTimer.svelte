@@ -146,17 +146,18 @@
 		<span class="flex items-center gap-1.5 text-xs"><i class="ph-fill ph-leaf text-moss" aria-hidden="true"></i> {companionText}</span>
 	</div>
 
-	<div class:timer-complete={phase === 'contract-complete'} class:timer-paused={phase === 'paused'} class:timer-starting={isStarting || isExtending} class="relative overflow-hidden rounded-[1.35rem_2.25rem_1.5rem_2rem] border border-moss/10 bg-surface px-4 py-5 shadow-inner">
+	<div
+		class:timer-complete={phase === 'contract-complete'}
+		class:timer-paused={phase === 'paused'}
+		class:timer-starting={isStarting || isExtending}
+		class="timer-panel relative overflow-hidden rounded-[1.35rem_2.25rem_1.5rem_2rem] border border-moss/10 bg-surface px-4 py-5 shadow-inner"
+		style={`--timer-progress: ${Math.max(0, Math.min(100, progress))}%`}
+	>
 		{#if isStarting || isExtending}
 			<div class="start-commit-glow" aria-hidden="true"></div>
 		{/if}
 		{#if phase === 'running' || phase === 'paused'}
-			<div
-				class:paused-fill={phase === 'paused'}
-				class="timer-progress-fill"
-				aria-hidden="true"
-				style={`width: ${Math.max(0, Math.min(100, progress))}%`}
-			></div>
+			<div class:paused-fill={phase === 'paused'} class="timer-progress-fill" aria-hidden="true"></div>
 		{/if}
 		{#if phase === 'contract-complete'}
 			<div class="confetti" aria-hidden="true">
@@ -332,17 +333,20 @@
 		}
 	}
 
+	.timer-panel {
+		--timer-progress: 0%;
+		border-color: color-mix(in srgb, var(--color-moss) 10%, var(--color-surface));
+		background-clip: padding-box;
+	}
+
 	.timer-progress-fill {
 		position: absolute;
 		z-index: 0;
-		inset: 0 auto 0 0;
+		inset: 0;
 		--progress-color: color-mix(in srgb, var(--color-moss) 34%, var(--color-surface));
-		background: linear-gradient(
-			90deg,
-			color-mix(in srgb, var(--color-moss) 22%, var(--color-surface)),
-			var(--progress-color)
-		);
-		transition: width 200ms ease-out;
+		background: linear-gradient(90deg, color-mix(in srgb, var(--color-moss) 22%, var(--color-surface)), var(--progress-color));
+		clip-path: inset(0 calc(100% - var(--timer-progress)) 0 0);
+		transition: clip-path 200ms ease-out;
 	}
 
 	.timer-starting {
@@ -410,24 +414,20 @@
 		animation: plus-forward 420ms ease-out forwards;
 	}
 
+	.timer-paused {
+		border-color: color-mix(in srgb, var(--color-clay) 42%, var(--color-surface));
+		background:
+			repeating-linear-gradient(-45deg, color-mix(in srgb, var(--color-clay) 7%, transparent) 0 0.7rem, transparent 0.7rem 1.4rem),
+			linear-gradient(145deg, color-mix(in srgb, var(--color-clay) 12%, var(--color-surface)), var(--color-surface) 64%);
+	}
+
 	.paused-fill {
 		--progress-color: color-mix(in srgb, var(--color-clay) 26%, var(--color-surface));
-		background: linear-gradient(
-			90deg,
-			color-mix(in srgb, var(--color-clay) 15%, var(--color-surface)),
-			var(--progress-color)
-		);
+		background: linear-gradient(90deg, color-mix(in srgb, var(--color-clay) 15%, var(--color-surface)), var(--progress-color));
 	}
 
 	.timer-complete {
 		background: linear-gradient(145deg, color-mix(in srgb, var(--color-sprout) 45%, var(--color-surface)), var(--color-surface) 62%);
-	}
-
-	.timer-paused {
-		border-color: color-mix(in srgb, var(--color-clay) 42%, transparent);
-		background:
-			repeating-linear-gradient(-45deg, color-mix(in srgb, var(--color-clay) 7%, transparent) 0 0.7rem, transparent 0.7rem 1.4rem),
-			linear-gradient(145deg, color-mix(in srgb, var(--color-clay) 12%, var(--color-surface)), var(--color-surface) 64%);
 	}
 
 	.paused-readout {
