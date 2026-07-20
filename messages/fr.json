@@ -176,6 +176,8 @@
   "toast_task_restored": "Tâche restaurée.",
   "toast_grove_reset": "Votre bosquet a été réinitialisé.",
   "toast_storage_error": "Vos modifications n’ont pas pu être enregistrées. Gardez cet onglet ouvert et réessayez.",
+  "toast_storage_conflict": "Un autre onglet a enregistré une modification plus récente. Celui-ci a été actualisé.",
+  "toast_session_finished_elsewhere": "Cette session de concentration a été terminée dans un autre onglet.",
   "notification_title": "Encore cinq minutes ?",
   "notification_focus_fallback": "Cette concentration",
   "notification_block_one": "un bloc de concentration",

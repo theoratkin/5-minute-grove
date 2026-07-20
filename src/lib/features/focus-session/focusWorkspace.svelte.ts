@@ -3,11 +3,13 @@ import type { AppPreferences } from '$lib/app/preferences.svelte';
 import { notifyContractComplete, prepareTimerNotifications } from '$lib/app/notifications';
 import { formatClock } from '$lib/app/time';
 import {
+	DurableStorageConflictError,
 	loadDurableData,
 	readLegacyDurableData,
 	replaceDurableData,
 	saveDurableGrove,
-	saveDurableTasks
+	saveDurableTasks,
+	subscribeDurableDataChanges
 } from '$lib/app/durableData.storage';
 import {
 	clearActiveSession,
@@ -86,6 +88,9 @@ export class FocusWorkspace {
 	private timerInterval: ReturnType<typeof setInterval> | undefined;
 	private deletedTaskUndo = $state<DeletedTaskUndo | null>(null);
 	private disposed = false;
+	private externalChangePending = false;
+	private externalSyncQueue: Promise<void> = Promise.resolve();
+	private unsubscribeDurableChanges: (() => void) | undefined;
 
 	constructor(private preferences: AppPreferences) {}
 
@@ -161,6 +166,14 @@ export class FocusWorkspace {
 
 	async setup() {
 		this.disposed = false;
+		this.unsubscribeDurableChanges?.();
+		this.unsubscribeDurableChanges = subscribeDurableDataChanges(() => {
+			if (!this.hydrated) {
+				this.externalChangePending = true;
+				return;
+			}
+			this.queueExternalSync(false);
+		});
 		const startDuration = loadStartDuration();
 		this.remainingSeconds = startDuration;
 		this.segmentDurationSeconds = startDuration;
@@ -222,17 +235,25 @@ export class FocusWorkspace {
 				totalSeconds: this.sessionTimeSeconds
 			});
 		}
-		this.groveState = reconcileGroveState(durableData.grove, groveSeeds);
-		this.persistGrove();
+		const reconciledGrove = reconcileGroveState(durableData.grove, groveSeeds);
+		const groveChangedDuringSetup = reconciledGrove !== durableData.grove;
+		this.groveState = reconciledGrove;
+		if (groveChangedDuringSetup) this.persistGrove();
 		this.creditCurrentSessionMinutes();
 
 		this.hydrated = true;
+		if (this.externalChangePending) {
+			this.externalChangePending = false;
+			this.queueExternalSync(false);
+		}
 		this.timerInterval = window.setInterval(() => this.syncTimer(), 250);
 		document.addEventListener('visibilitychange', this.syncTimer);
 	}
 
 	dispose() {
 		this.disposed = true;
+		this.unsubscribeDurableChanges?.();
+		this.unsubscribeDurableChanges = undefined;
 		if (this.timerInterval) window.clearInterval(this.timerInterval);
 		document.removeEventListener('visibilitychange', this.syncTimer);
 	}
@@ -852,8 +873,68 @@ export class FocusWorkspace {
 	private trackStorageWrite(write: Promise<void>) {
 		void write.catch((error) => {
 			console.error('Could not save durable focus data.', error);
-			this.toastMessage = m.toast_storage_error();
+			if (error instanceof DurableStorageConflictError) {
+				this.toastMessage = m.toast_storage_conflict();
+				this.queueExternalSync(true);
+			} else {
+				this.toastMessage = m.toast_storage_error();
+			}
 		});
+	}
+
+	private queueExternalSync(showConflict: boolean) {
+		this.externalSyncQueue = this.externalSyncQueue
+			.then(() => this.syncExternalDurableData(showConflict))
+			.catch((error) => {
+				console.error('Could not synchronize durable focus data.', error);
+				this.toastMessage = m.toast_storage_error();
+			});
+	}
+
+	private async syncExternalDurableData(showConflict: boolean) {
+		const durableData = await loadDurableData();
+		if (this.disposed) return;
+
+		const activeSessionFinishedElsewhere =
+			this.activeSessionId !== null &&
+			durableData.sessions.some((session) => session.id === this.activeSessionId);
+		const previousLeaves = this.groveState.totalLeaves;
+		this.history = durableData.sessions;
+		this.tasks = sortFocusTasks(durableData.tasks);
+
+		if (activeSessionFinishedElsewhere) {
+			this.resetSession();
+			clearActiveSession();
+			this.toastMessage = m.toast_session_finished_elsewhere();
+		} else if (this.activeTaskId) {
+			const activeTask = this.tasks.find((task) => task.id === this.activeTaskId);
+			if (activeTask) {
+				this.intention = activeTask.title;
+			} else if (this.phase === 'idle') {
+				this.activeTaskId = null;
+				this.intention = '';
+			} else {
+				this.recoverActiveTask();
+			}
+		}
+
+		const groveSeeds = this.history.map((record) => ({
+			id: record.id,
+			completedContracts: record.completedContracts,
+			totalSeconds: record.totalSeconds
+		}));
+		if (this.activeSessionId) {
+			groveSeeds.push({
+				id: this.activeSessionId,
+				completedContracts: this.completedContracts,
+				totalSeconds: this.sessionTimeSeconds
+			});
+		}
+		this.groveState = reconcileGroveState(durableData.grove, groveSeeds);
+		if (this.groveState.totalLeaves !== previousLeaves) this.groveGrowthToken += 1;
+		if (showConflict && !activeSessionFinishedElsewhere) {
+			this.toastMessage = m.toast_storage_conflict();
+		}
 	}
 
 	private playSound(sound: HTMLAudioElement | null) {

@@ -113,6 +113,8 @@ When implementation begins, a pragmatic MVP would be:
 - On the first database open, atomically copy the legacy localStorage task, session, and grove values into IndexedDB, record the completed migration in the same transaction, and then remove the migrated keys. A failed transaction leaves the original localStorage data intact for retry.
 - Keep active timer recovery and lightweight device preferences in localStorage; these values are small, synchronous, and intentionally outside the portable durable dataset.
 - Keep the archive format independent of the IndexedDB layout so exports remain stable through future database migrations.
+- Increment a durable revision inside every IndexedDB write transaction. Abort stale writes atomically, announce commits through BroadcastChannel with a storage-event fallback, and reload the authoritative snapshot in other tabs.
+- Treat a simultaneous edit conflict as an explicit committed-change-wins outcome rather than attempting to merge ambiguous task deletions or ordering. Surface the conflict and converge both tabs on the stored revision.
 
 ## UX Constraints
 
@@ -136,7 +138,7 @@ When implementation begins, a pragmatic MVP would be:
 
 ## Future Technical Questions
 
-- Whether multi-tab editing needs optimistic revision conflicts, live synchronization, or an explicit single-writer policy as usage patterns become clearer.
+- Whether future account sync needs an operation log or CRDT once conflicts can occur across devices and offline intervals rather than only between same-browser tabs.
 - Whether future grove interactions outgrow the current inline SVG and CSS approach.
 - Whether to support PWA installability.
 - Whether to add account sync later.

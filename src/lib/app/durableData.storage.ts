@@ -1,5 +1,6 @@
 import { browser } from '$app/environment';
 import { normalizeDurableData, type DurableData } from './dataArchive';
+import { DurableStorageConflictError, nextDurableRevision } from './durableRevision';
 import { readJson } from './storage';
 import {
 	HISTORY_STORAGE_KEY,
@@ -21,9 +22,12 @@ const DATABASE_NAME = '5-minute-grove';
 const DATABASE_VERSION = 1;
 const DATA_STORE = 'app-data';
 const MIGRATION_KEY = 'meta:local-storage-migrated';
+const REVISION_KEY = 'meta:revision';
 const TASKS_KEY = 'tasks';
 const SESSIONS_KEY = 'sessions';
 const GROVE_KEY = 'grove';
+const SYNC_CHANNEL_NAME = '5-minute-grove:durable-data';
+const SYNC_STORAGE_KEY = '5-minute-grove:durable-sync';
 const LEGACY_STORAGE_KEYS = [TASKS_STORAGE_KEY, HISTORY_STORAGE_KEY, GROVE_STORAGE_KEY] as const;
 
 type DatabaseRecord = {
@@ -34,12 +38,32 @@ type DatabaseRecord = {
 let databasePromise: Promise<IDBDatabase> | undefined;
 let migrationPromise: Promise<void> | undefined;
 let writeQueue: Promise<void> = Promise.resolve();
+let knownRevision = 0;
+let syncChannel: BroadcastChannel | undefined;
+let storageListenerInstalled = false;
+let lastExternalRevision = 0;
+const changeListeners = new Set<(change: DurableDataChange) => void>();
+const instanceId = globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2);
+
+export type DurableDataChange = {
+	revision: number;
+};
 
 export class DurableStorageError extends Error {
 	constructor(message: string, options?: ErrorOptions) {
 		super(message, options);
 		this.name = 'DurableStorageError';
 	}
+}
+
+export { DurableStorageConflictError } from './durableRevision';
+
+export function subscribeDurableDataChanges(
+	listener: (change: DurableDataChange) => void
+): () => void {
+	ensureSyncListeners();
+	changeListeners.add(listener);
+	return () => changeListeners.delete(listener);
 }
 
 export async function loadDurableData(): Promise<DurableData> {
@@ -50,12 +74,15 @@ export async function loadDurableData(): Promise<DurableData> {
 	const tasksRequest = store.get(TASKS_KEY);
 	const sessionsRequest = store.get(SESSIONS_KEY);
 	const groveRequest = store.get(GROVE_KEY);
-	const [tasks, sessions, grove] = await Promise.all([
+	const revisionRequest = store.get(REVISION_KEY);
+	const [tasks, sessions, grove, revision] = await Promise.all([
 		requestValue(tasksRequest),
 		requestValue(sessionsRequest),
 		requestValue(groveRequest),
+		requestValue(revisionRequest),
 		transactionComplete(transaction)
 	]);
+	knownRevision = finiteRevision(recordValue(revision));
 
 	return normalizeDurableData({
 		tasks: normalizeFocusTasks(recordValue(tasks)),
@@ -67,21 +94,30 @@ export async function loadDurableData(): Promise<DurableData> {
 export function saveDurableTasks(tasks: FocusTask[]): Promise<void> {
 	return enqueueWrite(async () => {
 		const database = await readyDatabase();
-		await putRecord(database, TASKS_KEY, normalizeFocusTasks(tasks));
+		const revision = await writeRecords(database, [
+			{ key: TASKS_KEY, value: normalizeFocusTasks(tasks) }
+		]);
+		publishChange(revision);
 	});
 }
 
 export function saveDurableSessions(sessions: FocusSessionRecord[]): Promise<void> {
 	return enqueueWrite(async () => {
 		const database = await readyDatabase();
-		await putRecord(database, SESSIONS_KEY, normalizeSessionHistory(sessions));
+		const revision = await writeRecords(database, [
+			{ key: SESSIONS_KEY, value: normalizeSessionHistory(sessions) }
+		]);
+		publishChange(revision);
 	});
 }
 
 export function saveDurableGrove(grove: GroveState): Promise<void> {
 	return enqueueWrite(async () => {
 		const database = await readyDatabase();
-		await putRecord(database, GROVE_KEY, normalizeGroveState(grove));
+		const revision = await writeRecords(database, [
+			{ key: GROVE_KEY, value: normalizeGroveState(grove) }
+		]);
+		publishChange(revision);
 	});
 }
 
@@ -89,7 +125,8 @@ export function replaceDurableData(data: DurableData): Promise<void> {
 	const normalized = normalizeDurableData(data);
 	return enqueueWrite(async () => {
 		const database = await readyDatabase();
-		await writeDataTransaction(database, normalized, false);
+		const revision = await writeRecords(database, dataRecords(normalized));
+		publishChange(revision);
 	});
 }
 
@@ -157,11 +194,10 @@ function openDatabase(): Promise<IDBDatabase> {
 }
 
 async function migrateLocalStorage(database: IDBDatabase): Promise<void> {
-	const migrationRecord = await getRecord(database, MIGRATION_KEY);
-	if (recordValue(migrationRecord) === true) return;
-
 	const legacyData = readLegacyDurableData();
-	await writeDataTransaction(database, legacyData, true);
+	const migration = await migrateDataIfNeeded(database, legacyData);
+	knownRevision = migration.revision;
+	if (!migration.migrated) return;
 	for (const key of LEGACY_STORAGE_KEYS) {
 		try {
 			localStorage.removeItem(key);
@@ -171,37 +207,144 @@ async function migrateLocalStorage(database: IDBDatabase): Promise<void> {
 	}
 }
 
-async function writeDataTransaction(
+function migrateDataIfNeeded(
 	database: IDBDatabase,
-	data: DurableData,
-	markMigrated: boolean
-): Promise<void> {
-	const transaction = database.transaction(DATA_STORE, 'readwrite');
-	const store = transaction.objectStore(DATA_STORE);
-	store.put({ key: TASKS_KEY, value: data.tasks } satisfies DatabaseRecord);
-	store.put({ key: SESSIONS_KEY, value: data.sessions } satisfies DatabaseRecord);
-	store.put({ key: GROVE_KEY, value: data.grove } satisfies DatabaseRecord);
-	if (markMigrated) store.put({ key: MIGRATION_KEY, value: true } satisfies DatabaseRecord);
-	await transactionComplete(transaction);
+	data: DurableData
+): Promise<{ migrated: boolean; revision: number }> {
+	return new Promise((resolve, reject) => {
+		const transaction = database.transaction(DATA_STORE, 'readwrite');
+		const store = transaction.objectStore(DATA_STORE);
+		let migrated = false;
+		let revision = 0;
+		let failure: Error | undefined;
+		const markerRequest = store.get(MIGRATION_KEY);
+
+		markerRequest.onsuccess = () => {
+			const revisionRequest = store.get(REVISION_KEY);
+			revisionRequest.onsuccess = () => {
+				revision = finiteRevision(recordValue(revisionRequest.result));
+				if (recordValue(markerRequest.result) === true) return;
+
+				migrated = true;
+				revision += 1;
+				for (const record of dataRecords(data)) store.put(record);
+				store.put({ key: MIGRATION_KEY, value: true } satisfies DatabaseRecord);
+				store.put({ key: REVISION_KEY, value: revision } satisfies DatabaseRecord);
+			};
+			revisionRequest.onerror = () => {
+				failure = new DurableStorageError('Could not read the database revision.', {
+					cause: revisionRequest.error
+				});
+			};
+		};
+		markerRequest.onerror = () => {
+			failure = new DurableStorageError('Could not read the database migration state.', {
+				cause: markerRequest.error
+			});
+		};
+		transaction.oncomplete = () => resolve({ migrated, revision });
+		transaction.onerror = () =>
+			reject(failure ?? new DurableStorageError('The database migration failed.', { cause: transaction.error }));
+		transaction.onabort = () =>
+			reject(failure ?? new DurableStorageError('The database migration was aborted.', { cause: transaction.error }));
+	});
 }
 
-async function putRecord(database: IDBDatabase, key: string, value: unknown): Promise<void> {
-	const transaction = database.transaction(DATA_STORE, 'readwrite');
-	transaction.objectStore(DATA_STORE).put({ key, value } satisfies DatabaseRecord);
-	await transactionComplete(transaction);
+function writeRecords(database: IDBDatabase, records: DatabaseRecord[]): Promise<number> {
+	return new Promise((resolve, reject) => {
+		const transaction = database.transaction(DATA_STORE, 'readwrite');
+		const store = transaction.objectStore(DATA_STORE);
+		const expectedRevision = knownRevision;
+		let nextRevision = expectedRevision;
+		let failure: Error | undefined;
+		const revisionRequest = store.get(REVISION_KEY);
+
+		revisionRequest.onsuccess = () => {
+			const actualRevision = finiteRevision(recordValue(revisionRequest.result));
+			try {
+				nextRevision = nextDurableRevision(expectedRevision, actualRevision);
+			} catch (error) {
+				failure = error as DurableStorageConflictError;
+				transaction.abort();
+				return;
+			}
+
+			for (const record of records) store.put(record);
+			store.put({ key: REVISION_KEY, value: nextRevision } satisfies DatabaseRecord);
+		};
+		revisionRequest.onerror = () => {
+			failure = new DurableStorageError('Could not read the database revision.', {
+				cause: revisionRequest.error
+			});
+		};
+		transaction.oncomplete = () => {
+			knownRevision = nextRevision;
+			resolve(nextRevision);
+		};
+		transaction.onerror = () =>
+			reject(failure ?? new DurableStorageError('A local database transaction failed.', { cause: transaction.error }));
+		transaction.onabort = () =>
+			reject(failure ?? new DurableStorageError('A local database transaction was aborted.', { cause: transaction.error }));
+	});
 }
 
-async function getRecord(database: IDBDatabase, key: string): Promise<DatabaseRecord | undefined> {
-	const transaction = database.transaction(DATA_STORE, 'readonly');
-	const request = transaction.objectStore(DATA_STORE).get(key);
-	const [record] = await Promise.all([requestValue(request), transactionComplete(transaction)]);
-	return record as DatabaseRecord | undefined;
+function dataRecords(data: DurableData): DatabaseRecord[] {
+	return [
+		{ key: TASKS_KEY, value: data.tasks },
+		{ key: SESSIONS_KEY, value: data.sessions },
+		{ key: GROVE_KEY, value: data.grove }
+	];
 }
 
 function enqueueWrite(operation: () => Promise<void>): Promise<void> {
 	const result = writeQueue.then(operation);
 	writeQueue = result.catch(() => undefined);
 	return result;
+}
+
+function publishChange(revision: number): void {
+	ensureSyncListeners();
+	const message = { source: instanceId, revision };
+	syncChannel?.postMessage(message);
+	try {
+		localStorage.setItem(SYNC_STORAGE_KEY, JSON.stringify({ ...message, nonce: Date.now() }));
+	} catch {
+		// BroadcastChannel remains the primary path when localStorage is unavailable.
+	}
+}
+
+function ensureSyncListeners(): void {
+	if (!browser) return;
+	if (!syncChannel && 'BroadcastChannel' in globalThis) {
+		syncChannel = new BroadcastChannel(SYNC_CHANNEL_NAME);
+		syncChannel.onmessage = (event: MessageEvent<unknown>) => receiveChange(event.data);
+	}
+	if (!storageListenerInstalled) {
+		window.addEventListener('storage', (event) => {
+			if (event.key !== SYNC_STORAGE_KEY || !event.newValue) return;
+			try {
+				receiveChange(JSON.parse(event.newValue) as unknown);
+			} catch {
+				// Ignore malformed synchronization messages from unrelated scripts.
+			}
+		});
+		storageListenerInstalled = true;
+	}
+}
+
+function receiveChange(value: unknown): void {
+	if (!value || typeof value !== 'object') return;
+	const message = value as { source?: unknown; revision?: unknown };
+	if (
+		message.source === instanceId ||
+		typeof message.revision !== 'number' ||
+		!Number.isInteger(message.revision) ||
+		message.revision <= lastExternalRevision
+	) {
+		return;
+	}
+	lastExternalRevision = message.revision;
+	for (const listener of changeListeners) listener({ revision: message.revision });
 }
 
 function requestValue<T = unknown>(request: IDBRequest<T>): Promise<T> {
@@ -234,6 +377,10 @@ function recordValue(record: unknown): unknown {
 	return record && typeof record === 'object' && 'value' in record
 		? (record as DatabaseRecord).value
 		: undefined;
+}
+
+function finiteRevision(value: unknown): number {
+	return typeof value === 'number' && Number.isInteger(value) && value >= 0 ? value : 0;
 }
 
 function assertBrowser(): void {

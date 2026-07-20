@@ -176,6 +176,8 @@
   "toast_task_restored": "Tugas dipulihkan.",
   "toast_grove_reset": "Hutan kecil Anda telah diatur ulang.",
   "toast_storage_error": "Perubahan Anda tidak dapat disimpan. Biarkan tab ini terbuka dan coba lagi.",
+  "toast_storage_conflict": "Tab lain menyimpan perubahan yang lebih baru. Tab ini telah diperbarui.",
+  "toast_session_finished_elsewhere": "Fokus ini diselesaikan di tab lain.",
   "notification_title": "Lima menit lagi?",
   "notification_focus_fallback": "Fokus ini",
   "notification_block_one": "satu blok fokus",

@@ -176,6 +176,8 @@
   "toast_task_restored": "할 일이 복원되었습니다.",
   "toast_grove_reset": "숲이 초기화되었습니다.",
   "toast_storage_error": "변경 사항을 저장하지 못했습니다. 이 탭을 열어 둔 채 다시 시도해 주세요.",
+  "toast_storage_conflict": "다른 탭에서 더 최근 변경 사항을 저장했습니다. 이 탭도 새로 반영되었습니다.",
+  "toast_session_finished_elsewhere": "이 집중은 다른 탭에서 종료되었습니다.",
   "notification_title": "5분 더 할까요?",
   "notification_focus_fallback": "이 집중",
   "notification_block_one": "집중 블록 1개",

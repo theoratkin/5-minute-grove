@@ -75,3 +75,8 @@
 - Removed the 12-session and 100-task persistence caps so display concerns no longer discard canonical user data. Task and session collections now persist in versioned wrappers while transparently migrating the original array format.
 - Kept active timer recovery and interface preferences device-local, and established IndexedDB as the next canonical storage step before unbounded history can approach localStorage quotas. The public archive schema remains storage-engine-independent.
 - Moved canonical tasks, completed sessions, and grove state into native IndexedDB. The first open atomically migrates and then removes the former localStorage values; in-tab writes are serialized, session completion and archive replacement use real transactions, and localized feedback makes persistence failures visible.
+
+## 2026-07-20
+
+- Added optimistic revision checks to every durable IndexedDB transaction so a stale tab cannot overwrite a newer commit. Conflicts abort before mutation, refresh from the authoritative database state, and show localized feedback.
+- Added live same-browser synchronization through BroadcastChannel with a localStorage event fallback. Tasks, sessions, and grove progress update across tabs, and a stable session ID prevents a focus finished elsewhere from being credited twice.

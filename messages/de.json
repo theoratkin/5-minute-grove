@@ -176,6 +176,8 @@
   "toast_task_restored": "Aufgabe wiederhergestellt.",
   "toast_grove_reset": "Dein Hain wurde zurückgesetzt.",
   "toast_storage_error": "Deine Änderungen konnten nicht gespeichert werden. Lass diesen Tab geöffnet und versuche es erneut.",
+  "toast_storage_conflict": "Ein anderer Tab hat eine neuere Änderung gespeichert. Dieser Tab wurde aktualisiert.",
+  "toast_session_finished_elsewhere": "Dieser Fokus wurde in einem anderen Tab beendet.",
   "notification_title": "Noch fünf Minuten?",
   "notification_focus_fallback": "Dieser Fokus",
   "notification_block_one": "ein Fokusblock",

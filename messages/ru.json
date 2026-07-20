@@ -176,6 +176,8 @@
   "toast_task_restored": "Задача восстановлена.",
   "toast_grove_reset": "Роща сброшена.",
   "toast_storage_error": "Не удалось сохранить изменения. Не закрывайте эту вкладку и попробуйте снова.",
+  "toast_storage_conflict": "В другой вкладке сохранено более новое изменение. Эта вкладка обновлена.",
+  "toast_session_finished_elsewhere": "Эта сессия завершена в другой вкладке.",
   "notification_title": "Ещё пять минут?",
   "notification_focus_fallback": "Эта сессия",
   "notification_block_one": "один блок фокусировки",

@@ -57,3 +57,11 @@ On first open, the app reads the former localStorage task, session, and grove ke
 Writes are queued within an app instance to preserve user-action order. Finishing a session commits its completed record, task aggregates, and current grove together. A database error leaves the in-memory workspace available and displays a localized warning rather than silently claiming the change was saved.
 
 Unbounded history is intentionally no longer coupled to an interface limit. Active timer recovery and preferences remain in localStorage because they are small device-local values and benefit from synchronous startup access.
+
+## Multi-tab Consistency
+
+Every successful durable-data transaction increments a revision stored beside the data. A tab remembers the revision it loaded and checks it inside the same read-write transaction as its next mutation. If another tab committed first, the stale transaction aborts before writing anything.
+
+After a commit, the writing tab publishes the new revision through `BroadcastChannel`, with a localStorage `storage` event as a compatibility fallback. Other tabs reload the authoritative IndexedDB snapshot and update tasks, completed sessions, and grove state without requiring a page refresh.
+
+Conflicting edits are intentionally not merged from stale in-memory snapshots because that would make deletions and ordering ambiguous. The committed change wins, both tabs converge on it, and the losing tab receives a localized conflict notice. A focus session already committed by another tab is recognized by its stable session ID and settled locally without adding its task totals twice.

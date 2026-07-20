@@ -176,6 +176,8 @@
   "toast_task_restored": "Tarefa restaurada.",
   "toast_grove_reset": "Seu bosque foi redefinido.",
   "toast_storage_error": "Não foi possível salvar suas alterações. Mantenha esta aba aberta e tente novamente.",
+  "toast_storage_conflict": "Outra aba salvou uma alteração mais recente. Esta aba foi atualizada.",
+  "toast_session_finished_elsewhere": "Este foco foi encerrado em outra aba.",
   "notification_title": "Mais cinco minutos?",
   "notification_focus_fallback": "Este foco",
   "notification_block_one": "um bloco de foco",
