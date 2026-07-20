@@ -65,7 +65,7 @@
 			type="button"
 			onclick={ondismiss}
 		>
-			{m.intro_choose_time()}
+			{m.about_start_focus()}
 		</button>
 	</div>
 </dialog>
