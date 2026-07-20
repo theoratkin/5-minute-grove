@@ -2,6 +2,8 @@
 
 ![5 Minute Grove wide logo](media/logo-wide.inkscape.svg)
 
+> Start with five minutes. Grow from there.
+
 A calm, local-first focus timer built around approachable starts and voluntary continuation.
 
 5 Minute Grove is for the moment when starting is harder than continuing. Choose an approachable amount of time—five minutes by default—focus until the timer ends, and then decide whether to stop or add another five minutes. Reaching that first stopping point is enough; continuing is always optional.
