@@ -31,11 +31,11 @@
 			{m.about_paragraph_4()}
 		</p>
 		<p>
-			{m.about_paragraph_5()}
+			<strong class="font-extrabold text-ink">{m.app_name()}</strong>{m.about_paragraph_5()}
 		</p>
-		<p class="rounded-2xl border border-moss/10 bg-mist/60 p-5 font-semibold text-ink">
+		<blockquote class="rounded-2xl border border-moss/10 bg-mist/60 p-5 font-semibold text-ink">
 			{m.about_paragraph_6()}
-		</p>
+		</blockquote>
 	</div>
 
 	<a class="mt-8 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-moss px-5 font-extrabold text-on-accent transition hover:bg-moss-dark" href={localizeHref('/')}>
