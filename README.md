@@ -1,5 +1,7 @@
 # 5 Minute Grove
 
+![5 Minute Grove wide logo](media/logo-wide.inkscape.svg)
+
 A calm, local-first focus timer built around tiny work contracts and voluntary continuation.
 
 5 Minute Grove is for the moment when starting is harder than continuing. Choose an honest amount of time—five minutes by default—focus until the contract ends, and then decide whether to stop or add another five minutes. Finishing the first contract is enough; stopping is not failure.
