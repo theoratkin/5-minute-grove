@@ -8,7 +8,12 @@
 	import IntroductionModal from '$lib/app/IntroductionModal.svelte';
 	import SleepReminder from '$lib/app/SleepReminder.svelte';
 	import { hasSeenIntroduction, markIntroductionSeen } from '$lib/app/introduction';
-	import { applyTheme, loadTheme, type ThemeId } from '$lib/app/theme';
+	import {
+		applyTheme,
+		loadTheme,
+		watchPreferredColorScheme,
+		type ThemePreference
+	} from '$lib/app/theme';
 	import { AppPreferences, providePreferences } from '$lib/app/preferences.svelte';
 	import {
 		FocusWorkspace,
@@ -23,7 +28,7 @@
 	import { localizeHref } from '$lib/paraglide/runtime.js';
 
 	let { children } = $props();
-	let theme = $state<ThemeId>('soft-daylight');
+	let theme = $state<ThemePreference>('auto');
 	let introductionOpen = $state(false);
 	const preferences = new AppPreferences();
 	providePreferences(preferences);
@@ -33,6 +38,9 @@
 	onMount(() => {
 		theme = loadTheme();
 		applyTheme(theme);
+		const stopWatchingPreferredColorScheme = watchPreferredColorScheme(() => {
+			if (theme === 'auto') applyTheme(theme);
+		});
 		preferences.load();
 		void workspace.setup();
 		introductionOpen = !hasSeenIntroduction();
@@ -58,13 +66,14 @@
 
 		return () => {
 			window.removeEventListener('keydown', showIntroductionForDevelopment);
+			stopWatchingPreferredColorScheme();
 			workspace.dispose();
 		};
 	});
 
 	$effect(() => workspace.persistActiveSession());
 
-	function changeTheme(nextTheme: ThemeId) {
+	function changeTheme(nextTheme: ThemePreference) {
 		theme = nextTheme;
 		applyTheme(theme);
 	}

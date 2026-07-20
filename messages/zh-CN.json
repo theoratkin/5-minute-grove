@@ -41,6 +41,7 @@
   "close_settings": "关闭设置",
   "language": "语言",
   "theme": "主题",
+  "theme_auto": "自动（跟随系统）",
   "theme_soft_daylight": "柔和日光",
   "theme_cozy_light": "温暖亚麻",
   "theme_cozy_dark": "可可夜色",

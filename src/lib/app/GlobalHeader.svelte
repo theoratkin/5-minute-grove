@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { themes, type ThemeId } from '$lib/app/theme';
+	import { themes, type ThemePreference } from '$lib/app/theme';
 	import type { AppPreferences } from '$lib/app/preferences.svelte';
 	import { prepareTimerNotifications } from '$lib/app/notifications';
 	import { languageOptions } from '$lib/app/language';
@@ -15,9 +15,9 @@
 		onResetGrove,
 		onPreviewSound
 	}: {
-		theme: ThemeId;
+		theme: ThemePreference;
 		preferences: AppPreferences;
-		onThemeChange: (theme: ThemeId) => void;
+		onThemeChange: (theme: ThemePreference) => void;
 		onResetGrove: () => void;
 		onPreviewSound: () => void;
 	} = $props();
@@ -73,12 +73,12 @@
 		};
 	});
 
-	function selectTheme(nextTheme: ThemeId) {
+	function selectTheme(nextTheme: ThemePreference) {
 		onThemeChange(nextTheme);
 		themeMenu.open = false;
 	}
 
-	function selectMobileTheme(nextTheme: ThemeId) {
+	function selectMobileTheme(nextTheme: ThemePreference) {
 		onThemeChange(nextTheme);
 		mobileThemeMenu.open = false;
 		mobileMenu.open = false;
@@ -189,7 +189,24 @@
 	</div>
 {/snippet}
 
-{#snippet themeOptions(onselect: (theme: ThemeId) => void)}
+{#snippet themeOptions(onselect: (theme: ThemePreference) => void)}
+	<button
+		class={`flex w-full items-center justify-between gap-4 rounded-xl px-3 py-2.5 text-left text-sm font-bold transition hover:bg-mist ${theme === 'auto' ? 'bg-sprout/50 text-moss' : 'text-ink-muted'}`}
+		type="button"
+		onclick={() => onselect('auto')}
+		aria-pressed={theme === 'auto'}
+	>
+		<span class="flex items-center gap-2.5">
+			<span class="flex -space-x-1" aria-hidden="true">
+				<span class="size-4 rounded-full border border-ink/20 bg-[#fbfaf5] shadow-sm ring-1 ring-paper"></span>
+				<span class="size-4 rounded-full border border-ink/20 bg-[#202725] shadow-sm ring-1 ring-paper"></span>
+			</span>
+			<span>{m.theme_auto()}</span>
+		</span>
+		{#if theme === 'auto'}
+			<i class="ph-bold ph-check text-base" aria-hidden="true"></i>
+		{/if}
+	</button>
 	{#each themes as option (option.id)}
 		<button
 			class={`flex w-full items-center justify-between gap-4 rounded-xl px-3 py-2.5 text-left text-sm font-bold transition hover:bg-mist ${theme === option.id ? 'bg-sprout/50 text-moss' : 'text-ink-muted'}`}

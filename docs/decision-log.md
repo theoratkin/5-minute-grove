@@ -78,6 +78,7 @@
 
 ## 2026-07-20
 
+- Made the default theme follow the browser's light/dark preference, using Soft daylight and Quiet night as the automatic pair. Added a persisted Auto option that responds live to system appearance changes while preserving explicit palette choices.
 - Promoted theme selection from the general preferences panel to a dedicated palette dropdown in the global header, keeping frequent appearance changes direct while leaving device preferences grouped separately.
 - Split preferences into a quick menu for language and timer feedback plus a complete settings modal. Wellbeing and grove reset remain available without crowding the frequently used controls.
 - Added Catppuccin Latte, Catppuccin Mocha, Tokyo Night, Monokai, and Rosé Pine as familiar programmer-inspired themes. Each palette is adapted to the app's semantic color roles, with accessible primary-action contrast and unchanged consent-based interaction emphasis.

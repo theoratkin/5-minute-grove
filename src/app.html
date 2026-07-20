@@ -12,7 +12,7 @@
 		/>
 		<script>
 			try {
-				const theme = localStorage.getItem('5-minute-grove:theme');
+				const savedTheme = localStorage.getItem('5-minute-grove:theme');
 				const themes = [
 					'soft-daylight',
 					'cozy-light',
@@ -26,7 +26,13 @@
 					'monokai',
 					'rose-pine'
 				];
-				document.documentElement.dataset.theme = themes.includes(theme) ? theme : 'soft-daylight';
+				const theme = themes.includes(savedTheme) ? savedTheme : 'auto';
+				document.documentElement.dataset.theme =
+					theme === 'auto'
+						? window.matchMedia('(prefers-color-scheme: dark)').matches
+							? 'quiet-night'
+							: 'soft-daylight'
+						: theme;
 			} catch {
 				document.documentElement.dataset.theme = 'soft-daylight';
 			}

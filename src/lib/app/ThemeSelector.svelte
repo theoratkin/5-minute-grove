@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { themes, type ThemeId } from '$lib/app/theme';
+	import { themes, type ThemePreference } from '$lib/app/theme';
 	import * as m from '$lib/paraglide/messages.js';
 
 	let {
 		value,
 		onchange
 	}: {
-		value: ThemeId;
-		onchange: (theme: ThemeId) => void;
+		value: ThemePreference;
+		onchange: (theme: ThemePreference) => void;
 	} = $props();
 </script>
 
@@ -16,8 +16,9 @@
 	<select
 		class="min-h-10 w-full rounded-xl border border-moss/15 bg-surface px-3 text-sm font-bold text-ink outline-none transition focus:border-moss focus:ring-4 focus:ring-sprout/60"
 		value={value}
-		onchange={(event) => onchange(event.currentTarget.value as ThemeId)}
+		onchange={(event) => onchange(event.currentTarget.value as ThemePreference)}
 	>
+		<option value="auto">{m.theme_auto()}</option>
 		{#each themes as theme (theme.id)}
 			<option value={theme.id}>{theme.label()}</option>
 		{/each}

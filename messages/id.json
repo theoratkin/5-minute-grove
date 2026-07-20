@@ -41,6 +41,7 @@
   "close_settings": "Tutup pengaturan",
   "language": "Bahasa",
   "theme": "Tema",
+  "theme_auto": "Otomatis (sistem)",
   "theme_soft_daylight": "Cahaya siang lembut",
   "theme_cozy_light": "Linen hangat",
   "theme_cozy_dark": "Malam kakao",

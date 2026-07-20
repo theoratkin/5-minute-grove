@@ -17,24 +17,42 @@ export const themes = [
 ] as const;
 
 export type ThemeId = (typeof themes)[number]['id'];
+export type ThemePreference = ThemeId | 'auto';
 
 const THEME_KEY = storageKey('theme');
-const defaultTheme: ThemeId = 'soft-daylight';
+const defaultTheme: ThemePreference = 'auto';
+const defaultLightTheme: ThemeId = 'soft-daylight';
+const defaultDarkTheme: ThemeId = 'quiet-night';
 
 function isThemeId(value: string | null): value is ThemeId {
 	return themes.some((theme) => theme.id === value);
 }
 
-export function loadTheme(): ThemeId {
+export function loadTheme(): ThemePreference {
 	if (!browser) return defaultTheme;
 
 	const savedTheme = localStorage.getItem(THEME_KEY);
-	return isThemeId(savedTheme) ? savedTheme : defaultTheme;
+	return savedTheme === 'auto' || isThemeId(savedTheme) ? savedTheme : defaultTheme;
 }
 
-export function applyTheme(theme: ThemeId): void {
+export function applyTheme(theme: ThemePreference): void {
 	if (!browser) return;
 
-	document.documentElement.dataset.theme = theme;
+	const resolvedTheme =
+		theme === 'auto'
+			? window.matchMedia('(prefers-color-scheme: dark)').matches
+				? defaultDarkTheme
+				: defaultLightTheme
+			: theme;
+
+	document.documentElement.dataset.theme = resolvedTheme;
 	localStorage.setItem(THEME_KEY, theme);
+}
+
+export function watchPreferredColorScheme(onchange: () => void): () => void {
+	if (!browser) return () => {};
+
+	const preference = window.matchMedia('(prefers-color-scheme: dark)');
+	preference.addEventListener('change', onchange);
+	return () => preference.removeEventListener('change', onchange);
 }

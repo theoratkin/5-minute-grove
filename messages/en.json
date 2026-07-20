@@ -43,6 +43,7 @@
 	"close_settings": "Close settings",
 	"language": "Language",
 	"theme": "Theme",
+	"theme_auto": "Auto (system)",
 	"theme_soft_daylight": "Soft daylight",
 	"theme_cozy_light": "Warm linen",
 	"theme_cozy_dark": "Cocoa night",
