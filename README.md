@@ -46,6 +46,23 @@ This is not a Pomodoro clone. Changes should preserve the product's core princip
 
 More context lives in [the product documentation](docs/product-context.md).
 
+## How I collaborated with Codex and GPT-5.6
+
+I began 5 Minute Grove on July 12, the day before OpenAI Builders Week, because I wanted this focus tool for myself. I would have built it without the hackathon, but most of the substantial development happened during Builders Week. Codex with GPT-5.6 was my coding collaborator throughout that work.
+
+The collaboration was iterative rather than a one-shot app generation. I described a feature, problem, or design concern; Codex inspected the existing project, proposed or implemented a focused change, ran the relevant tests and checks, and summarized the result. I then tried the behavior in the browser and directed the next revision. This loop accelerated:
+
+- turning product ideas into SvelteKit and TypeScript implementation;
+- tracing timer, persistence, migration, and cross-tab edge cases;
+- evolving the SVG grove and its one-leaf-per-focused-minute growth model;
+- building and refining the Focus list, localization, themes, accessibility, and responsive UI;
+- writing tests and repeatedly running type checks and production builds; and
+- keeping the product context, technical direction, storage model, and decision log aligned with the code.
+
+GPT-5.6 was especially useful when a small interface request concealed a larger state-management problem. For example, while adding a `+1 minute` control, Codex identified that simply changing the countdown would make elapsed-time accounting inaccurate across pauses, refresh recovery, and completion. It updated the segment model, persistence behavior, UI, tests, and decision log together.
+
+I made the key product and design decisions: the five-minute starting point, genuine permission to stop, the voluntary `+5` checkpoint, the local-first scope, the lightweight task model, and the grove as a keepsake without streaks or penalties. I also reviewed the interface throughout development, chose the final copy and interaction priorities, drew the logo, created the timer sounds, and decided which Codex suggestions to keep or revise. Codex and GPT-5.6 made implementation and verification dramatically faster; the product thesis and final judgment remained mine.
+
 ## Tech stack
 
 - [SvelteKit](https://svelte.dev/docs/kit) and Svelte 5
