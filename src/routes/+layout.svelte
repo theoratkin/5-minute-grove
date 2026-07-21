@@ -90,6 +90,16 @@
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
+	<meta property="og:site_name" content={m.app_name()} />
+	<meta property="og:type" content="website" />
+	<meta property="og:image" content="https://5minutegrove.com/social-card.png" />
+	<meta property="og:image:type" content="image/png" />
+	<meta property="og:image:width" content="1200" />
+	<meta property="og:image:height" content="630" />
+	<meta property="og:image:alt" content={m.app_name()} />
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:image" content="https://5minutegrove.com/social-card.png" />
+	<meta name="twitter:image:alt" content={m.app_name()} />
 </svelte:head>
 
 <AmbientCanopy />
