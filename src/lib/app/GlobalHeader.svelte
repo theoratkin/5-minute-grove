@@ -75,13 +75,10 @@
 
 	function selectTheme(nextTheme: ThemePreference) {
 		onThemeChange(nextTheme);
-		themeMenu.open = false;
 	}
 
 	function selectMobileTheme(nextTheme: ThemePreference) {
 		onThemeChange(nextTheme);
-		mobileThemeMenu.open = false;
-		mobileMenu.open = false;
 	}
 
 	async function toggleNotifications(enabled: boolean) {
