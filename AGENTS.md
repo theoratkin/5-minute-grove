@@ -42,6 +42,10 @@ The key nuance is consent-based continuation. This is not a standard Pomodoro cl
 - Prefer a simple local-first MVP unless the user asks for accounts or sync.
 - Choose implementation details in line with SvelteKit conventions once the project is scaffolded.
 
+## Component Architecture
+
+- Always prefer splitting UI into smaller, focused Svelte components instead of allowing a parent component to accumulate distinct controls, behavior, and styling. Extract self-contained interface elements when they represent a clear responsibility, while avoiding components that only wrap trivial markup.
+
 ## Durable Docs
 
 - Product context: `docs/product-context.md`
