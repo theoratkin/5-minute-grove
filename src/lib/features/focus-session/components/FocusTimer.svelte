@@ -8,6 +8,7 @@
 	import type { FocusTask } from '$lib/features/focus-list/focusTask.types';
 	import TaskIntentionInput from '$lib/features/task-intention/components/TaskIntentionInput.svelte';
 	import ActiveTaskPicker from './ActiveTaskPicker.svelte';
+	import ClockModeSwitch from './ClockModeSwitch.svelte';
 	import GroveVignette from './GroveVignette.svelte';
 	import DurationField from './DurationField.svelte';
 	import * as m from '$lib/paraglide/messages.js';
@@ -154,10 +155,7 @@
 		{#if phase === 'contract-complete'}
 			<span class="flex items-center gap-1.5 text-xs"><i class="ph-fill ph-leaf text-moss" aria-hidden="true"></i> {companionText}</span>
 		{:else}
-			<div class="clock-mode-switch" role="group" aria-label={m.timer_mode_label()}>
-				<button class:active={clockMode === 'countdown'} type="button" aria-pressed={clockMode === 'countdown'} onclick={() => onClockModeChange('countdown')}>{m.timer_mode_countdown()}</button>
-				<button class:active={clockMode === 'count-up'} type="button" aria-pressed={clockMode === 'count-up'} onclick={() => onClockModeChange('count-up')}>{m.timer_mode_count_up()}</button>
-			</div>
+			<ClockModeSwitch mode={clockMode} onchange={onClockModeChange} />
 		{/if}
 	</div>
 
@@ -284,37 +282,6 @@
 </section>
 
 <style>
-	.clock-mode-switch {
-		display: inline-flex;
-		flex-shrink: 0;
-		border: 1px solid color-mix(in srgb, var(--color-moss) 14%, transparent);
-		border-radius: 9999px;
-		padding: 0.15rem;
-		background: color-mix(in srgb, var(--color-mist) 65%, transparent);
-	}
-
-	.clock-mode-switch button {
-		min-height: 1.8rem;
-		border-radius: 9999px;
-		padding: 0.25rem 0.55rem;
-		color: var(--color-ink-muted);
-		font-size: 0.6875rem;
-		font-weight: 800;
-		line-height: 1;
-		transition: color 150ms, background 150ms, box-shadow 150ms;
-	}
-
-	.clock-mode-switch button.active {
-		color: var(--color-moss-dark);
-		background: var(--color-surface);
-		box-shadow: 0 1px 0.35rem color-mix(in srgb, var(--color-ink) 9%, transparent);
-	}
-
-	.clock-mode-switch button:focus-visible {
-		outline: 2px solid color-mix(in srgb, var(--color-moss) 45%, transparent);
-		outline-offset: 1px;
-	}
-
 	.count-up-readout {
 		font-family: var(--font-timer);
 		font-size: clamp(4.5rem, 18vw, 8rem);
