@@ -33,6 +33,7 @@ The first usable version should likely include:
 
 - An optional task title, with the ability to plan a small task before starting.
 - A default 5-minute timer with a custom opening duration.
+- A remembered open-ended Count up option for work that no longer needs checkpoints, available before starting or during an active countdown without resetting elapsed time.
 - A brief first-visit introduction to the small-start and voluntary-continuation idea.
 - A clear end-of-timer state.
 - A prominent "Add 5 minutes" action.

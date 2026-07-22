@@ -52,7 +52,7 @@ Archive imports validate and merge in memory first, then replace all three recor
 
 The canonical browser database is IndexedDB database `5-minute-grove`, version 1, with one `app-data` object store. It contains `tasks`, `sessions`, and `grove` records plus revision metadata. Keeping related records in one store allows atomic replacement without coupling the public archive to the physical database layout.
 
-IndexedDB version 1, archive version 1, active-session version 2, and grove version 2 are the first public formats. Pre-public localStorage task/history/grove keys, active-session version 1, grove version 1, and old task/session title aliases are intentionally unsupported. Fresh installations create the empty version 1 database through migration `0 → 1`.
+IndexedDB version 1, archive version 1, active-session version 2, and grove version 2 are the first public formats. Active-session version 3 adds the clock mode and an absolute count-up start timestamp; version 2 recovery records migrate in memory as countdowns. Pre-public localStorage task/history/grove keys, active-session version 1, grove version 1, and old task/session title aliases are intentionally unsupported. Fresh installations create the empty version 1 database through migration `0 → 1`.
 
 Writes are queued within an app instance to preserve user-action order. Finishing a session commits its completed record, task aggregates, and current grove together. A database error leaves the in-memory workspace available and displays a localized warning rather than silently claiming the change was saved.
 

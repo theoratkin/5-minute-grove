@@ -13,12 +13,14 @@ import {
 import {
 	clearActiveSession,
 	loadActiveSession,
+	loadClockMode,
 	loadStartDuration,
+	saveClockMode,
 	saveStartDuration,
 	saveActiveSession
 } from './focusSession.storage';
 import { elapsedInCurrentContract, restoreFocusSession } from './focusSession.state';
-import type { FocusPhase, FocusSessionRecord } from './focusSession.types';
+import type { FocusClockMode, FocusPhase, FocusSessionRecord } from './focusSession.types';
 import {
 	FIVE_MINUTES_SECONDS,
 	createSessionId,
@@ -30,6 +32,7 @@ import {
 	creditElapsedMinutes,
 	deriveGroveProgress,
 	emptyGroveState,
+	LEAVES_PER_TREE,
 	reconcileGroveState,
 	resetGroveState,
 	settleMatureTrees
@@ -65,6 +68,7 @@ type DeletedTaskUndo = {
 export class FocusWorkspace {
 	intention = $state('');
 	phase = $state<FocusPhase>('idle');
+	clockMode = $state<FocusClockMode>('countdown');
 	remainingSeconds = $state(FIVE_MINUTES_SECONDS);
 	segmentDurationSeconds = $state(FIVE_MINUTES_SECONDS);
 	completedContracts = $state(0);
@@ -74,6 +78,8 @@ export class FocusWorkspace {
 	activeSessionId = $state<string | null>(null);
 	activeTaskId = $state<string | null>(null);
 	segmentEndsAt = $state<number | null>(null);
+	countUpStartedAt = $state<number | null>(null);
+	countUpElapsedSeconds = $state(0);
 	history = $state<FocusSessionRecord[]>([]);
 	tasks = $state<FocusTask[]>([]);
 	hydrated = $state(false);
@@ -114,6 +120,7 @@ export class FocusWorkspace {
 	}
 
 	get segmentProgress() {
+		if (this.clockMode === 'count-up') return 0;
 		if (this.phase === 'contract-complete') return 100;
 		return (
 			((this.segmentDurationSeconds - this.remainingSeconds) / this.segmentDurationSeconds) * 100
@@ -129,17 +136,25 @@ export class FocusWorkspace {
 	}
 
 	get sessionTimeSeconds() {
-		return this.phase === 'idle'
-			? 0
-			: this.elapsedSessionSeconds +
-					(this.phase === 'contract-complete'
-						? 0
-						: elapsedInCurrentContract(this.remainingSeconds, this.segmentDurationSeconds));
+		if (this.phase === 'idle') return 0;
+		if (this.clockMode === 'count-up') {
+			return this.elapsedSessionSeconds + this.countUpElapsedSeconds;
+		}
+		return (
+			this.elapsedSessionSeconds +
+			(this.phase === 'contract-complete'
+				? 0
+				: elapsedInCurrentContract(this.remainingSeconds, this.segmentDurationSeconds))
+		);
 	}
 
 	get pageTitle() {
 		if (this.phase === 'running') {
-			return m.page_title_running({ time: formatClock(this.remainingSeconds) });
+			return m.page_title_running({
+				time: formatClock(
+					this.clockMode === 'count-up' ? this.sessionTimeSeconds : this.remainingSeconds
+				)
+			});
 		}
 		if (this.phase === 'paused') return m.page_title_paused();
 		return m.app_name();
@@ -175,6 +190,7 @@ export class FocusWorkspace {
 			this.queueExternalSync(false);
 		});
 		const startDuration = loadStartDuration();
+		this.clockMode = loadClockMode();
 		this.remainingSeconds = startDuration;
 		this.segmentDurationSeconds = startDuration;
 		let durableData;
@@ -202,6 +218,7 @@ export class FocusWorkspace {
 			const restored = restoreFocusSession(savedSession);
 			this.intention = restored.intention;
 			this.phase = restored.phase;
+			this.clockMode = restored.clockMode;
 			this.remainingSeconds = restored.remainingSeconds;
 			this.segmentDurationSeconds = restored.segmentDurationSeconds;
 			this.completedContracts = restored.completedContracts;
@@ -212,6 +229,8 @@ export class FocusWorkspace {
 			this.activeTaskId = restored.taskId;
 			this.recoverActiveTask();
 			this.segmentEndsAt = restored.segmentEndsAt;
+			this.countUpStartedAt = restored.countUpStartedAt;
+			this.countUpElapsedSeconds = restored.countUpElapsedSeconds;
 			this.toastMessage = restored.completedWhileAway
 				? m.toast_contract_finished_away()
 				: m.toast_focus_restored();
@@ -266,9 +285,10 @@ export class FocusWorkspace {
 		}
 
 		saveActiveSession({
-			version: 2,
+			version: 3,
 			taskId: this.activeTaskId,
 			intention: this.intention,
+			clockMode: this.clockMode,
 			phase: this.phase,
 			remainingSeconds: this.remainingSeconds,
 			segmentDurationSeconds: this.segmentDurationSeconds,
@@ -277,7 +297,8 @@ export class FocusWorkspace {
 			elapsedSessionSeconds: this.elapsedSessionSeconds,
 			sessionStartedAt: this.sessionStartedAt,
 			activeSessionId: this.activeSessionId,
-			segmentEndsAt: this.segmentEndsAt
+			segmentEndsAt: this.segmentEndsAt,
+			countUpStartedAt: this.countUpStartedAt
 		});
 	}
 
@@ -323,7 +344,9 @@ export class FocusWorkspace {
 	}
 
 	startSession() {
-		if (this.preferences.notificationsEnabled) void prepareTimerNotifications();
+		if (this.clockMode === 'countdown' && this.preferences.notificationsEnabled) {
+			void prepareTimerNotifications();
+		}
 		this.playSound(this.startOrExtendSound);
 		this.settleGrove();
 		this.ensureTaskForIntention();
@@ -333,12 +356,61 @@ export class FocusWorkspace {
 		this.completedContracts = 0;
 		this.extensionCount = 0;
 		this.elapsedSessionSeconds = 0;
-		const startDuration = normalizeStartDuration(this.remainingSeconds);
-		this.remainingSeconds = startDuration;
-		this.segmentDurationSeconds = startDuration;
-		this.segmentEndsAt = Date.now() + startDuration * 1000;
-		saveStartDuration(startDuration);
+		this.countUpElapsedSeconds = 0;
+		if (this.clockMode === 'count-up') {
+			this.countUpStartedAt = Date.now();
+			this.segmentEndsAt = null;
+		} else {
+			const startDuration = normalizeStartDuration(this.remainingSeconds);
+			this.remainingSeconds = startDuration;
+			this.segmentDurationSeconds = startDuration;
+			this.segmentEndsAt = Date.now() + startDuration * 1000;
+			this.countUpStartedAt = null;
+			saveStartDuration(startDuration);
+		}
 		this.phase = 'running';
+	}
+
+	setClockMode(mode: FocusClockMode) {
+		if (mode === this.clockMode) return;
+
+		if (this.phase === 'running') this.syncTimer();
+		if (this.clockMode === 'countdown' && this.phase !== 'idle') {
+			this.elapsedSessionSeconds +=
+				this.phase === 'contract-complete'
+					? 0
+					: elapsedInCurrentContract(this.remainingSeconds, this.segmentDurationSeconds);
+		} else if (this.clockMode === 'count-up' && this.phase !== 'idle') {
+			this.elapsedSessionSeconds += this.countUpElapsedSeconds;
+		}
+
+		this.clockMode = mode;
+		saveClockMode(mode);
+		this.countUpElapsedSeconds = 0;
+		this.countUpStartedAt = null;
+
+		if (mode === 'count-up') {
+			this.segmentEndsAt = null;
+			if (this.phase === 'contract-complete') {
+				this.settleGrove();
+				this.phase = 'running';
+			}
+			if (this.phase === 'running') this.countUpStartedAt = Date.now();
+			return;
+		}
+
+		if (this.phase !== 'idle') {
+			if (this.preferences.notificationsEnabled) void prepareTimerNotifications();
+			this.remainingSeconds = FIVE_MINUTES_SECONDS;
+			this.segmentDurationSeconds = FIVE_MINUTES_SECONDS;
+			this.segmentEndsAt =
+				this.phase === 'running' ? Date.now() + FIVE_MINUTES_SECONDS * 1000 : null;
+		}
+	}
+
+	continueCountingUp() {
+		this.playSound(this.startOrExtendSound);
+		this.setClockMode('count-up');
 	}
 
 	setStartDuration(seconds: number) {
@@ -353,6 +425,10 @@ export class FocusWorkspace {
 		if (this.preferences.notificationsEnabled) void prepareTimerNotifications();
 		this.playSound(this.startOrExtendSound);
 		this.settleGrove();
+		this.clockMode = 'countdown';
+		saveClockMode('countdown');
+		this.countUpStartedAt = null;
+		this.countUpElapsedSeconds = 0;
 
 		this.extensionCount += 1;
 		this.remainingSeconds = FIVE_MINUTES_SECONDS;
@@ -362,7 +438,11 @@ export class FocusWorkspace {
 	}
 
 	addOneMinute() {
-		if (this.phase !== 'running' || this.segmentEndsAt === null) return;
+		if (
+			this.clockMode !== 'countdown' ||
+			this.phase !== 'running' ||
+			this.segmentEndsAt === null
+		) return;
 		if (this.segmentEndsAt <= Date.now()) {
 			this.syncTimer();
 			return;
@@ -379,6 +459,7 @@ export class FocusWorkspace {
 
 	removeOneMinute() {
 		if (
+			this.clockMode !== 'countdown' ||
 			this.phase !== 'running' ||
 			this.segmentEndsAt === null ||
 			this.segmentDurationSeconds <= 60
@@ -407,7 +488,16 @@ export class FocusWorkspace {
 	}
 
 	pauseSession() {
-		if (this.phase !== 'running' || this.segmentEndsAt === null) return;
+		if (this.phase !== 'running') return;
+		if (this.clockMode === 'count-up') {
+			this.syncTimer();
+			this.elapsedSessionSeconds += this.countUpElapsedSeconds;
+			this.countUpElapsedSeconds = 0;
+			this.countUpStartedAt = null;
+			this.phase = 'paused';
+			return;
+		}
+		if (this.segmentEndsAt === null) return;
 		this.remainingSeconds = Math.max(
 			1,
 			Math.ceil((this.segmentEndsAt - Date.now()) / 1000)
@@ -418,7 +508,11 @@ export class FocusWorkspace {
 
 	resumeSession() {
 		if (this.phase !== 'paused') return;
-		this.segmentEndsAt = Date.now() + this.remainingSeconds * 1000;
+		if (this.clockMode === 'count-up') {
+			this.countUpStartedAt = Date.now();
+		} else {
+			this.segmentEndsAt = Date.now() + this.remainingSeconds * 1000;
+		}
 		this.phase = 'running';
 	}
 
@@ -451,7 +545,9 @@ export class FocusWorkspace {
 
 	stopSessionEarly() {
 		if (!this.sessionStartedAt || !this.activeSessionId || this.sessionTimeSeconds <= 0) return;
-		if (this.phase === 'running') this.playSound(this.timerFinishSound);
+		if (this.phase === 'running' && this.clockMode === 'countdown') {
+			this.playSound(this.timerFinishSound);
+		}
 		this.finishSession();
 	}
 
@@ -714,7 +810,17 @@ export class FocusWorkspace {
 	}
 
 	private syncTimer = () => {
-		if (this.phase !== 'running' || this.segmentEndsAt === null) return;
+		if (this.phase !== 'running') return;
+		if (this.clockMode === 'count-up') {
+			if (this.countUpStartedAt === null) return;
+			this.countUpElapsedSeconds = Math.max(
+				0,
+				Math.floor((Date.now() - this.countUpStartedAt) / 1000)
+			);
+			this.creditCurrentSessionMinutes();
+			return;
+		}
+		if (this.segmentEndsAt === null) return;
 		this.remainingSeconds = Math.max(
 			0,
 			Math.ceil((this.segmentEndsAt - Date.now()) / 1000)
@@ -727,7 +833,7 @@ export class FocusWorkspace {
 	};
 
 	private completeCurrentContract(playFinishSound = true) {
-		if (this.phase !== 'running') return;
+		if (this.clockMode !== 'countdown' || this.phase !== 'running') return;
 
 		const nextCompletedContracts = this.completedContracts + 1;
 		this.elapsedSessionSeconds += this.segmentDurationSeconds;
@@ -746,13 +852,21 @@ export class FocusWorkspace {
 	}
 
 	private fastForwardCurrentContract() {
-		if (!import.meta.env.DEV || (this.phase !== 'running' && this.phase !== 'paused')) return;
+		if (
+			!import.meta.env.DEV ||
+			this.clockMode !== 'countdown' ||
+			(this.phase !== 'running' && this.phase !== 'paused')
+		) return;
 		if (this.phase === 'paused') this.phase = 'running';
 		this.completeCurrentContract();
 	}
 
 	private skipOneMinute() {
-		if (!import.meta.env.DEV || (this.phase !== 'running' && this.phase !== 'paused')) return;
+		if (
+			!import.meta.env.DEV ||
+			this.clockMode !== 'countdown' ||
+			(this.phase !== 'running' && this.phase !== 'paused')
+		) return;
 
 		if (this.remainingSeconds <= 60) {
 			if (this.phase === 'paused') this.phase = 'running';
@@ -769,6 +883,7 @@ export class FocusWorkspace {
 
 	private resetSession(clearIntention = false) {
 		this.phase = 'idle';
+		this.clockMode = loadClockMode();
 		const startDuration = loadStartDuration();
 		this.remainingSeconds = startDuration;
 		this.segmentDurationSeconds = startDuration;
@@ -778,6 +893,8 @@ export class FocusWorkspace {
 		this.sessionStartedAt = null;
 		this.activeSessionId = null;
 		this.segmentEndsAt = null;
+		this.countUpStartedAt = null;
+		this.countUpElapsedSeconds = 0;
 		if (clearIntention) {
 			this.intention = '';
 			this.activeTaskId = null;
@@ -859,6 +976,12 @@ export class FocusWorkspace {
 			this.groveGrowthToken += 1;
 		}
 		this.persistGrove();
+		if (
+			this.clockMode === 'count-up' &&
+			nextProgress.currentTreeLeaves === LEAVES_PER_TREE
+		) {
+			this.settleGrove();
+		}
 	}
 
 	private settleGrove() {

@@ -6,6 +6,7 @@ type StoredValueName =
 	| 'active-session'
 	| 'introduction-seen-v1'
 	| 'preferences'
+	| 'clock-mode'
 	| 'start-duration'
 	| 'theme';
 

@@ -27,6 +27,8 @@
 	<div class="grid gap-7 px-6 py-7 sm:px-10 sm:py-9">
 		<FocusTimer
 			remainingSeconds={workspace.remainingSeconds}
+			elapsedSeconds={workspace.sessionTimeSeconds}
+			clockMode={workspace.clockMode}
 			canRemoveOneMinute={workspace.segmentDurationSeconds > 60}
 			progress={workspace.segmentProgress}
 			groveTotalLeaves={workspace.groveTotalLeaves}
@@ -34,6 +36,8 @@
 			groveGrowthToken={workspace.groveGrowthToken}
 			phase={workspace.phase}
 			onDurationChange={(seconds) => workspace.setStartDuration(seconds)}
+			onClockModeChange={(mode) => workspace.setClockMode(mode)}
+			onContinueCountUp={() => workspace.continueCountingUp()}
 			intentionValue={workspace.taskInputValue}
 			tasks={workspace.tasks}
 			activeTaskId={workspace.activeTaskId}

@@ -9,9 +9,10 @@ import {
 import { UNTITLED_TASK_ID } from '../src/lib/features/focus-list/focusTask.state.ts';
 
 const baseSession: ActiveFocusSession = {
-	version: 2,
+	version: 3,
 	taskId: 'task-1',
 	intention: 'Write the opening',
+	clockMode: 'countdown',
 	phase: 'running',
 	remainingSeconds: 300,
 	segmentDurationSeconds: 300,
@@ -20,7 +21,8 @@ const baseSession: ActiveFocusSession = {
 	elapsedSessionSeconds: 300,
 	sessionStartedAt: '2026-07-16T12:00:00.000Z',
 	activeSessionId: 'session-1',
-	segmentEndsAt: 1_000_000
+	segmentEndsAt: 1_000_000,
+	countUpStartedAt: null
 };
 
 test('restores a running timer from its absolute end time', () => {
@@ -47,6 +49,40 @@ test('does not alter a paused timer while restoring it', () => {
 	assert.equal(restored.phase, 'paused');
 	assert.equal(restored.remainingSeconds, 173);
 	assert.equal(restored.completedContracts, 1);
+});
+
+test('restores elapsed count-up time from its absolute start time', () => {
+	const restored = restoreFocusSession(
+		{
+			...baseSession,
+			clockMode: 'count-up',
+			segmentEndsAt: null,
+			countUpStartedAt: 800_000
+		},
+		923_999
+	);
+
+	assert.equal(restored.phase, 'running');
+	assert.equal(restored.elapsedSessionSeconds, 300);
+	assert.equal(restored.countUpElapsedSeconds, 123);
+	assert.equal(restored.completedWhileAway, false);
+});
+
+test('does not add wall-clock time while a count-up session is paused', () => {
+	const restored = restoreFocusSession(
+		{
+			...baseSession,
+			clockMode: 'count-up',
+			phase: 'paused',
+			segmentEndsAt: null,
+			countUpStartedAt: null,
+			elapsedSessionSeconds: 463
+		},
+		2_000_000
+	);
+
+	assert.equal(restored.elapsedSessionSeconds, 463);
+	assert.equal(restored.countUpElapsedSeconds, 0);
 });
 
 test('counts partial work honestly without exceeding one contract', () => {

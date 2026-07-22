@@ -14,6 +14,8 @@
 
 	let {
 		remainingSeconds,
+		elapsedSeconds,
+		clockMode,
 		canRemoveOneMinute,
 		progress,
 		groveTotalLeaves,
@@ -28,6 +30,8 @@
 		onCreateTask,
 		onIntentionChange,
 		onDurationChange,
+		onClockModeChange,
+		onContinueCountUp,
 		onStart,
 		onAddFive,
 		onAddOne,
@@ -40,6 +44,8 @@
 		onCompleteTask,
 	}: {
 		remainingSeconds: number;
+		elapsedSeconds: number;
+		clockMode: 'countdown' | 'count-up';
 		canRemoveOneMinute: boolean;
 		progress: number;
 		groveTotalLeaves: number;
@@ -54,6 +60,8 @@
 		onCreateTask: (title: string) => void;
 		onIntentionChange: (value: string) => void;
 		onDurationChange: (seconds: number) => void;
+		onClockModeChange: (mode: 'countdown' | 'count-up') => void;
+		onContinueCountUp: () => void;
 		onStart: () => void;
 		onAddFive: () => void;
 		onAddOne: () => void;
@@ -141,9 +149,16 @@
 </script>
 
 <section class="grid gap-5" aria-label={m.timer_label()}>
-	<div class="flex items-center justify-between gap-4 text-sm font-semibold text-ink-muted">
+	<div class="flex flex-wrap items-center justify-between gap-3 text-sm font-semibold text-ink-muted">
 		<span aria-live="polite">{statusText}</span>
-		<span class="flex items-center gap-1.5 text-xs"><i class="ph-fill ph-leaf text-moss" aria-hidden="true"></i> {companionText}</span>
+		{#if phase === 'contract-complete'}
+			<span class="flex items-center gap-1.5 text-xs"><i class="ph-fill ph-leaf text-moss" aria-hidden="true"></i> {companionText}</span>
+		{:else}
+			<div class="clock-mode-switch" role="group" aria-label={m.timer_mode_label()}>
+				<button class:active={clockMode === 'countdown'} type="button" aria-pressed={clockMode === 'countdown'} onclick={() => onClockModeChange('countdown')}>{m.timer_mode_countdown()}</button>
+				<button class:active={clockMode === 'count-up'} type="button" aria-pressed={clockMode === 'count-up'} onclick={() => onClockModeChange('count-up')}>{m.timer_mode_count_up()}</button>
+			</div>
+		{/if}
 	</div>
 
 	<div
@@ -156,7 +171,7 @@
 		{#if isStarting || isExtending}
 			<div class="start-commit-glow" aria-hidden="true"></div>
 		{/if}
-		{#if phase === 'running' || phase === 'paused'}
+		{#if (phase === 'running' || phase === 'paused') && clockMode === 'countdown'}
 			<div class:paused-fill={phase === 'paused'} class="timer-progress-fill" aria-hidden="true"></div>
 		{/if}
 		{#if phase === 'contract-complete'}
@@ -188,7 +203,9 @@
 							{m.timer_paused()}
 						</div>
 					{/if}
-					{#if phase === 'running'}
+					{#if clockMode === 'count-up'}
+						<div class="count-up-readout" role="timer" aria-label={m.duration_elapsed({ time: formatClock(elapsedSeconds) })}>{formatClock(elapsedSeconds)}</div>
+					{:else if phase === 'running'}
 						<div class="timer-adjustment-layout">
 							<button class="minute-adjust minute-adjust-remove" type="button" use:buttonSplash={{ ripples: 1, durationMs: 2000, simple: true }} onclick={onRemoveOne} title={m.timer_remove_minute_title()} aria-label={m.timer_remove_minute()} disabled={!canRemoveOneMinute}>−1:00</button>
 							<div class="timer-adjust-readout"><DurationField seconds={remainingSeconds} editable={false} /></div>
@@ -216,7 +233,7 @@
 				<div class="raised-button raised-button-start">
 					<button class:starting={isStarting} class="start-button relative z-10 flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-moss px-5 py-4 text-base font-extrabold text-on-accent transition hover:bg-moss-dark active:translate-y-1" type="button" use:buttonSplash onclick={startWithCommitment} disabled={isStarting}>
 						<i class:starting={isStarting} class="start-icon ph-fill ph-play text-lg" aria-hidden="true"></i>
-						<span>{isStarting ? m.timer_here_we_go() : m.timer_start({ time: formatClock(remainingSeconds) })}</span>
+						<span>{isStarting ? m.timer_here_we_go() : clockMode === 'count-up' ? m.timer_start_count_up() : m.timer_start({ time: formatClock(remainingSeconds) })}</span>
 					</button>
 				</div>
 			{:else if phase === 'contract-complete'}
@@ -227,6 +244,10 @@
 							<span>{isExtending ? m.timer_another_five() : m.timer_add_five()}</span>
 						</button>
 					</div>
+					<button class="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-moss/15 bg-mist/55 px-3 text-sm font-extrabold text-moss transition hover:bg-sprout/40" type="button" use:buttonSplash onclick={onContinueCountUp}>
+						<i class="ph-bold ph-trend-up" aria-hidden="true"></i>
+						<span>{m.timer_continue_count_up()}</span>
+					</button>
 					<div class={`grid gap-2 ${canCompleteTask ? 'grid-cols-2' : 'grid-cols-1'}`}>
 						<button class="flex min-h-12 items-center justify-center gap-1 rounded-xl border border-moss/15 bg-surface px-2 text-sm font-extrabold text-moss transition hover:bg-mist" type="button" onclick={onDone} title={m.timer_save_without_completing()}><i class="ph-bold ph-stop" aria-hidden="true"></i><span>{m.timer_stop_for_now()}</span></button>
 						{#if canCompleteTask}<button class="flex min-h-12 items-center justify-center gap-1 rounded-xl border border-moss/20 bg-sprout/25 px-2 text-sm font-extrabold text-moss transition hover:bg-sprout/45" type="button" use:confettiBurst onclick={onCompleteTask} title={m.timer_save_and_complete()}><i class="ph-bold ph-check" aria-hidden="true"></i><span>{m.timer_mark_done()}</span></button>{/if}
@@ -263,6 +284,47 @@
 </section>
 
 <style>
+	.clock-mode-switch {
+		display: inline-flex;
+		flex-shrink: 0;
+		border: 1px solid color-mix(in srgb, var(--color-moss) 14%, transparent);
+		border-radius: 9999px;
+		padding: 0.15rem;
+		background: color-mix(in srgb, var(--color-mist) 65%, transparent);
+	}
+
+	.clock-mode-switch button {
+		min-height: 1.8rem;
+		border-radius: 9999px;
+		padding: 0.25rem 0.55rem;
+		color: var(--color-ink-muted);
+		font-size: 0.6875rem;
+		font-weight: 800;
+		line-height: 1;
+		transition: color 150ms, background 150ms, box-shadow 150ms;
+	}
+
+	.clock-mode-switch button.active {
+		color: var(--color-moss-dark);
+		background: var(--color-surface);
+		box-shadow: 0 1px 0.35rem color-mix(in srgb, var(--color-ink) 9%, transparent);
+	}
+
+	.clock-mode-switch button:focus-visible {
+		outline: 2px solid color-mix(in srgb, var(--color-moss) 45%, transparent);
+		outline-offset: 1px;
+	}
+
+	.count-up-readout {
+		font-family: var(--font-timer);
+		font-size: clamp(4.5rem, 18vw, 8rem);
+		font-weight: 700;
+		font-variant-numeric: tabular-nums lining-nums;
+		font-feature-settings: 'tnum' 1, 'lnum' 1;
+		letter-spacing: -0.035em;
+		line-height: 1;
+	}
+
 	.minute-adjust {
 		min-width: 3.25rem;
 		border: 1px solid color-mix(in srgb, var(--color-moss) 13%, transparent);

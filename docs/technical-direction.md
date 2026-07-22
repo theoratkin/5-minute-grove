@@ -91,7 +91,7 @@ When implementation begins, a pragmatic MVP would be:
 - Single main route.
 - Task/intention input and a lightweight local Focus list.
 - Derive normalized hashtags from task titles through one shared parser. Keep the title as the durable source of truth so highlighting and future filtering do not require a parallel tag-editing workflow.
-- Direct minutes-and-seconds countdown input that remembers the last chosen starting duration.
+- Direct minutes-and-seconds countdown input that remembers the last chosen starting duration, plus a remembered Count up mode that can be selected before starting or during an active countdown.
 - End-of-timer decision screen with:
   - Add 5 minutes
   - Done
@@ -100,7 +100,7 @@ When implementation begins, a pragmatic MVP would be:
 - Separate local persistence for planned task state and internal focus-attempt records. The task is the user-facing object; attempt records preserve timestamps, recovery, and honest accounting without appearing as a second workflow.
 - Use one stable system ID for the shared Anything task. Explicit assignment moves an entire active attempt, while starting another Focus-list task closes the current attempt and begins a new one.
 - Versioned local persistence for cumulative grove growth, credited idempotently per elapsed session minute.
-- Absolute end timestamps for timer accuracy across throttled background tabs and refresh recovery.
+- Absolute countdown-end and count-up-start timestamps for timer accuracy across throttled background tabs and refresh recovery.
 
 ## Durable Storage
 
@@ -125,6 +125,7 @@ When implementation begins, a pragmatic MVP would be:
 - Avoid visual or copy patterns that imply failure when the user stops.
 - Keep stop feedback neutral and concise; let the completed-timer copy gently invite continuation without over-explaining either choice.
 - Keep controls stable in size so timer transitions do not shift the layout.
+- Keep the Countdown/Count up choice compact and available at the start and while focusing. Switching to Count up preserves the whole session's elapsed time; switching back begins a fresh five-minute checkpoint.
 - Use restrained, task-focused UI rather than a marketing page.
 - Do not put the changing once-per-second timer value in a live region; announce meaningful phase changes instead.
 - Respect reduced-motion preferences for decorative and interaction animation.

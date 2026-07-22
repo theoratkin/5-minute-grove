@@ -1,4 +1,5 @@
 export type FocusPhase = 'idle' | 'running' | 'paused' | 'contract-complete';
+export type FocusClockMode = 'countdown' | 'count-up';
 
 export interface FocusSessionRecord {
 	id: string;
@@ -12,9 +13,10 @@ export interface FocusSessionRecord {
 }
 
 export interface ActiveFocusSession {
-	version: 2;
+	version: 3;
 	taskId: string | null;
 	intention: string;
+	clockMode: FocusClockMode;
 	phase: Exclude<FocusPhase, 'idle'>;
 	remainingSeconds: number;
 	segmentDurationSeconds: number;
@@ -24,4 +26,5 @@ export interface ActiveFocusSession {
 	sessionStartedAt: string;
 	activeSessionId: string;
 	segmentEndsAt: number | null;
+	countUpStartedAt: number | null;
 }

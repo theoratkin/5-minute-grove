@@ -93,3 +93,7 @@
 - Made Paraglide compilation an explicit clean-checkout step before type-checking, because its generated modules are intentionally gitignored and Vite's build-time plugin runs too late for a check-first deployment workflow.
 - Removed obligation-heavy “contract,” “commitment,” and “promise” language from the interface and current product guidance. The app now describes a small starting point, a chosen time, and an end-of-timer choice while preserving genuine permission to stop and voluntary continuation. Existing internal storage and state identifiers remain unchanged for compatibility.
 - Added client-start locale redirection for the static deployment, so a first visit without a locale URL or saved language can use the browser's preferred language before the app hydrates.
+
+## 2026-07-22
+
+- Added a compact, remembered Countdown/Count up choice at the start and during active focus. Switching from a running countdown preserves its elapsed portion and continues upward from the whole session total; switching back preserves that time and begins a fresh five-minute checkpoint. Count up remains one recoverable session, excludes paused time, grows the grove by completed minutes, and is also available as an end-of-timer continuation.

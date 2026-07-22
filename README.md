@@ -20,6 +20,7 @@ The grove is a keepsake, not a productivity economy. There are no streaks, penal
 ## Features
 
 - Custom starting durations with a prominent **Add 5 minutes** continuation loop
+- A remembered Count up mode that can be chosen before starting or entered without resetting an active session
 - Pause, resume, stop early, and adjust the active timer by one minute
 - Honest partial-time accounting when a session ends before its chosen time
 - Active-session recovery after refreshes or accidental tab closures
