@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { tick } from 'svelte';
 	import { flip } from 'svelte/animate';
 	import {
 		dragHandle,
@@ -11,9 +10,9 @@
 	import { buttonSplash } from '$lib/actions/buttonSplash';
 	import { confettiBurst } from '$lib/actions/confettiBurst';
 	import { formatMinutes } from '$lib/app/time';
-	import { parseTaskTitle } from '../focusTask.hashtags';
 	import { UNTITLED_TASK_ID } from '../focusTask.state';
 	import type { FocusTask } from '../focusTask.types';
+	import EditableTaskTitle from './EditableTaskTitle.svelte';
 	import * as m from '$lib/paraglide/messages.js';
 
 	let {
@@ -44,8 +43,6 @@
 
 	let draft = $state('');
 	let openMenuTaskId = $state<string | null>(null);
-	let editingTitles = $state<Record<string, string>>({});
-	let titleRenderRevision = $state(0);
 	let draggedTaskId = $state<string | null>(null);
 	let consideredOpenTasks = $state<FocusTask[] | null>(null);
 	let openTasks = $derived(consideredOpenTasks ?? tasks.filter((task) => !task.completedAt));
@@ -69,82 +66,6 @@
 
 	function taskTitle(task: FocusTask) {
 		return task.id === UNTITLED_TASK_ID ? m.focus_list_untitled() : task.title;
-	}
-
-	function caretOffset(element: HTMLElement) {
-		const selection = window.getSelection();
-		if (!selection?.rangeCount) return (element.textContent ?? '').length;
-		const range = selection.getRangeAt(0);
-		if (!element.contains(range.endContainer)) return (element.textContent ?? '').length;
-		const beforeCaret = range.cloneRange();
-		beforeCaret.selectNodeContents(element);
-		beforeCaret.setEnd(range.endContainer, range.endOffset);
-		return beforeCaret.toString().length;
-	}
-
-	function restoreCaret(element: HTMLElement, offset: number) {
-		const selection = window.getSelection();
-		if (!selection) return;
-		const range = document.createRange();
-		const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
-		let remaining = offset;
-		let node = walker.nextNode();
-
-		while (node) {
-			const length = node.textContent?.length ?? 0;
-			if (remaining <= length) {
-				range.setStart(node, remaining);
-				range.collapse(true);
-				selection.removeAllRanges();
-				selection.addRange(range);
-				return;
-			}
-			remaining -= length;
-			node = walker.nextNode();
-		}
-
-		range.selectNodeContents(element);
-		range.collapse(false);
-		selection.removeAllRanges();
-		selection.addRange(range);
-	}
-
-	async function updateEditableTitle(element: HTMLElement, task: FocusTask) {
-		const offset = caretOffset(element);
-		const text = (element.textContent ?? '').replace(/[\r\n]+/g, ' ');
-		const title = text.slice(0, 80);
-		editingTitles[task.id] = title;
-		if (title !== text) {
-			element.textContent = title;
-			await tick();
-			restoreCaret(element, Math.min(offset, title.length));
-		}
-	}
-
-	function handleTitleInput(event: Event, task: FocusTask) {
-		if (!(event as InputEvent).isComposing) {
-			void updateEditableTitle(event.currentTarget as HTMLElement, task);
-		}
-	}
-
-	async function commitTitle(task: FocusTask) {
-		const originalTitle = taskTitle(task);
-		const title = (editingTitles[task.id] ?? originalTitle).replace(/\s+/g, ' ').trim().slice(0, 80);
-		if (title && title !== originalTitle) onrename(task.id, title);
-		delete editingTitles[task.id];
-		titleRenderRevision += 1;
-		await tick();
-	}
-
-	function handleTitleKeydown(event: KeyboardEvent, task: FocusTask) {
-		if (event.key === 'Enter') {
-			event.preventDefault();
-			(event.currentTarget as HTMLElement).blur();
-		} else if (event.key === 'Escape') {
-			event.preventDefault();
-			editingTitles[task.id] = taskTitle(task);
-			(event.currentTarget as HTMLElement).blur();
-		}
 	}
 
 	function handleDndConsider(event: CustomEvent<DndEvent<FocusTask>>) {
@@ -180,14 +101,6 @@
 		if (!(event.target as Element | null)?.closest('.task-menu-control')) closeTransientControls();
 	}
 </script>
-
-{#snippet highlightedTaskTitle(title: string)}
-	{#each parseTaskTitle(title) as part}
-		{#if part.type === 'hashtag'}
-			<span class="task-hashtag">{part.value}</span>
-		{:else}{part.value}{/if}
-	{/each}
-{/snippet}
 
 <svelte:window onclick={handleWindowClick} onkeydown={(event) => event.key === 'Escape' && closeTransientControls()} />
 
@@ -240,7 +153,7 @@
 						</button>
 					{/if}
 					<div class="min-w-0 self-center">
-						<div class="editable-title task-title rounded-md text-sm font-bold text-ink" contenteditable="plaintext-only" role="textbox" tabindex="0" aria-label={m.focus_list_edit_title({ title: taskTitle(task) })} spellcheck="true" onfocus={() => editingTitles[task.id] = taskTitle(task)} oninput={(event) => handleTitleInput(event, task)} oncompositionend={(event) => void updateEditableTitle(event.currentTarget as HTMLElement, task)} onblur={() => void commitTitle(task)} onkeydown={(event) => handleTitleKeydown(event, task)}>{#key titleRenderRevision}{@render highlightedTaskTitle(taskTitle(task))}{/key}</div>
+						<EditableTaskTitle title={taskTitle(task)} label={m.focus_list_edit_title({ title: taskTitle(task) })} onrename={(title) => onrename(task.id, title)} />
 						<span class="mt-0.5 block text-xs font-semibold text-ink-muted">{m.focus_list_minutes_focused({ minutes: formatMinutes(taskSeconds(task)) })}{task.id === activeTaskId && currentSession ? m.focus_list_now() : ''}</span>
 					</div>
 					{#if task.id === activeTaskId && currentSession}
@@ -290,7 +203,7 @@
 					<li class="relative grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 rounded-xl bg-mist/45 p-2">
 						<button class="grid size-10 shrink-0 place-items-center rounded-xl text-moss hover:bg-sprout/40" type="button" onclick={() => ontoggle(task.id)} aria-label={m.focus_list_reopen({ title: task.title })} title={m.focus_list_reopen_title()}><i class="ph-fill ph-check-square text-lg" aria-hidden="true"></i></button>
 						<div class="min-w-0">
-							<div class="editable-title task-title rounded-md text-sm font-bold text-ink-muted line-through" contenteditable="plaintext-only" role="textbox" tabindex="0" aria-label={m.focus_list_edit_completed({ title: task.title })} spellcheck="true" onfocus={() => editingTitles[task.id] = task.title} oninput={(event) => handleTitleInput(event, task)} oncompositionend={(event) => void updateEditableTitle(event.currentTarget as HTMLElement, task)} onblur={() => void commitTitle(task)} onkeydown={(event) => handleTitleKeydown(event, task)}>{#key titleRenderRevision}{@render highlightedTaskTitle(task.title)}{/key}</div>
+							<EditableTaskTitle title={task.title} label={m.focus_list_edit_completed({ title: task.title })} completed onrename={(title) => onrename(task.id, title)} />
 							<span class="text-xs text-ink-muted">{m.focus_list_minutes_focused({ minutes: formatMinutes(task.accumulatedSeconds) })}</span>
 						</div>
 						<button class="grid size-10 place-items-center rounded-xl text-clay transition hover:bg-clay/10" type="button" onclick={() => ondelete(task.id)} aria-label={m.focus_list_delete()} title={m.focus_list_delete()}><i class="ph-bold ph-trash text-lg" aria-hidden="true"></i></button>
@@ -305,17 +218,12 @@
 <style>
 	.task-row { border-radius: 0.85rem 1.35rem 1rem 0.75rem; }
 	.active-task { border-color: color-mix(in srgb, var(--color-moss) 30%, transparent); background: color-mix(in srgb, var(--color-sprout) 24%, var(--color-surface)); }
-	.task-title { overflow-wrap: anywhere; white-space: normal; line-height: 1.3; }
-	.task-hashtag { border-radius: 0.35rem; background: color-mix(in srgb, var(--color-sprout) 34%, transparent); color: var(--color-moss); padding: 0 0.16rem; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
-	.editable-title { cursor: text; padding: 0.15rem 0.2rem; margin: -0.15rem -0.2rem; }
-	.editable-title:hover { background: color-mix(in srgb, var(--color-mist) 60%, transparent); }
-	.editable-title:focus { background: var(--color-paper); box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-moss) 34%, transparent); outline: none; }
 	.drag-handle { cursor: grab; opacity: 0; transform: translateX(-0.15rem); touch-action: none; transition: color 120ms ease, background 120ms ease, opacity 120ms ease, transform 120ms ease; }
 	.task-row:hover .drag-handle,
 	.drag-handle:focus-visible { opacity: 1; transform: translateX(0); }
 	.drag-handle:active { cursor: grabbing; }
 	.dragging-task { opacity: 0.45; }
-	.drag-in-progress .editable-title { pointer-events: none; }
+	.drag-in-progress :global(.editable-title) { pointer-events: none; }
 	.menu-action { display: flex; min-height: 2.5rem; align-items: center; gap: 0.6rem; border-radius: 0.6rem; padding: 0.45rem 0.65rem; text-align: left; font-size: 0.875rem; font-weight: 700; color: var(--color-ink); }
 	.menu-action:hover:not(:disabled) { background: var(--color-mist); }
 	.menu-action:disabled { opacity: 0.4; }
