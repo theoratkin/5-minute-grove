@@ -101,3 +101,4 @@
 ## 2026-07-24
 
 - Added a device-local desktop layout preference for placing the Focus list on the left or right. The quick and full settings surfaces share a compact text toggle, while mobile keeps its existing stacked order.
+- Replaced the button splash's animated CSS boxes with fixed-resolution canvas textures. The same two organic layers, fill, outline, glow, timing, and viewport coverage remain, while the browser now paints each small texture once and only composites its transform and opacity. A capped 320px texture with up to 2× backing resolution keeps expanded edges smooth without returning to unbounded high-DPI raster growth on laptops and phones.

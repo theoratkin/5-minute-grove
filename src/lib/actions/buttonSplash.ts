@@ -10,9 +10,10 @@ type ButtonSplashOptions = {
 const DEFAULT_COLOR = 'rgb(49 94 76 / 72%)';
 const DEFAULT_FILL = 'rgb(49 94 76 / 12%)';
 const DEFAULT_GLOW = 'rgb(49 94 76 / 24%)';
-// Keep the composited splash layer small. Its dimensions, border, and shadows are
-// scaled together below, so the resulting on-screen geometry remains unchanged.
+// Canvas gives the compositor a fixed bitmap to scale. A styled DOM element can
+// be re-rasterized near its largest animated size even when its CSS box is small.
 const MAX_TEXTURE_WIDTH = 320;
+const MAX_RASTER_SCALE = 2;
 
 export const buttonSplash: Action<HTMLElement, ButtonSplashOptions | undefined> = (
 	node,
@@ -49,7 +50,6 @@ export const buttonSplash: Action<HTMLElement, ButtonSplashOptions | undefined> 
 		const background = document.getElementById('button-splash-background') ?? document.body;
 
 		for (let index = 0; index < config.ripples; index += 1) {
-			const ripple = document.createElement('span');
 			const delay = index * 85;
 			const duration = config.durationMs + index * 140;
 			const width = finalSize * (0.96 + Math.random() * 0.16);
@@ -60,10 +60,24 @@ export const buttonSplash: Action<HTMLElement, ButtonSplashOptions | undefined> 
 			const rotation = -18 + Math.random() * 36;
 			const skewX = -5 + Math.random() * 10;
 			const skewY = -3 + Math.random() * 6;
-			const radius = config.simple ? '9999px' : createOrganicRadius();
 			const borderWidth = (config.simple ? 5 : 10) / textureScale;
 			const outerGlow = 28 / textureScale;
 			const innerGlow = 22 / textureScale;
+			const texturePadding = config.simple
+				? Math.max(1, borderWidth)
+				: Math.ceil(borderWidth + outerGlow * 2);
+			const ripple = createSplashTexture({
+				width: textureWidth,
+				height: textureHeight,
+				padding: texturePadding,
+				borderWidth,
+				outerGlow,
+				innerGlow,
+				color,
+				fill,
+				glow,
+				simple: config.simple
+			});
 			const initialTransform = createTransform(0.02 * textureScale, rotation, skewX, skewY);
 			const middleTransform = createTransform(
 				(config.simple ? 0.26 : 0.58) * textureScale,
@@ -83,17 +97,11 @@ export const buttonSplash: Action<HTMLElement, ButtonSplashOptions | undefined> 
 			ripple.style.position = 'fixed';
 			ripple.style.left = `${originX}px`;
 			ripple.style.top = `${originY}px`;
-			ripple.style.width = `${textureWidth}px`;
-			ripple.style.height = `${textureHeight}px`;
-			ripple.style.border = `${borderWidth}px solid ${color}`;
-			ripple.style.background = config.simple ? 'transparent' : fill;
-			ripple.style.borderRadius = radius;
-			ripple.style.boxShadow = config.simple
-				? 'none'
-				: `0 0 ${outerGlow}px ${glow}, inset 0 0 ${innerGlow}px ${fill}`;
 			ripple.style.pointerEvents = 'none';
 			ripple.style.zIndex = '0';
 			ripple.style.transform = initialTransform;
+			ripple.style.transformOrigin = 'center';
+			ripple.style.backfaceVisibility = 'hidden';
 			ripple.style.willChange = 'transform, opacity';
 
 			background.appendChild(ripple);
@@ -105,13 +113,13 @@ export const buttonSplash: Action<HTMLElement, ButtonSplashOptions | undefined> 
 							transform: initialTransform
 						},
 						{
-						opacity: 0.48,
-						offset: 0.38,
+							opacity: 0.48,
+							offset: 0.38,
 							transform: middleTransform
 						},
 						{
 							opacity: 0,
-						offset: 0.7,
+							offset: 0.7,
 							transform: fadeTransform
 						},
 						{
@@ -168,15 +176,131 @@ function createTransform(scale: number, rotation: number, skewX: number, skewY: 
 	return `translate(-50%, -50%) rotate(${rotation}deg) skew(${skewX}deg, ${skewY}deg) scale(${scale})`;
 }
 
-function createOrganicRadius() {
-	const horizontal = createRadiusStops();
-	const vertical = createRadiusStops();
+type SplashTexture = {
+	width: number;
+	height: number;
+	padding: number;
+	borderWidth: number;
+	outerGlow: number;
+	innerGlow: number;
+	color: string;
+	fill: string;
+	glow: string;
+	simple: boolean;
+};
 
-	return `${horizontal} / ${vertical}`;
+function createSplashTexture(options: SplashTexture) {
+	const canvas = document.createElement('canvas');
+	const canvasWidth = Math.ceil(options.width + options.padding * 2);
+	const canvasHeight = Math.ceil(options.height + options.padding * 2);
+	// Keep Retina edges smooth without letting very dense mobile screens create
+	// unbounded textures. The bitmap is still painted only once per ripple.
+	const rasterScale = Math.min(window.devicePixelRatio || 1, MAX_RASTER_SCALE);
+	canvas.width = Math.ceil(canvasWidth * rasterScale);
+	canvas.height = Math.ceil(canvasHeight * rasterScale);
+	canvas.style.width = `${canvasWidth}px`;
+	canvas.style.height = `${canvasHeight}px`;
+
+	const context = canvas.getContext('2d');
+	if (!context) return canvas;
+	context.scale(rasterScale, rasterScale);
+
+	const path = createOrganicPath(
+		options.padding,
+		options.padding,
+		options.width,
+		options.height
+	);
+
+	context.save();
+	context.lineWidth = options.borderWidth;
+	context.strokeStyle = options.color;
+	context.fillStyle = options.simple ? 'transparent' : options.fill;
+	if (!options.simple) {
+		// Canvas shadow blur does not follow the current transform.
+		context.shadowBlur = options.outerGlow * rasterScale;
+		context.shadowColor = options.glow;
+	}
+	context.fill(path);
+	context.stroke(path);
+	context.restore();
+
+	if (!options.simple) {
+		// Approximate the inset glow while clipped to the already-painted shape.
+		context.save();
+		context.clip(path);
+		context.lineWidth = options.innerGlow * 2;
+		context.strokeStyle = options.fill;
+		context.stroke(path);
+		context.restore();
+	}
+
+	return canvas;
 }
 
-function createRadiusStops() {
-	return Array.from({ length: 4 }, () => `${42 + Math.round(Math.random() * 16)}%`).join(' ');
+function createOrganicPath(x: number, y: number, width: number, height: number) {
+	const horizontal = createRadiusValues(width);
+	const vertical = createRadiusValues(height);
+	const radiusScale = Math.min(
+		1,
+		width / (horizontal[0] + horizontal[1]),
+		width / (horizontal[2] + horizontal[3]),
+		height / (vertical[0] + vertical[3]),
+		height / (vertical[1] + vertical[2])
+	);
+	const [topLeftX, topRightX, bottomRightX, bottomLeftX] = horizontal.map(
+		(value) => value * radiusScale
+	);
+	const [topLeftY, topRightY, bottomRightY, bottomLeftY] = vertical.map(
+		(value) => value * radiusScale
+	);
+	const curve = 0.5522847498;
+	const path = new Path2D();
+
+	path.moveTo(x + topLeftX, y);
+	path.lineTo(x + width - topRightX, y);
+	path.bezierCurveTo(
+		x + width - topRightX * (1 - curve),
+		y,
+		x + width,
+		y + topRightY * (1 - curve),
+		x + width,
+		y + topRightY
+	);
+	path.lineTo(x + width, y + height - bottomRightY);
+	path.bezierCurveTo(
+		x + width,
+		y + height - bottomRightY * (1 - curve),
+		x + width - bottomRightX * (1 - curve),
+		y + height,
+		x + width - bottomRightX,
+		y + height
+	);
+	path.lineTo(x + bottomLeftX, y + height);
+	path.bezierCurveTo(
+		x + bottomLeftX * (1 - curve),
+		y + height,
+		x,
+		y + height - bottomLeftY * (1 - curve),
+		x,
+		y + height - bottomLeftY
+	);
+	path.lineTo(x, y + topLeftY);
+	path.bezierCurveTo(
+		x,
+		y + topLeftY * (1 - curve),
+		x + topLeftX * (1 - curve),
+		y,
+		x + topLeftX,
+		y
+	);
+	path.closePath();
+
+	return path;
+}
+
+function createRadiusValues(size: number) {
+	return Array.from({ length: 4 }, () => size * (0.42 + Math.random() * 0.16));
 }
 
 function normalizeOptions(options: ButtonSplashOptions) {
