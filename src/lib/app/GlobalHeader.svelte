@@ -3,6 +3,7 @@
 	import type { ThemePreference } from '$lib/app/theme';
 	import type { AppPreferences } from '$lib/app/preferences.svelte';
 	import GroveLogo from '$lib/app/GroveLogo.svelte';
+	import FocusListPositionSetting from '$lib/app/settings/FocusListPositionSetting.svelte';
 	import LanguageSetting from '$lib/app/settings/LanguageSetting.svelte';
 	import ThemeOptions from '$lib/app/settings/ThemeOptions.svelte';
 	import TimerFeedbackSettings from '$lib/app/settings/TimerFeedbackSettings.svelte';
@@ -149,6 +150,7 @@
 
 				<div class="absolute top-[calc(100%+0.5rem)] right-0 z-30 grid max-h-[calc(100vh-6rem)] w-[min(20rem,calc(100vw-2rem))] gap-4 overflow-y-auto rounded-2xl border border-surface/90 bg-paper p-4 shadow-[0_16px_45px_rgb(0_0_0/18%)]">
 					<LanguageSetting />
+					<FocusListPositionSetting {preferences} />
 					<TimerFeedbackSettings {preferences} {onPreviewSound} />
 
 					<button
@@ -214,6 +216,7 @@
 						</summary>
 						<div class="mt-1 grid gap-4 border-t border-moss/10 px-1 pt-3">
 							<LanguageSetting />
+							<FocusListPositionSetting {preferences} />
 							<TimerFeedbackSettings {preferences} {onPreviewSound} />
 							<button
 								class="flex min-h-11 items-center justify-between gap-4 border-t border-moss/10 px-1 pt-4 text-left text-sm font-bold text-moss transition hover:text-moss-dark"
@@ -253,6 +256,7 @@
 		</button>
 
 		<LanguageSetting />
+		<FocusListPositionSetting {preferences} />
 		<TimerFeedbackSettings {preferences} {onPreviewSound} />
 
 		<div class="grid gap-2 border-t border-moss/10 pt-4">

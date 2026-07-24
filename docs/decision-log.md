@@ -97,3 +97,7 @@
 ## 2026-07-22
 
 - Added a compact, remembered Countdown/Count up choice at the start and during active focus. Switching from a running countdown preserves its elapsed portion and continues upward from the whole session total; switching back preserves that time and begins a fresh five-minute checkpoint. Count up remains one recoverable session, excludes paused time, grows the grove by completed minutes, and is also available as an end-of-timer continuation.
+
+## 2026-07-24
+
+- Added a device-local desktop layout preference for placing the Focus list on the left or right. The quick and full settings surfaces share a compact text toggle, while mobile keeps its existing stacked order.

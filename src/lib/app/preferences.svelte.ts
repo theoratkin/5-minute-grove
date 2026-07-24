@@ -5,12 +5,15 @@ import { storageKey } from './storage';
 const PREFERENCES_KEY = storageKey('preferences');
 const PREFERENCES_CONTEXT = Symbol('app-preferences');
 
+export type FocusListPosition = 'left' | 'right';
+
 type StoredPreferences = {
 	soundEnabled?: boolean;
 	soundVolume?: number;
 	notificationsEnabled?: boolean;
 	sleepReminderEnabled?: boolean;
 	lastSleepReminderDate?: string;
+	focusListPosition?: FocusListPosition;
 };
 
 export class AppPreferences {
@@ -20,6 +23,7 @@ export class AppPreferences {
 	notificationsEnabled = $state(false);
 	sleepReminderEnabled = $state(true);
 	lastSleepReminderDate = $state<string | undefined>();
+	focusListPosition = $state<FocusListPosition>('right');
 
 	load() {
 		if (!browser) return;
@@ -33,6 +37,7 @@ export class AppPreferences {
 				Notification.permission === 'granted';
 			this.sleepReminderEnabled = stored.sleepReminderEnabled ?? true;
 			this.lastSleepReminderDate = stored.lastSleepReminderDate;
+			this.focusListPosition = stored.focusListPosition === 'left' ? 'left' : 'right';
 		} catch {
 			// Keep the calm defaults if stored preferences are invalid.
 		} finally {
@@ -60,6 +65,11 @@ export class AppPreferences {
 		this.save();
 	}
 
+	setFocusListPosition(position: FocusListPosition) {
+		this.focusListPosition = position;
+		this.save();
+	}
+
 	markSleepReminderSeen(localDate: string) {
 		this.lastSleepReminderDate = localDate;
 		this.save();
@@ -74,7 +84,8 @@ export class AppPreferences {
 				soundVolume: this.soundVolume,
 				notificationsEnabled: this.notificationsEnabled,
 				sleepReminderEnabled: this.sleepReminderEnabled,
-				lastSleepReminderDate: this.lastSleepReminderDate
+				lastSleepReminderDate: this.lastSleepReminderDate,
+				focusListPosition: this.focusListPosition
 			})
 		);
 	}
