@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
 	UNTITLED_TASK_ID,
 	assignUntitledTask,
+	discardUntitledTask,
 	moveOpenFocusTask,
 	normalizeFocusTasks,
 	removeEmptyUntitledTask,
@@ -159,6 +160,30 @@ test('assigns saved Anything focus to a named task and removes the shared inbox'
 	assert.equal(assigned[0].accumulatedSeconds, 210);
 	assert.equal(assigned[0].sessionCount, 3);
 	assert.equal(assigned[0].updatedAt, '2026-07-18T12:00:00.000Z');
+});
+
+test('discards saved Anything focus without changing named tasks', () => {
+	const tasks = normalizeFocusTasks([
+		{
+			id: UNTITLED_TASK_ID,
+			title: 'Anything',
+			createdAt: '2026-07-18T10:00:00.000Z',
+			accumulatedSeconds: 300,
+			sessionCount: 1
+		},
+		{
+			id: 'named',
+			title: 'Named task',
+			createdAt: '2026-07-18T11:00:00.000Z',
+			accumulatedSeconds: 120,
+			sessionCount: 2
+		}
+	]);
+
+	const discarded = discardUntitledTask(tasks);
+	assert.deepEqual(discarded.map((task) => task.id), ['named']);
+	assert.equal(discarded[0].accumulatedSeconds, 120);
+	assert.equal(discarded[0].sessionCount, 2);
 });
 
 test('retains more than the former one-hundred-task persistence limit', () => {

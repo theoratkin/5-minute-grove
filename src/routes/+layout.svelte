@@ -142,6 +142,7 @@
 			onreorder={(orderedIds) => workspace.reorderTasks(orderedIds)}
 			ondelete={(id) => workspace.deleteTask(id)}
 			onassignuntitled={(id) => workspace.assignUntitledTask(id)}
+			ondiscarduntitled={() => workspace.discardUntitledTime()}
 		/>
 	</aside>
 </main>

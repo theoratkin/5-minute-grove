@@ -41,6 +41,7 @@ import type { GroveState } from '$lib/features/grove/grove.types';
 import {
 	assignUntitledTask,
 	createUntitledTask,
+	discardUntitledTask,
 	moveOpenFocusTask,
 	reorderOpenFocusTasks,
 	sortFocusTasks,
@@ -55,6 +56,7 @@ const C_MAJOR_OCTAVE_SEMITONES = [0, 2, 4, 5, 7, 9, 11, 12] as const;
 const LOWER_C_MAJOR_OCTAVE_SEMITONES = [-12, -10, -8, -7, -5, -3, -1, 0] as const;
 
 type DeletedTaskUndo = {
+	kind: 'task' | 'anything';
 	task: FocusTask;
 	index: number;
 	previousActiveTaskId: string | null;
@@ -108,7 +110,10 @@ export class FocusWorkspace {
 	}
 
 	get canUndoTaskDeletion() {
-		return this.deletedTaskUndo !== null && this.toastMessage === m.toast_task_deleted();
+		return this.deletedTaskUndo !== null && (
+			this.toastMessage === m.toast_task_deleted() ||
+			this.toastMessage === m.toast_anything_discarded()
+		);
 	}
 
 	get canCompleteActiveTask() {
@@ -617,6 +622,35 @@ export class FocusWorkspace {
 		this.toastMessage = m.toast_focus_assigned({ title: task.title });
 	}
 
+	discardUntitledTime() {
+		const index = this.tasks.findIndex((item) => item.id === UNTITLED_TASK_ID);
+		const task = this.tasks[index];
+		if (!task || task.accumulatedSeconds <= 0) return;
+		if (this.activeTaskId === UNTITLED_TASK_ID && this.phase !== 'idle') return;
+
+		const previousActiveTaskId = this.activeTaskId;
+		const previousIntention = this.intention;
+		if (this.activeTaskId === UNTITLED_TASK_ID) {
+			this.activeTaskId = null;
+			this.intention = '';
+		}
+
+		this.tasks = discardUntitledTask(this.tasks);
+		this.persistTasks();
+		this.deletedTaskUndo = {
+			kind: 'anything',
+			task,
+			index,
+			previousActiveTaskId,
+			previousIntention,
+			activeSessionId: this.activeSessionId,
+			replacementActiveTaskId: this.activeTaskId,
+			replacementIntention: this.intention,
+			createdReplacementUntitled: false
+		};
+		this.toastMessage = m.toast_anything_discarded();
+	}
+
 	toggleTaskDone(id: string) {
 		const task = this.tasks.find((item) => item.id === id);
 		if (!task || id === UNTITLED_TASK_ID) return;
@@ -722,6 +756,7 @@ export class FocusWorkspace {
 		this.tasks = this.tasks.filter((item) => item.id !== id);
 		this.persistTasks();
 		this.deletedTaskUndo = {
+			kind: 'task',
 			task,
 			index,
 			previousActiveTaskId,
@@ -762,7 +797,9 @@ export class FocusWorkspace {
 
 		this.persistTasks();
 		this.deletedTaskUndo = null;
-		this.toastMessage = m.toast_task_restored();
+		this.toastMessage = undo.kind === 'anything'
+			? m.toast_anything_restored()
+			: m.toast_task_restored();
 	}
 
 	updateIntention(title: string) {

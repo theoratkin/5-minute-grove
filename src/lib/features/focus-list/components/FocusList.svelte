@@ -26,7 +26,8 @@
 		onmove,
 		onreorder,
 		ondelete,
-		onassignuntitled
+		onassignuntitled,
+		ondiscarduntitled
 	}: {
 		tasks: FocusTask[];
 		currentSession?: { totalSeconds: number } | null;
@@ -39,6 +40,7 @@
 		onreorder: (orderedIds: string[]) => void;
 		ondelete: (id: string) => void;
 		onassignuntitled: (id: string) => void;
+		ondiscarduntitled: () => void;
 	} = $props();
 
 	let draft = $state('');
@@ -165,17 +167,25 @@
 							<i class="ph-fill ph-play" aria-hidden="true"></i>
 						</button>
 					{/if}
-					{#if task.id !== UNTITLED_TASK_ID || untitledAssignmentTargets.length > 0}
+					{#if task.id !== UNTITLED_TASK_ID || untitledAssignmentTargets.length > 0 || taskSeconds(task) > 0 || (task.id === activeTaskId && currentSession !== null)}
 						<div class="task-menu-control relative">
-							<button class="grid size-10 place-items-center rounded-xl text-ink-muted transition hover:bg-mist hover:text-ink" type="button" onclick={() => openMenuTaskId = openMenuTaskId === task.id ? null : task.id} aria-label={task.id === UNTITLED_TASK_ID ? m.timer_assign_focus() : m.focus_list_more_actions({ title: taskTitle(task) })} aria-expanded={openMenuTaskId === task.id} title={task.id === UNTITLED_TASK_ID ? m.timer_assign_focus() : m.focus_list_more_actions_title()}><i class={`ph-bold ${task.id === UNTITLED_TASK_ID ? 'ph-swap' : 'ph-dots-three-vertical'} text-lg`} aria-hidden="true"></i></button>
+							<button class="grid size-10 place-items-center rounded-xl text-ink-muted transition hover:bg-mist hover:text-ink" type="button" onclick={() => openMenuTaskId = openMenuTaskId === task.id ? null : task.id} aria-label={m.focus_list_more_actions({ title: taskTitle(task) })} aria-expanded={openMenuTaskId === task.id} title={m.focus_list_more_actions_title()}><i class="ph-bold ph-dots-three-vertical text-lg" aria-hidden="true"></i></button>
 							{#if openMenuTaskId === task.id}
-								<div class="task-menu absolute top-[calc(100%+0.35rem)] right-0 z-30 grid w-44 gap-1 rounded-xl border border-moss/15 bg-paper p-1.5 shadow-[0_12px_32px_rgb(0_0_0/18%)]" role="menu">
+								<div class="task-menu absolute top-[calc(100%+0.35rem)] right-0 z-30 grid w-52 gap-1 rounded-xl border border-moss/15 bg-paper p-1.5 shadow-[0_12px_32px_rgb(0_0_0/18%)]" role="menu">
 									{#if task.id === UNTITLED_TASK_ID && untitledAssignmentTargets.length > 0}
 										<p class="px-2 pb-0.5 pt-1 text-[0.6875rem] font-bold uppercase tracking-wide text-ink-muted">{m.timer_assign_focus()}</p>
 										<div class="max-h-44 overflow-y-auto">
 											{#each untitledAssignmentTargets as target (target.id)}
 												<button class="menu-action w-full" type="button" onclick={() => { onassignuntitled(target.id); openMenuTaskId = null; }} role="menuitem"><i class="ph-bold ph-arrow-right" aria-hidden="true"></i><span class="truncate">{target.title}</span></button>
 											{/each}
+										</div>
+									{/if}
+									{#if task.id === UNTITLED_TASK_ID && (taskSeconds(task) > 0 || (task.id === activeTaskId && currentSession !== null))}
+										<div class:border-t={untitledAssignmentTargets.length > 0} class="border-moss/10 pt-1" class:mt-1={untitledAssignmentTargets.length > 0}>
+											<button class="menu-action menu-action-delete w-full" type="button" onclick={() => { ondiscarduntitled(); openMenuTaskId = null; }} disabled={activeTaskId === UNTITLED_TASK_ID && currentSession !== null} role="menuitem"><i class="ph-bold ph-trash" aria-hidden="true"></i>{m.focus_list_discard_anything({ time: formatMinutes(taskSeconds(task)) })}</button>
+											{#if activeTaskId === UNTITLED_TASK_ID && currentSession !== null}
+												<p class="px-2 pb-1 text-xs leading-snug text-ink-muted">{m.focus_list_discard_stop_first()}</p>
+											{/if}
 										</div>
 									{/if}
 									{#if task.id !== UNTITLED_TASK_ID}

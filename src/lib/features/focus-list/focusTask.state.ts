@@ -98,6 +98,10 @@ export function assignUntitledTask(tasks: FocusTask[], targetId: string): FocusT
 		);
 }
 
+export function discardUntitledTask(tasks: FocusTask[]): FocusTask[] {
+	return tasks.filter((task) => task.id !== UNTITLED_TASK_ID);
+}
+
 export function sortFocusTasks(tasks: FocusTask[]): FocusTask[] {
 	const untitled = tasks.find((task) => task.id === UNTITLED_TASK_ID);
 	const openTasks = tasks.filter(

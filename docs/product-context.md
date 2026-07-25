@@ -43,6 +43,7 @@ The first usable version should likely include:
 - Separate session records that accumulate focused time on a task without implying that the task is complete.
 - Direct timer starts without a title use one shared Anything task rather than creating anonymous duplicates.
 - Renaming Anything from the Focus list creates a named task and transfers all focus credited there to it.
+- Saved Anything time can be discarded from the Focus list instead of assigned. Discarding removes the Anything bucket but preserves already-earned grove growth, and can be undone.
 - An in-progress focus attempt can be reassigned in full to another open task.
 - Starting a different task from the Focus list ends the current attempt and begins a new one; it does not reassign or remove Anything.
 - Honest accounting when a session ends early: partial time is saved without counting a finished timer block.

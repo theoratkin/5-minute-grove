@@ -99,6 +99,7 @@ When implementation begins, a pragmatic MVP would be:
 - Current session summary with total elapsed time and extension count.
 - Separate local persistence for planned task state and internal focus-attempt records. The task is the user-facing object; attempt records preserve timestamps, recovery, and honest accounting without appearing as a second workflow.
 - Use one stable system ID for the shared Anything task. Explicit assignment moves an entire active attempt, while starting another Focus-list task closes the current attempt and begins a new one.
+- Discarding the shared Anything task removes its task aggregate only; completed session records and grove credit remain durable. Do not allow discard while Anything has an active focus attempt, and retain the removed task briefly for undo.
 - Versioned local persistence for cumulative grove growth, credited idempotently per elapsed session minute.
 - Absolute countdown-end and count-up-start timestamps for timer accuracy across throttled background tabs and refresh recovery.
 
