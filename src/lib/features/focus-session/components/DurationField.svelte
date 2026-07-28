@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { normalizeStartDuration } from '../focusSession.utils';
 	import * as m from '$lib/paraglide/messages.js';
 
@@ -20,10 +21,23 @@
 	let secondsText = $state('00');
 	let editing = $state(false);
 
-	$effect(() => {
+	function syncDisplay() {
 		if (editing) return;
 		minutesText = String(Math.floor(seconds / 60)).padStart(2, '0');
 		secondsText = String(seconds % 60).padStart(2, '0');
+
+		// Browsers can restore an input's previous DOM value when reopening tabs.
+		// Reapply the formatted value because Svelte may otherwise see no state change
+		// to write (for example, its state is already "00" while the DOM contains "0").
+		if (minutesInput) minutesInput.value = minutesText;
+		if (secondsInput) secondsInput.value = secondsText;
+	}
+
+	$effect(syncDisplay);
+
+	onMount(() => {
+		window.addEventListener('pageshow', syncDisplay);
+		return () => window.removeEventListener('pageshow', syncDisplay);
 	});
 
 	function numeric(value: string, maximum: number) {
