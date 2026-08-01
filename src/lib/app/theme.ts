@@ -12,6 +12,7 @@ export const themes = [
 	{ id: 'gruvbox-dark', label: m.theme_gruvbox_dark, swatches: ['#282828', '#b8bb26', '#fabd2f'] },
 	{ id: 'gruvbox-light', label: m.theme_gruvbox_light, swatches: ['#fbf1c7', '#75700e', '#d79921'] },
 	{ id: 'monokai', label: m.theme_monokai, swatches: ['#272822', '#a6e22e', '#f92672'] },
+	{ id: 'monokai-light', label: m.theme_monokai_light, swatches: ['#f8efe7', '#218871', '#ce4770'] },
 	{ id: 'rose-pine', label: m.theme_rose_pine, swatches: ['#191724', '#9ccfd8', '#eb6f92'] },
 	{ id: 'tokyo-night', label: m.theme_tokyo_night, swatches: ['#1a1b26', '#9ece6a', '#7dcfff'] }
 ] as const;

@@ -9,6 +9,7 @@
 @import './themes/catppuccin-mocha.css';
 @import './themes/tokyo-night.css';
 @import './themes/monokai.css';
+@import './themes/monokai-light.css';
 @import './themes/rose-pine.css';
 
 @theme inline {
